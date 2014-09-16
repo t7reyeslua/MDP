@@ -15,7 +15,7 @@
     <string name="status_sign_in_error">Error signing in: %s</string>
     <string name="status_loading">Loading…</string>
     <string name="status_signing_in">Signing in with Google+…</string>
-    <string name="status_signed_out">Signed out</string>
+    <string name="status_signed_out"></string>
     <string name="status_revoke_access">Revoked access</string>
     <string name="status_revoke_access_error">Error revoking access: %s</string>
     <string name="signed_in_as">Signed in as %s</string>
