@@ -3,7 +3,6 @@ package tudelft.mdp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
@@ -12,7 +11,6 @@ import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.People.LoadPeopleResult;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
-import com.google.android.gms.plus.model.people.PersonBuffer;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -23,13 +21,11 @@ import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 /**
  * Demonstrates Google+ Sign-In and usage of the Google+ APIs to retrieve a
@@ -39,7 +35,7 @@ public class login extends FragmentActivity implements
         ConnectionCallbacks, OnConnectionFailedListener,
         ResultCallback<People.LoadPeopleResult>, View.OnClickListener {
 
-    private static final String TAG = "android-plus-quickstart";
+    private static final String TAG = "MDP";
 
     private static final int STATE_DEFAULT = 0;
     private static final int STATE_SIGN_IN = 1;
@@ -81,12 +77,7 @@ public class login extends FragmentActivity implements
     private int mSignInError;
 
     private SignInButton mSignInButton;
-    private Button mSignOutButton;
-    private Button mRevokeButton;
     private TextView mStatus;
-    private ListView mCirclesListView;
-    private ArrayAdapter<String> mCirclesAdapter;
-    private ArrayList<String> mCirclesList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,26 +85,39 @@ public class login extends FragmentActivity implements
         setContentView(R.layout.activity_login);
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        mSignOutButton = (Button) findViewById(R.id.sign_out_button);
-        mRevokeButton = (Button) findViewById(R.id.revoke_access_button);
         mStatus = (TextView) findViewById(R.id.sign_in_status);
-        mCirclesListView = (ListView) findViewById(R.id.circles_list);
 
         mSignInButton.setOnClickListener(this);
-        mSignOutButton.setOnClickListener(this);
-        mRevokeButton.setOnClickListener(this);
-
-        mCirclesList = new ArrayList<String>();
-        mCirclesAdapter = new ArrayAdapter<String>(
-                this, R.layout.circle_member, mCirclesList);
-        mCirclesListView.setAdapter(mCirclesAdapter);
-
         if (savedInstanceState != null) {
             mSignInProgress = savedInstanceState
                     .getInt(SAVED_PROGRESS, STATE_DEFAULT);
         }
 
         mGoogleApiClient = buildGoogleApiClient();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.login, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle your other action bar items...
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return false;
+            case R.id.action_signout:
+                login_signout();
+                return true;
+            case R.id.action_revoke:
+                login_revoke();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private GoogleApiClient buildGoogleApiClient() {
@@ -156,29 +160,49 @@ public class login extends FragmentActivity implements
             // between connected and not connected.
             switch (v.getId()) {
                 case R.id.sign_in_button:
-                    mStatus.setText(R.string.status_signing_in);
-                    resolveSignInError();
+                    login_signin();
                     break;
-                case R.id.sign_out_button:
-                    // We clear the default account on sign out so that Google Play
-                    // services will not return an onConnected callback without user
-                    // interaction.
-                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-                    mGoogleApiClient.disconnect();
-                    mGoogleApiClient.connect();
-                    break;
-                case R.id.revoke_access_button:
-                    // After we revoke permissions for the user with a GoogleApiClient
-                    // instance, we must discard it and create a new one.
-                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-                    // Our sample has caches no user data from Google+, however we
-                    // would normally register a callback on revokeAccessAndDisconnect
-                    // to delete user data so that we comply with Google developer
-                    // policies.
-                    Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
-                    mGoogleApiClient = buildGoogleApiClient();
-                    mGoogleApiClient.connect();
-                    break;
+            }
+        }
+    }
+
+    public void login_signin(){
+        if (!mGoogleApiClient.isConnecting()) {
+            mStatus.setText(R.string.status_signing_in);
+            resolveSignInError();
+        }
+    }
+
+    public void login_signout(){
+        if (!mGoogleApiClient.isConnecting()) {
+            if (mGoogleApiClient.isConnected()) {
+                // We only process button clicks when GoogleApiClient is not transitioning
+                // between connected and not connected.
+                // We clear the default account on sign out so that Google Play
+                // services will not return an onConnected callback without user
+                // interaction.
+                Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+                mGoogleApiClient.disconnect();
+                mGoogleApiClient.connect();
+            }
+
+        }
+    }
+
+    public void login_revoke(){
+        if (!mGoogleApiClient.isConnecting()) {
+
+            if (mGoogleApiClient.isConnected()) {
+                // After we revoke permissions for the user with a GoogleApiClient
+                // instance, we must discard it and create a new one.
+                Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+                // Our sample has caches no user data from Google+, however we
+                // would normally register a callback on revokeAccessAndDisconnect
+                // to delete user data so that we comply with Google developer
+                // policies.
+                Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
+                mGoogleApiClient = buildGoogleApiClient();
+                mGoogleApiClient.connect();
             }
         }
     }
@@ -196,8 +220,6 @@ public class login extends FragmentActivity implements
 
         // Update the user interface to reflect that the user is signed in.
         mSignInButton.setEnabled(false);
-        mSignOutButton.setEnabled(true);
-        mRevokeButton.setEnabled(true);
 
         // Retrieve some profile information to personalize our app for the user.
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
@@ -308,34 +330,13 @@ public class login extends FragmentActivity implements
 
     @Override
     public void onResult(LoadPeopleResult peopleData) {
-        if (peopleData.getStatus().getStatusCode() == CommonStatusCodes.SUCCESS) {
-            mCirclesList.clear();
-            PersonBuffer personBuffer = peopleData.getPersonBuffer();
-            try {
-                int count = personBuffer.getCount();
-                for (int i = 0; i < count; i++) {
-                    mCirclesList.add(personBuffer.get(i).getDisplayName());
-                }
-            } finally {
-                personBuffer.close();
-            }
 
-            mCirclesAdapter.notifyDataSetChanged();
-        } else {
-            Log.e(TAG, "Error requesting visible circles: " + peopleData.getStatus());
-        }
     }
 
     private void onSignedOut() {
         // Update the UI to reflect that the user is signed out.
         mSignInButton.setEnabled(true);
-        mSignOutButton.setEnabled(false);
-        mRevokeButton.setEnabled(false);
-
         mStatus.setText(R.string.status_signed_out);
-
-        mCirclesList.clear();
-        mCirclesAdapter.notifyDataSetChanged();
     }
 
     @Override
