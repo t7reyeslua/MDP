@@ -85,6 +85,7 @@ public class login extends FragmentActivity implements
         setContentView(R.layout.activity_login);
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        mSignInButton.setSize(1);
         mStatus = (TextView) findViewById(R.id.sign_in_status);
 
         mSignInButton.setOnClickListener(this);
