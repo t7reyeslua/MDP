@@ -3,12 +3,15 @@
               android:layout_height="match_parent"
               android:orientation="vertical"
               android:padding="20dip" android:gravity="center_vertical|center_horizontal">
+
+
     <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center"
             android:padding="2dip">
+
         <com.google.android.gms.common.SignInButton
                 android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"

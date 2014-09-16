@@ -1,25 +1,12 @@
 package tudelft.mdp;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.People.LoadPeopleResult;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.PendingIntent;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +18,7 @@ import android.widget.TextView;
  * Demonstrates Google+ Sign-In and usage of the Google+ APIs to retrieve a
  * users profile information.
  */
-public class login extends GoogleLoginManager implements View.OnClickListener{
+public class Login_Activity extends GoogleLoginManager implements View.OnClickListener{
 
     private static final String TAG = "MDP-Login";
 
@@ -45,7 +32,7 @@ public class login extends GoogleLoginManager implements View.OnClickListener{
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignInButton.setSize(1);
-        mStatus = (TextView) findViewById(R.id.sign_in_status);
+        //mStatus = (TextView) findViewById(R.id.sign_in_status);
 
         mSignInButton.setOnClickListener(this);
         if (savedInstanceState != null) {
@@ -59,7 +46,7 @@ public class login extends GoogleLoginManager implements View.OnClickListener{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.login, menu);
+        inflater.inflate(R.menu.login_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -111,16 +98,21 @@ public class login extends GoogleLoginManager implements View.OnClickListener{
         // Retrieve some profile information to personalize our app for the user.
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
 
+        /*
         mStatus.setText(String.format(
                 getResources().getString(R.string.signed_in_as),
                 currentUser.getDisplayName()));
+                */
 
 
-        Plus.PeopleApi.loadVisible(mGoogleApiClient, null)
-                .setResultCallback(this);
+        // Plus.PeopleApi.loadVisible(mGoogleApiClient, null).setResultCallback(this);
 
         // Indicate that the sign in process is complete.
         mSignInProgress = STATE_DEFAULT;
+
+        Intent intent = new Intent(this, Main_Activity.class);
+        startActivity(intent);
+
     }
 
     @Override
@@ -132,7 +124,7 @@ public class login extends GoogleLoginManager implements View.OnClickListener{
     public void onSignedOut() {
         // Update the UI to reflect that the user is signed out.
         mSignInButton.setEnabled(true);
-        mStatus.setText(R.string.status_signed_out);
+        //mStatus.setText(R.string.status_signed_out);
     }
 
 

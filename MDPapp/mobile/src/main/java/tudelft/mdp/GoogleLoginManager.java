@@ -2,7 +2,6 @@ package tudelft.mdp;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
@@ -10,7 +9,6 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.People.LoadPeopleResult;
 import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,11 +19,6 @@ import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 /**
  * Demonstrates Google+ Sign-In and usage of the Google+ APIs to retrieve a
@@ -303,19 +296,6 @@ public class GoogleLoginManager extends FragmentActivity implements
                                     //mStatus.setText(R.string.status_signed_out);
                                 }
                             });
-                } else {
-                    return new AlertDialog.Builder(this)
-                            .setMessage(R.string.play_services_error)
-                            .setPositiveButton(R.string.close,
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            Log.e(TAG, "Google Play services error could not be "
-                                                    + "resolved: " + mSignInError);
-                                            mSignInProgress = STATE_DEFAULT;
-                                            //mStatus.setText(R.string.status_signed_out);
-                                        }
-                                    }).create();
                 }
             default:
                 return super.onCreateDialog(id);
