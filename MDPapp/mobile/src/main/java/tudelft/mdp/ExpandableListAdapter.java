@@ -1,6 +1,8 @@
 package tudelft.mdp;
 
 
+import com.google.android.gms.common.SignInButton;
+
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -102,53 +104,76 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	@Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
         {
-            if (convertView == null)
-            {
-                LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = layoutInflater.inflate(R.layout.list_item_drawer,parent,false);
-            }
 
+            if (groupPosition == 0){
+                if (convertView == null) {
+                    LayoutInflater layoutInflater = (LayoutInflater) context
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            TextView textView = (TextView) convertView.findViewById(R.id.group_name);
-            textView.setText(groupItem.get(groupPosition));
-            convertView.setTag(groupItem.get(groupPosition));
+                    convertView = layoutInflater
+                            .inflate(R.layout.list_header_drawer, parent, false);
 
-            View ind = convertView.findViewById(R.id.explist_indicator);
-            if (ind != null) {
-                ImageView indicator = (ImageView) ind;
-                if (getChildrenCount(groupPosition) == 0) {
-
-                    indicator.setVisibility(View.INVISIBLE);
-                } else {
-                    indicator.setVisibility(View.VISIBLE);
-                    indicator.setImageResource(
-                            isExpanded ? R.drawable.ic_action_collapse : R.drawable.ic_action_expand);
                 }
-            }
 
-            TextView tw = (TextView) convertView.findViewById(R.id.explist_bar);
-            ImageView icon = (ImageView) convertView.findViewById(R.id.explist_icon);
-            switch (groupPosition) {
-                case NavigationDrawer.DASHBOARD:
-                    tw.setBackgroundColor(context.getResources().getColor(R.color.Crimson));
-                    icon.setImageResource(R.drawable.ic_action_labels);
-                    break;
-                case NavigationDrawer.ACTIVITYMONITOR:
-                    tw.setBackgroundColor(context.getResources().getColor(R.color.DarkOrchid));
-                    icon.setImageResource(R.drawable.ic_action_person);
-                    break;
-                case NavigationDrawer.LOCATIONTRACKER:
-                    tw.setBackgroundColor(context.getResources().getColor(R.color.DarkCyan));
-                    icon.setImageResource(R.drawable.ic_action_place);
-                    break;
-                case NavigationDrawer.UTILITIES:
-                    tw.setBackgroundColor(context.getResources().getColor(R.color.Gold));
-                    icon.setImageResource(R.drawable.settings3);
-                    break;
-                default:
-                    break;
-            }
+                SignInButton mSignInButton = (SignInButton) convertView.findViewById(R.id.sign_in_button);
+                mSignInButton.setSize(2);
+            } else {
+                if (convertView == null) {
+                    LayoutInflater layoutInflater = (LayoutInflater) context
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+                    convertView = layoutInflater
+                            .inflate(R.layout.list_item_drawer, parent, false);
+
+                }
+
+                TextView textView = (TextView) convertView.findViewById(R.id.group_name);
+                textView.setText(groupItem.get(groupPosition));
+                convertView.setTag(groupItem.get(groupPosition));
+
+                View ind = convertView.findViewById(R.id.explist_indicator);
+                if (ind != null) {
+                    ImageView indicator = (ImageView) ind;
+                    if (getChildrenCount(groupPosition) == 0) {
+
+                        indicator.setVisibility(View.INVISIBLE);
+                    } else {
+                        indicator.setVisibility(View.VISIBLE);
+                        indicator.setImageResource(
+                                isExpanded ? R.drawable.ic_action_collapse
+                                        : R.drawable.ic_action_expand);
+                    }
+                }
+
+                TextView tw = (TextView) convertView.findViewById(R.id.explist_bar);
+                ImageView icon = (ImageView) convertView.findViewById(R.id.explist_icon);
+                switch (groupPosition) {
+                    case NavigationDrawer.DASHBOARD:
+                        tw.setBackgroundColor(context.getResources().getColor(R.color.Crimson));
+                        icon.setImageResource(R.drawable.ic_action_labels);
+                        break;
+                    case NavigationDrawer.ACTIVITYMONITOR:
+                        tw.setBackgroundColor(context.getResources().getColor(R.color.DarkOrchid));
+                        icon.setImageResource(R.drawable.ic_action_person);
+                        break;
+                    case NavigationDrawer.LOCATIONTRACKER:
+                        tw.setBackgroundColor(context.getResources().getColor(R.color.DarkCyan));
+                        icon.setImageResource(R.drawable.ic_action_place);
+                        break;
+                    case NavigationDrawer.DEVICEMANAGER:
+                        tw.setBackgroundColor(
+                                context.getResources().getColor(R.color.DarkOliveGreen));
+                        icon.setImageResource(R.drawable.ic_action_dock);
+                        break;
+                    case NavigationDrawer.UTILITIES:
+                        tw.setBackgroundColor(context.getResources().getColor(R.color.Gold));
+                        icon.setImageResource(R.drawable.settings3);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
             return convertView;
         }
 

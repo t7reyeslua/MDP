@@ -5,18 +5,27 @@ import com.google.android.gms.plus.model.people.Person;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 
@@ -32,10 +41,14 @@ public class Main_Activity extends GoogleLoginManager {
     private CharSequence mTitle;
 
     private ExpandableListView mDrawerListExpandable;
+    private ExpandableListAdapter mDrawerListAdapter;
 
     private ArrayList<String> groupItem = new ArrayList<String>();
     private ArrayList<Object> childItem = new ArrayList<Object>();
     private TextView mUsername;
+    private TextView mUsernamePic;
+    private ImageView imgProfilePic;
+    private ListView mListView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +57,8 @@ public class Main_Activity extends GoogleLoginManager {
 
 
         mUsername = (TextView) findViewById(R.id.username);
+
+
 
         if (savedInstanceState != null) {
             mSignInProgress = savedInstanceState
@@ -58,6 +73,7 @@ public class Main_Activity extends GoogleLoginManager {
 
         configureActionBar();
         initDrawer();
+
 
 
     }
@@ -117,6 +133,8 @@ public class Main_Activity extends GoogleLoginManager {
                 getResources().getString(R.string.signed_in_as),
                 currentUser.getDisplayName()));
 
+        getProfileInformation();
+
 
         // Indicate that the sign in process is complete.
         mSignInProgress = STATE_DEFAULT;
@@ -167,8 +185,9 @@ public class Main_Activity extends GoogleLoginManager {
         setChildGroupData();
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerListAdapter = new ExpandableListAdapter(this, groupItem, childItem);
         mDrawerListExpandable = (ExpandableListView) findViewById(R.id.left_drawer_exp);
-        mDrawerListExpandable.setAdapter(new ExpandableListAdapter(this, groupItem, childItem));
+        mDrawerListExpandable.setAdapter(mDrawerListAdapter);
 
 
         // set a custom shadow that overlays the main content when the drawer opens
@@ -199,6 +218,7 @@ public class Main_Activity extends GoogleLoginManager {
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+
     }
 
     private class ExpDrawerChildClickListener implements ExpandableListView.OnChildClickListener {
@@ -228,9 +248,11 @@ public class Main_Activity extends GoogleLoginManager {
     }
 
     private void setGroupData() {
+        groupItem.add("Profile Picture");
         groupItem.add("Dashboard");
         groupItem.add("Activity Monitor");
         groupItem.add("Location Tracker");
+        groupItem.add("Device Manager");
         groupItem.add("Utilities");
     }
 
@@ -240,6 +262,11 @@ public class Main_Activity extends GoogleLoginManager {
          * Add Data For Dashboard
          */
         ArrayList<String> child = new ArrayList<String>();
+        childItem.add(child);
+
+        /**
+         * Add Data For Dashboard
+         */
         childItem.add(child);
 
         /**
@@ -258,6 +285,13 @@ public class Main_Activity extends GoogleLoginManager {
         child.add("Locator");*/
         childItem.add(child);
         /**
+         * Add Data For Device Manager
+         */
+        child = new ArrayList<String>();
+        /*child.add("Fingerprinting");
+        child.add("Locator");*/
+        childItem.add(child);
+        /**
          * Add Data For Utilities
          */
         child = new ArrayList<String>();
@@ -269,4 +303,72 @@ public class Main_Activity extends GoogleLoginManager {
         childItem.add(child);
     }
 
+    /**
+     * Fetching user's information name, email, profile pic
+     * */
+    private void getProfileInformation() {
+        try {
+            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
+                Person currentPerson = Plus.PeopleApi
+                        .getCurrentPerson(mGoogleApiClient);
+                String personName = currentPerson.getDisplayName();
+                String personPhotoUrl = currentPerson.getImage().getUrl();
+                String personGooglePlusProfile = currentPerson.getUrl();
+                String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+                String personId = currentPerson.getId();
+
+                Log.e(TAG, "Name: " + personName + ", Id: " + personId +  ", plusProfile: "
+                        + personGooglePlusProfile + ", email: " + email
+                        + ", Image: " + personPhotoUrl);
+
+
+                mUsernamePic = (TextView) findViewById(R.id.textViewUser);
+                mUsernamePic.setText(" " + personName + " ");
+                // by default the profile url gives 50x50 px image only
+                // we can replace the value with whatever dimension we want by
+                // replacing sz=X
+                personPhotoUrl = personPhotoUrl.substring(0,
+                        personPhotoUrl.length() - 2)
+                        + 560;
+
+                imgProfilePic = (ImageView) findViewById(R.id.imgProfile);
+                new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
+
+                mDrawerListAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "Person information is null", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Background Async task to load user profile picture from url
+     * */
+    private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public LoadProfileImage(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+    }
 }

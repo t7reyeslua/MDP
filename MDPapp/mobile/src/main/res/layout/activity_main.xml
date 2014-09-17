@@ -13,6 +13,7 @@ android:layout_height="match_parent">
         android:text="@string/hello_world"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
 <ExpandableListView
         android:id="@+id/left_drawer_exp"
         android:layout_width="240dp"
@@ -23,6 +24,7 @@ android:layout_height="match_parent">
         android:divider="#d711030c"
         android:groupIndicator="@android:color/transparent"
         android:dividerHeight="0dp" android:clickable="false"/>
+
 <ListView
         android:id="@+id/left_drawer"
         android:layout_width="240dp"

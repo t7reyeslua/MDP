@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="120dp"
+              android:orientation="vertical" android:gravity="center_vertical|center_horizontal"
+              android:background="#09ffffff">
+
+    <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <ImageView
+                android:src="@drawable/map"
+                android:id="@+id/imgProfile"
+                android:layout_gravity="fill_horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="120dp"
+                android:scaleType="centerCrop"
+                android:layout_weight="1" />
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:background="#30FFFFFF"
+                android:baselineAligned="false"
+                android:layout_alignParentBottom="true">
+            <com.google.android.gms.common.SignInButton
+                    android:id="@+id/sign_in_button"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:enabled="false" />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="User Unknown"
+                    android:textColor="@color/White"
+                    android:id="@+id/textViewUser"
+                    />
+        </LinearLayout>
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>
