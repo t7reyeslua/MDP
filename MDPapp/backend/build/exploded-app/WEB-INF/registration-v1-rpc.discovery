@@ -1,6 +1,6 @@
 {
  "kind": "discovery#rpcDescription",
- "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/MT2J9oFCvbGnPXUmLCGNz_S-bHI\"",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/f1dTGroIDdVd6cGKpHMFnp-StLI\"",
  "discoveryVersion": "v1",
  "id": "registration:v1",
  "name": "registration",
@@ -13,8 +13,8 @@
   "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "protocol": "rpc",
- "rootUrl": "https://myApplicationId.appspot.com/_ah/api/",
- "rpcUrl": "https://myApplicationId.appspot.com/_ah/api/rpc",
+ "rootUrl": "https://tudelft-mdp.appspot.com/_ah/api/",
+ "rpcUrl": "https://tudelft-mdp.appspot.com/_ah/api/rpc",
  "rpcPath": "/_ah/api/rpc",
  "parameters": {
   "alt": {

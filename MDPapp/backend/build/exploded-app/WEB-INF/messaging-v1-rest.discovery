@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/H1W7YEya0rVbRtRP0h8g_eACBng\"",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/dbrhFQgaPEsdB4P2eHIH0Dr_Pdo\"",
  "discoveryVersion": "v1",
  "id": "messaging:v1",
  "name": "messaging",
@@ -13,9 +13,9 @@
   "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "protocol": "rest",
- "baseUrl": "https://myApplicationId.appspot.com/_ah/api/messaging/v1/sendMessage/",
+ "baseUrl": "https://tudelft-mdp.appspot.com/_ah/api/messaging/v1/sendMessage/",
  "basePath": "/_ah/api/messaging/v1/sendMessage/",
- "rootUrl": "https://myApplicationId.appspot.com/_ah/api/",
+ "rootUrl": "https://tudelft-mdp.appspot.com/_ah/api/",
  "servicePath": "messaging/v1/sendMessage/",
  "batchPath": "batch",
  "parameters": {

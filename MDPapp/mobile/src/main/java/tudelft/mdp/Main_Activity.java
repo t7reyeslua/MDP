@@ -87,8 +87,7 @@ public class Main_Activity extends GoogleLoginManager {
 
         verifyNFCenabled();
 
-
-
+        new GcmRegistrationAsyncTask().execute(this);
     }
 
 

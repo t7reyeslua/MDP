@@ -92,7 +92,7 @@
     <orderEntry type="library" exported="" name="google-oauth-client-1.18.0-rc" level="project" />
     <orderEntry type="library" exported="" name="palette-v7-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-1.18.0-rc" level="project" />
-    <orderEntry type="library" exported="" name="play-services-5.2.08" level="project" />
+    <orderEntry type="library" exported="" name="play-services-5.0.89" level="project" />
   </component>
 </module>
 

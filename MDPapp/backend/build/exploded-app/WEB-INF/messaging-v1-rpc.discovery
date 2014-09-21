@@ -1,6 +1,6 @@
 {
  "kind": "discovery#rpcDescription",
- "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/H1W7YEya0rVbRtRP0h8g_eACBng\"",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/dbrhFQgaPEsdB4P2eHIH0Dr_Pdo\"",
  "discoveryVersion": "v1",
  "id": "messaging:v1",
  "name": "messaging",
@@ -13,8 +13,8 @@
   "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "protocol": "rpc",
- "rootUrl": "https://myApplicationId.appspot.com/_ah/api/",
- "rpcUrl": "https://myApplicationId.appspot.com/_ah/api/rpc",
+ "rootUrl": "https://tudelft-mdp.appspot.com/_ah/api/",
+ "rpcUrl": "https://tudelft-mdp.appspot.com/_ah/api/rpc",
  "rpcPath": "/_ah/api/rpc",
  "parameters": {
   "alt": {
