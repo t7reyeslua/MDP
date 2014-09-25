@@ -1,13 +1,13 @@
 {
  "kind": "discovery#rpcDescription",
- "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/f1dTGroIDdVd6cGKpHMFnp-StLI\"",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/I_G5yf3JehMq6ONXPE2U-kJVAXk\"",
  "discoveryVersion": "v1",
  "id": "registration:v1",
  "name": "registration",
  "version": "v1",
- "description": "This is an API",
- "ownerDomain": "backend.mdp.tudelft",
- "ownerName": "backend.mdp.tudelft",
+ "description": "An API to manage the device GCM registration",
+ "ownerDomain": "endpoints.backend.mdp.tudelft",
+ "ownerName": "endpoints.backend.mdp.tudelft",
  "icons": {
   "x16": "http://www.google.com/images/icons/product/search-16.gif",
   "x32": "http://www.google.com/images/icons/product/search-32.gif"

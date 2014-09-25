@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 
-group = 'tudelft.mdp.backend'
+group = 'tudelft.mdp.backend.endpoints'
 archivesBaseName = 'registration'
 version = 'v1-1.19.0-SNAPSHOT'
 

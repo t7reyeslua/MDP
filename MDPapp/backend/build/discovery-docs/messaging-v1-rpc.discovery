@@ -1,13 +1,13 @@
 {
  "kind": "discovery#rpcDescription",
- "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/dbrhFQgaPEsdB4P2eHIH0Dr_Pdo\"",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/0t8KAXkrnQIHixOqI3HdsMMuzxY\"",
  "discoveryVersion": "v1",
  "id": "messaging:v1",
  "name": "messaging",
  "version": "v1",
- "description": "This is an API",
- "ownerDomain": "backend.mdp.tudelft",
- "ownerName": "backend.mdp.tudelft",
+ "description": "An API to send Messages through GCM",
+ "ownerDomain": "endpoints.backend.mdp.tudelft",
+ "ownerName": "endpoints.backend.mdp.tudelft",
  "icons": {
   "x16": "http://www.google.com/images/icons/product/search-16.gif",
   "x32": "http://www.google.com/images/icons/product/search-32.gif"

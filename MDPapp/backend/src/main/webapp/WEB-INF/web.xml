@@ -5,7 +5,12 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>tudelft.mdp.backend.RegistrationEndpoint, tudelft.mdp.backend.MessagingEndpoint</param-value>
+            <param-value>
+                tudelft.mdp.backend.endpoints.RegistrationEndpoint,
+                tudelft.mdp.backend.endpoints.MessagingEndpoint,
+                tudelft.mdp.backend.endpoints.NfcRecordEndpoint,
+                tudelft.mdp.backend.endpoints.NfcLogRecordEndpoint
+            </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
