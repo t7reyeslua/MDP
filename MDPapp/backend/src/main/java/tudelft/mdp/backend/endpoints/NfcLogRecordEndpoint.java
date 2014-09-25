@@ -68,7 +68,11 @@ public class NfcLogRecordEndpoint {
                 .order("timestamp")
                 .list();
 
-        return records.get(records.size()-1);
+        if (records.size() > 0) {
+            return records.get(records.size() - 1);
+        } else {
+            return null;
+        }
     }
 
     @ApiMethod(name = "listDeviceLogFromUser", path = "list_deviceLog_user")

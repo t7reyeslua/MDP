@@ -17,6 +17,7 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -60,6 +61,8 @@ public class Main_Activity extends GoogleLoginManager {
     private TextView mUsernamePic;
     private ImageView imgProfilePic;
     private NfcAdapter mNfcAdapter;
+
+    private Person currentUser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,7 +144,7 @@ public class Main_Activity extends GoogleLoginManager {
 
 
         // Retrieve some profile information to personalize our app for the user.
-        Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+        currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
 
         mUsername.setText(String.format(
                 getResources().getString(R.string.signed_in_as),
@@ -323,13 +326,13 @@ public class Main_Activity extends GoogleLoginManager {
     private void getProfileInformation() {
         try {
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
-                Person currentPerson = Plus.PeopleApi
+                currentUser = Plus.PeopleApi
                         .getCurrentPerson(mGoogleApiClient);
-                String personName = currentPerson.getDisplayName();
-                String personPhotoUrl = currentPerson.getImage().getUrl();
-                String personGooglePlusProfile = currentPerson.getUrl();
+                String personName = currentUser.getDisplayName();
+                String personPhotoUrl = currentUser.getImage().getUrl();
+                String personGooglePlusProfile = currentUser.getUrl();
                 String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-                String personId = currentPerson.getId();
+                String personId = currentUser.getId();
 
                 Log.e(TAG, "Name: " + personName + ", Id: " + personId +  ", plusProfile: "
                         + personGooglePlusProfile + ", email: " + email
@@ -489,7 +492,14 @@ public class Main_Activity extends GoogleLoginManager {
         } else if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)) {
             Log.d(TAG, action);
             String nfcUID = ByteArrayToHexString(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
-            mUsername.append("\nNFC TAG: " + nfcUID);
+            //mUsername.append("\nNFC TAG: " + nfcUID);
+            if (!mGoogleApiClient.isConnected()){
+                login_signin();
+            }
+            new NfcDetectionAsyncTask().execute(this, nfcUID, currentUser.getDisplayName());
+            Vibrator v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+            v.vibrate(500);
+
             Log.d(TAG, nfcUID);
         }
     }
