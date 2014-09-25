@@ -1,0 +1,249 @@
+{
+ "kind": "discovery#restDescription",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/BgkXpNJRoSNhCJPVOIRg0VJ3UdU\"",
+ "discoveryVersion": "v1",
+ "id": "deviceEndpoint:v1",
+ "name": "deviceEndpoint",
+ "version": "v1",
+ "description": "An API to manage the devices (NFC tags)",
+ "ownerDomain": "endpoints.backend.mdp.tudelft",
+ "ownerName": "endpoints.backend.mdp.tudelft",
+ "icons": {
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+ },
+ "protocol": "rest",
+ "baseUrl": "https://tudelft-mdp.appspot.com/_ah/api/deviceEndpoint/v1/",
+ "basePath": "/_ah/api/deviceEndpoint/v1/",
+ "rootUrl": "https://tudelft-mdp.appspot.com/_ah/api/",
+ "servicePath": "deviceEndpoint/v1/",
+ "batchPath": "batch",
+ "parameters": {
+  "alt": {
+   "type": "string",
+   "description": "Data format for the response.",
+   "default": "json",
+   "enum": [
+    "json"
+   ],
+   "enumDescriptions": [
+    "Responses with Content-Type of application/json"
+   ],
+   "location": "query"
+  },
+  "fields": {
+   "type": "string",
+   "description": "Selector specifying which fields to include in a partial response.",
+   "location": "query"
+  },
+  "key": {
+   "type": "string",
+   "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+   "location": "query"
+  },
+  "oauth_token": {
+   "type": "string",
+   "description": "OAuth 2.0 token for the current user.",
+   "location": "query"
+  },
+  "prettyPrint": {
+   "type": "boolean",
+   "description": "Returns response with indentations and line breaks.",
+   "default": "true",
+   "location": "query"
+  },
+  "quotaUser": {
+   "type": "string",
+   "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters. Overrides userIp if both are provided.",
+   "location": "query"
+  },
+  "userIp": {
+   "type": "string",
+   "description": "IP address of the site where the request originates. Use this if you want to enforce per-user limits.",
+   "location": "query"
+  }
+ },
+ "auth": {
+  "oauth2": {
+   "scopes": {
+    "https://www.googleapis.com/auth/userinfo.email": {
+     "description": "View your email address"
+    }
+   }
+  }
+ },
+ "schemas": {
+  "CollectionResponse_NfcRecord": {
+   "id": "CollectionResponse_NfcRecord",
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "NfcRecord"
+     }
+    },
+    "nextPageToken": {
+     "type": "string"
+    }
+   }
+  },
+  "NfcRecord": {
+   "id": "NfcRecord",
+   "type": "object",
+   "properties": {
+    "description": {
+     "type": "string"
+    },
+    "location": {
+     "type": "string"
+    },
+    "nfcId": {
+     "type": "string"
+    },
+    "state": {
+     "type": "integer",
+     "format": "int32"
+    },
+    "type": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "methods": {
+  "decreaseDeviceUsers": {
+   "id": "deviceEndpoint.decreaseDeviceUsers",
+   "path": "decreaseNFC/{id}",
+   "httpMethod": "POST",
+   "parameters": {
+    "id": {
+     "type": "string",
+     "required": true,
+     "location": "path"
+    }
+   },
+   "parameterOrder": [
+    "id"
+   ],
+   "response": {
+    "$ref": "NfcRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deleteDevice": {
+   "id": "deviceEndpoint.deleteDevice",
+   "path": "nfc/{id}",
+   "httpMethod": "DELETE",
+   "parameters": {
+    "id": {
+     "type": "string",
+     "required": true,
+     "location": "path"
+    }
+   },
+   "parameterOrder": [
+    "id"
+   ],
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "getDevice": {
+   "id": "deviceEndpoint.getDevice",
+   "path": "get_device",
+   "httpMethod": "GET",
+   "parameters": {
+    "id": {
+     "type": "string",
+     "required": true,
+     "location": "query"
+    }
+   },
+   "parameterOrder": [
+    "id"
+   ],
+   "response": {
+    "$ref": "NfcRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "increaseDeviceUsers": {
+   "id": "deviceEndpoint.increaseDeviceUsers",
+   "path": "increaseNFC/{id}",
+   "httpMethod": "POST",
+   "parameters": {
+    "id": {
+     "type": "string",
+     "required": true,
+     "location": "path"
+    }
+   },
+   "parameterOrder": [
+    "id"
+   ],
+   "response": {
+    "$ref": "NfcRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "insertDevice": {
+   "id": "deviceEndpoint.insertDevice",
+   "path": "nfcrecord",
+   "httpMethod": "POST",
+   "request": {
+    "$ref": "NfcRecord",
+    "parameterName": "resource"
+   },
+   "response": {
+    "$ref": "NfcRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "listDevices": {
+   "id": "deviceEndpoint.listDevices",
+   "path": "nfcrecord/{count}",
+   "httpMethod": "GET",
+   "parameters": {
+    "count": {
+     "type": "integer",
+     "required": true,
+     "format": "int32",
+     "location": "path"
+    }
+   },
+   "parameterOrder": [
+    "count"
+   ],
+   "response": {
+    "$ref": "CollectionResponse_NfcRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "updateDevice": {
+   "id": "deviceEndpoint.updateDevice",
+   "path": "nfcrecord",
+   "httpMethod": "PUT",
+   "request": {
+    "$ref": "NfcRecord",
+    "parameterName": "resource"
+   },
+   "response": {
+    "$ref": "NfcRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  }
+ }
+}

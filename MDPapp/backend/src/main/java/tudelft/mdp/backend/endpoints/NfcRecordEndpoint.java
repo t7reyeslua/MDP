@@ -17,7 +17,7 @@ import tudelft.mdp.backend.records.NfcRecord;
 import static tudelft.mdp.backend.OfyService.ofy;
 
 /** An endpoint class we are exposing */
-@Api(name = "nfcRecordEndpoint", description = "An API to manage the NFC tags", version = "v1", namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft", ownerName = "endpoints.backend.mdp.tudelft", packagePath=""))
+@Api(name = "deviceEndpoint", description = "An API to manage the devices (NFC tags)", version = "v1", namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft", ownerName = "endpoints.backend.mdp.tudelft", packagePath=""))
 public class NfcRecordEndpoint {
 
 
@@ -28,7 +28,7 @@ public class NfcRecordEndpoint {
      * @param id The id of the object to be returned.
      * @return The <code>NfcRecord</code> associated with <code>id</code>.
      */
-    @ApiMethod(name = "getNFC", path = "get_nfc")
+    @ApiMethod(name = "getDevice", path = "get_device")
     public NfcRecord getNFC(@Named("id") String id) throws NotFoundException {
 
         LOG.info("Calling getNFC method");
@@ -44,7 +44,7 @@ public class NfcRecordEndpoint {
      * @param nfcRecord The object to be added.
      * @return The object to be added.
      */
-    @ApiMethod(name = "insertNFC")
+    @ApiMethod(name = "insertDevice")
     public NfcRecord insertNFC(NfcRecord nfcRecord) throws ConflictException {
         // Implement this function
 
@@ -57,6 +57,7 @@ public class NfcRecordEndpoint {
                 throw new ConflictException("Object already exists");
             }
         }
+        nfcRecord.setState(0);
         //Since our @Id field is a Long, Objectify will generate a unique value for us
         //when we use put
         ofy().save().entity(nfcRecord).now();
@@ -68,7 +69,7 @@ public class NfcRecordEndpoint {
      * @param nfcRecord The object to be added.
      * @return The object to be updated.
      */
-    @ApiMethod(name = "updateNFC")
+    @ApiMethod(name = "updateDevice")
     public NfcRecord updateNFC(NfcRecord nfcRecord)throws NotFoundException {
 
         LOG.info("Calling updateNFC method");
@@ -80,20 +81,39 @@ public class NfcRecordEndpoint {
     }
 
     /**
-     * This toggles the ON/OFF status of an existing <code>NfcRecord</code> object.
+     * This increases by 1 the total count of users making use of of an existing <code>NfcRecord</code> object.
      * @param id The object to be updated.
      * @return The object to be updated.
      */
-    @ApiMethod(name = "toggleNFC")
-    public NfcRecord toggleNFC(@Named("id") String id)throws NotFoundException {
+    @ApiMethod(name = "increaseDeviceUsers")
+    public NfcRecord increaseNFC(@Named("id") String id)throws NotFoundException {
 
-        LOG.info("Calling toggleNFC method");
+        LOG.info("Calling increaseNFC method");
 
         NfcRecord nfcRecord = findRecord(id);
         if (findRecord(id) == null) {
             throw new NotFoundException("NFC Record does not exist");
         }
-        nfcRecord.setState(!nfcRecord.getState());
+        nfcRecord.setState(nfcRecord.getState()+1);
+        ofy().save().entity(nfcRecord).now();
+        return nfcRecord;
+    }
+
+    /**
+     * This decreases by 1 the total count of users making use of of an existing <code>NfcRecord</code> object.
+     * @param id The object to be updated.
+     * @return The object to be updated.
+     */
+    @ApiMethod(name = "decreaseDeviceUsers")
+    public NfcRecord decreaseNFC(@Named("id") String id)throws NotFoundException {
+
+        LOG.info("Calling decreaseNFC method");
+
+        NfcRecord nfcRecord = findRecord(id);
+        if (findRecord(id) == null) {
+            throw new NotFoundException("NFC Record does not exist");
+        }
+        nfcRecord.setState(nfcRecord.getState()-1);
         ofy().save().entity(nfcRecord).now();
         return nfcRecord;
     }
@@ -102,7 +122,7 @@ public class NfcRecordEndpoint {
      * This deletes an existing <code>NfcRecord</code> object.
      * @param id The id of the object to be deleted.
      */
-    @ApiMethod(name = "deleteNFC")
+    @ApiMethod(name = "deleteDevice")
     public void deleteNFC(@Named("id") String id) throws NotFoundException {
 
         LOG.info("Calling deleteNFC method");
@@ -119,7 +139,7 @@ public class NfcRecordEndpoint {
      * @param count The number of NFC to list
      * @return a list of NFC registered tags
      */
-    @ApiMethod(name = "listNFC")
+    @ApiMethod(name = "listDevices")
     public CollectionResponse<NfcRecord> listNFC(@Named("count") int count) {
         List<NfcRecord> records = ofy().load().type(NfcRecord.class).limit(count).list();
         return CollectionResponse.<NfcRecord>builder().setItems(records).build();

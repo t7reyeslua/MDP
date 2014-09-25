@@ -1,0 +1,332 @@
+{
+ "kind": "discovery#rpcDescription",
+ "etag": "\"koCc_mmAOJe4d9CoedmJUnZeEcg/Of7qkN6dlG9vRxiaoOWv-Rh-AxI\"",
+ "discoveryVersion": "v1",
+ "id": "deviceLogEndpoint:v1",
+ "name": "deviceLogEndpoint",
+ "version": "v1",
+ "description": "An API to manage the historical log of devices usage (NFC tags)",
+ "ownerDomain": "endpoints.backend.mdp.tudelft",
+ "ownerName": "endpoints.backend.mdp.tudelft",
+ "icons": {
+  "x16": "http://www.google.com/images/icons/product/search-16.gif",
+  "x32": "http://www.google.com/images/icons/product/search-32.gif"
+ },
+ "protocol": "rpc",
+ "rootUrl": "https://tudelft-mdp.appspot.com/_ah/api/",
+ "rpcUrl": "https://tudelft-mdp.appspot.com/_ah/api/rpc",
+ "rpcPath": "/_ah/api/rpc",
+ "parameters": {
+  "alt": {
+   "type": "string",
+   "description": "Data format for the response.",
+   "default": "json",
+   "enum": [
+    "json"
+   ],
+   "enumDescriptions": [
+    "Responses with Content-Type of application/json"
+   ],
+   "location": "query"
+  },
+  "fields": {
+   "type": "string",
+   "description": "Selector specifying which fields to include in a partial response.",
+   "location": "query"
+  },
+  "key": {
+   "type": "string",
+   "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+   "location": "query"
+  },
+  "oauth_token": {
+   "type": "string",
+   "description": "OAuth 2.0 token for the current user.",
+   "location": "query"
+  },
+  "prettyPrint": {
+   "type": "boolean",
+   "description": "Returns response with indentations and line breaks.",
+   "default": "true",
+   "location": "query"
+  },
+  "quotaUser": {
+   "type": "string",
+   "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters. Overrides userIp if both are provided.",
+   "location": "query"
+  },
+  "userIp": {
+   "type": "string",
+   "description": "IP address of the site where the request originates. Use this if you want to enforce per-user limits.",
+   "location": "query"
+  }
+ },
+ "auth": {
+  "oauth2": {
+   "scopes": {
+    "https://www.googleapis.com/auth/userinfo.email": {
+     "description": "View your email address"
+    }
+   }
+  }
+ },
+ "schemas": {
+  "CollectionResponse_NfcLogRecord": {
+   "id": "CollectionResponse_NfcLogRecord",
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "NfcLogRecord"
+     }
+    },
+    "nextPageToken": {
+     "type": "string"
+    }
+   }
+  },
+  "NfcLogRecord": {
+   "id": "NfcLogRecord",
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "string",
+     "format": "int64"
+    },
+    "nfcId": {
+     "type": "string"
+    },
+    "state": {
+     "type": "boolean"
+    },
+    "timestamp": {
+     "type": "number",
+     "format": "double"
+    },
+    "user": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "methods": {
+  "deviceLogEndpoint.deleteDeviceLog": {
+   "id": "deviceLogEndpoint.deleteDeviceLog",
+   "parameters": {
+    "id": {
+     "type": "string",
+     "required": true,
+     "format": "int64"
+    }
+   },
+   "parameterOrder": [
+    "id"
+   ],
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.getLastUserLogOfDevice": {
+   "id": "deviceLogEndpoint.getLastUserLogOfDevice",
+   "allowGet": true,
+   "parameters": {
+    "nfcId": {
+     "type": "string",
+     "required": true
+    },
+    "user": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "nfcId",
+    "user"
+   ],
+   "returns": {
+    "$ref": "NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.insertDeviceLog": {
+   "id": "deviceLogEndpoint.insertDeviceLog",
+   "parameters": {
+    "resource": {
+     "$ref": "NfcLogRecord"
+    }
+   },
+   "parameterOrder": [
+    "resource"
+   ],
+   "returns": {
+    "$ref": "NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.listDeviceLog": {
+   "id": "deviceLogEndpoint.listDeviceLog",
+   "allowGet": true,
+   "parameters": {
+    "nfcId": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "nfcId"
+   ],
+   "returns": {
+    "$ref": "CollectionResponse_NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.listDeviceLogByDate": {
+   "id": "deviceLogEndpoint.listDeviceLogByDate",
+   "allowGet": true,
+   "parameters": {
+    "maxDate": {
+     "type": "number",
+     "required": true,
+     "format": "double"
+    },
+    "minDate": {
+     "type": "number",
+     "required": true,
+     "format": "double"
+    },
+    "nfcId": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "maxDate",
+    "minDate",
+    "nfcId"
+   ],
+   "returns": {
+    "$ref": "CollectionResponse_NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.listDeviceLogFromUser": {
+   "id": "deviceLogEndpoint.listDeviceLogFromUser",
+   "allowGet": true,
+   "parameters": {
+    "nfcId": {
+     "type": "string",
+     "required": true
+    },
+    "user": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "nfcId",
+    "user"
+   ],
+   "returns": {
+    "$ref": "CollectionResponse_NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.listUserDeviceLog": {
+   "id": "deviceLogEndpoint.listUserDeviceLog",
+   "allowGet": true,
+   "parameters": {
+    "user": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "user"
+   ],
+   "returns": {
+    "$ref": "CollectionResponse_NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.listUserDeviceLogByDate": {
+   "id": "deviceLogEndpoint.listUserDeviceLogByDate",
+   "allowGet": true,
+   "parameters": {
+    "maxDate": {
+     "type": "number",
+     "required": true,
+     "format": "double"
+    },
+    "minDate": {
+     "type": "number",
+     "required": true,
+     "format": "double"
+    },
+    "user": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "maxDate",
+    "minDate",
+    "user"
+   ],
+   "returns": {
+    "$ref": "CollectionResponse_NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  },
+  "deviceLogEndpoint.listUserDeviceLogByDateDevice": {
+   "id": "deviceLogEndpoint.listUserDeviceLogByDateDevice",
+   "allowGet": true,
+   "parameters": {
+    "maxDate": {
+     "type": "number",
+     "required": true,
+     "format": "double"
+    },
+    "minDate": {
+     "type": "number",
+     "required": true,
+     "format": "double"
+    },
+    "nfcId": {
+     "type": "string",
+     "required": true
+    },
+    "user": {
+     "type": "string",
+     "required": true
+    }
+   },
+   "parameterOrder": [
+    "maxDate",
+    "minDate",
+    "nfcId",
+    "user"
+   ],
+   "returns": {
+    "$ref": "CollectionResponse_NfcLogRecord"
+   },
+   "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email"
+   ]
+  }
+ }
+}

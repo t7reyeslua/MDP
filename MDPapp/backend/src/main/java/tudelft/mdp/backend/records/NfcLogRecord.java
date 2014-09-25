@@ -14,6 +14,7 @@ public class NfcLogRecord {
     @Index
     private String nfcId;
 
+    @Index
     private Boolean state;
 
     @Index

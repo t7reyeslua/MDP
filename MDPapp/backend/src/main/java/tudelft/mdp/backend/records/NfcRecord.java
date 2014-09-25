@@ -13,17 +13,16 @@ public class NfcRecord {
 
     private String type;
     private String description;
-    private Boolean state;
-    private String user;
-
+    private Integer state;
     @Index
-    private Double timestamp;
+    private String Location;
+
 
 
     public NfcRecord() {
     }
 
-    public NfcRecord(String nfcId, Boolean state, String description) {
+    public NfcRecord(String nfcId, Integer state, String description) {
         this.nfcId = nfcId;
         this.state = state;
         this.description = description;
@@ -35,6 +34,14 @@ public class NfcRecord {
 
     public void setNfcId(String nfcId) {
         this.nfcId = nfcId;
+    }
+
+    public String getLocation() {
+        return Location;
+    }
+
+    public void setLocation(String location) {
+        Location = location;
     }
 
     public String getType() {
@@ -53,27 +60,12 @@ public class NfcRecord {
         this.description = description;
     }
 
-    public Boolean getState() {
+    public Integer getState() {
         return state;
     }
 
-    public void setState(Boolean state) {
+    public void setState(Integer state) {
         this.state = state;
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public Double getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Double timestamp) {
-        this.timestamp = timestamp;
-    }
 }
