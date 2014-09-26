@@ -1,8 +1,9 @@
-package tudelft.mdp;
+package tudelft.mdp.deviceManager;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import tudelft.mdp.DeviceRegistration_Dialog;
 import tudelft.mdp.backend.endpoints.deviceEndpoint.DeviceEndpoint;
 import tudelft.mdp.backend.endpoints.deviceEndpoint.model.NfcRecord;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.DeviceLogEndpoint;
@@ -25,6 +27,7 @@ public class NfcDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     private Context context;
     private String nfcTag;
     private String user;
+    private FragmentManager mFragmentManager;
     private static DeviceEndpoint mDeviceEndpointService = null;
     private static DeviceLogEndpoint mDeviceLogEndpointService = null;
     private static final String TAG = "MDP-NfcDetectionAsyncTask";
@@ -34,6 +37,7 @@ public class NfcDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         context = (Context) params[0];
         nfcTag  = (String)  params[1];
         user    = (String)  params[2];
+        mFragmentManager   = (FragmentManager)  params[3];
 
 
         if (mDeviceEndpointService == null) {
@@ -97,11 +101,14 @@ public class NfcDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean tagExists) {
         if (tagExists) {
-            Toast.makeText(context, "Tag exists", Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, "Tag exists", Toast.LENGTH_LONG).show();
             Logger.getLogger(TAG).log(Level.INFO, "Tag exists");
         } else {
-            Toast.makeText(context, "Tag does not exists", Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, "Tag does not exists", Toast.LENGTH_LONG).show();
             Logger.getLogger(TAG).log(Level.INFO, "Tag does not exists");
+            DeviceRegistration_Dialog dialog = new DeviceRegistration_Dialog();
+            dialog.setNfcTag(nfcTag);
+            dialog.show(mFragmentManager, "newDeviceDialog");
         }
     }
 

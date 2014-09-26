@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import tudelft.mdp.deviceManager.NfcDetectionAsyncTask;
 import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
 import tudelft.mdp.ui.ExpandableListAdapter;
 
@@ -454,10 +455,7 @@ public class Main_Activity extends GoogleLoginManager {
 
         if (!mNfcAdapter.isEnabled()) {
             Toast.makeText(this, "NFC is disabled.", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "NFC is enabled.", Toast.LENGTH_LONG).show();
         }
-
         handleIntent(getIntent());
     }
 
@@ -496,7 +494,7 @@ public class Main_Activity extends GoogleLoginManager {
             if (!mGoogleApiClient.isConnected()){
                 login_signin();
             }
-            new NfcDetectionAsyncTask().execute(this, nfcUID, currentUser.getDisplayName());
+            new NfcDetectionAsyncTask().execute(this, nfcUID, currentUser.getDisplayName(), getFragmentManager());
             Vibrator v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
             v.vibrate(500);
 

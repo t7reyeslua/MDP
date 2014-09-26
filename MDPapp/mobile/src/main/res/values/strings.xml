@@ -29,4 +29,8 @@
     <string name="drawer_close">Close navigation drawer</string>
 
 
+    <string name="ok">OK</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+
 </resources>
