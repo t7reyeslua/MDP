@@ -29,7 +29,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     private FragmentManager mFragmentManager;
     private static DeviceEndpoint mDeviceEndpointService = null;
     private static DeviceLogEndpoint mDeviceLogEndpointService = null;
-    private static final String TAG = "MDP-NfcDetectionAsyncTask";
+    private static final String TAG = "MDP-DeviceDetectionAsyncTask";
 
     @Override
     protected Boolean doInBackground(Object... params) {
