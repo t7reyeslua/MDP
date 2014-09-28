@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="horizontal"
+              android:paddingLeft="15dp"
+              android:paddingRight="15dp"
+              android:paddingBottom="8dp"
+              android:paddingTop="5dp"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="10">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:text=""
+                android:id="@+id/twDummy"/>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:src="@drawable/ic_action_alarms"
+                android:id="@+id/imageTimeIcon" android:layout_gravity="center"/>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:src="@drawable/ic_action_flash_on"
+                android:id="@+id/imagePowerIcon" android:layout_gravity="center"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="25">
+        <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:src="@drawable/ic_action_group"
+                android:id="@+id/twTotalHeader" android:gravity="center"/>
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="14sp"
+                android:text="33:15:02"
+                android:id="@+id/twTotalTime" android:gravity="center_vertical|center_horizontal"/>
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="14sp"
+                android:text="25.3 kW"
+                android:id="@+id/twTotalPower" android:gravity="center_vertical|center_horizontal"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="25">
+        <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:src="@drawable/ic_action_person"
+                android:id="@+id/twYouHeader" android:gravity="center"/>
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="bold"
+                android:textSize="14sp"
+                android:text="21:08:27"
+                android:id="@+id/twYouTime" android:gravity="center_vertical|center_horizontal"/>
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="bold"
+                android:textSize="14sp"
+                android:text="18.5 kW"
+                android:id="@+id/twYouPower" android:gravity="center_vertical|center_horizontal"/>
+    </LinearLayout>
+
+
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text=""
+            android:id="@+id/twDummyColumn" android:layout_weight="15"
+            android:layout_gravity="center"/>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="30">
+        <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:src="@drawable/ic_action_data_usage"
+                android:id="@+id/imageUsagePercentage"
+                android:gravity="center"/>
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:text="70%"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="bold"
+                android:textSize="24sp"
+                android:id="@+id/twUsagePercentage" android:layout_gravity="center"
+                android:textAlignment="center" android:gravity="center"/>
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="14sp"
+                android:text="of total usage"
+                android:id="@+id/twUsagePercentageFooter" android:layout_gravity="center_horizontal|bottom"
+                android:gravity="center_vertical"/>
+    </LinearLayout>
+</LinearLayout>

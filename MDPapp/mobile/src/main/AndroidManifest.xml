@@ -37,13 +37,13 @@
         <service android:name=".gcm.GcmIntentService" />
 
         <activity
-            android:name="tudelft.mdp.Login_Activity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:name=".LoginActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".MainActivity"
+            android:theme="@android:style/Theme.NoTitleBar" >
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="tudelft.mdp.MainActivity" />
         </activity>
 
         <meta-data
@@ -51,34 +51,35 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="tudelft.mdp.Main_Activity"
+            android:name=".MainActivity"
             android:label="@string/title_activity_main_"
-            android:launchMode="singleInstance"
-            android:parentActivityName="tudelft.mdp.Login_Activity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="tudelft.mdp.Login_Activity" />
+            android:launchMode="singleInstance" >
 
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
+            <meta-data
+                    android:name="android.nfc.action.TECH_DISCOVERED"
+                    android:resource="@xml/nfc_tech_filter" />
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.nfc.action.TECH_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
-
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
+
+
         </activity>
     </application>
 

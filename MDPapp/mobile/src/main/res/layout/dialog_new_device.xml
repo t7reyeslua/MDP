@@ -15,11 +15,11 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_marginBottom="4dp"
-                android:text="Type"
+                android:text="Type *"
                 android:id="@+id/textDeviceType"/>
-            <EditText
+            <AutoCompleteTextView
                 android:id="@+id/deviceType"
-                android:inputType="textNoSuggestions"
+                android:inputType="textAutoComplete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -46,7 +46,7 @@
         <EditText
                 android:id="@+id/deviceDescription"
                 android:inputType="textNoSuggestions"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_marginLeft="4dp"
@@ -68,11 +68,11 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_marginBottom="4dp"
-                android:text="Location"
+                android:text="Location *"
                 android:id="@+id/textDeviceLoc"/>
-        <EditText
+        <AutoCompleteTextView
                 android:id="@+id/deviceLocation"
-                android:inputType="textNoSuggestions"
+                android:inputType="textAutoComplete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
