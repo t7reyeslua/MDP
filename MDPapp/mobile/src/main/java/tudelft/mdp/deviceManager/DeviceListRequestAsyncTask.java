@@ -21,7 +21,7 @@ public class DeviceListRequestAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
     private static DeviceEndpoint mDeviceEndpointService = null;
     private static final String TAG = "MDP-DeviceListRequestAsyncTask";
-    public RequestDeviceListAsyncResponse delegate=null;
+    public RequestDeviceListAsyncResponse delegate =null;
 
     private List<NfcRecord> mDevices;
 

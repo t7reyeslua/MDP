@@ -1,8 +1,16 @@
 package tudelft.mdp.ui;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
+import android.view.View;
+import android.widget.Toast;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
+import tudelft.mdp.deviceManager.DeviceManagerFragment;
+import tudelft.mdp.deviceManager.DeviceUsageByUserRequestAsyncTask;
+import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.ui.DeviceCard;
 import tudelft.mdp.ui.DeviceCardExpand;
 import tudelft.mdp.ui.DeviceCardHeader;
@@ -25,6 +33,10 @@ public class DeviceCardBuilder {
     private String mDeviceDesc;
     private String mDeviceLocation;
     private Integer mCurrentUsers;
+
+    private DeviceManagerFragment mDeviceManagerFragment;
+
+    private String mUsername;
 
     private Double mTotalTime;
     private Double mUserTime;
@@ -50,7 +62,7 @@ public class DeviceCardBuilder {
         mCurrentUsers = currentUsers;
     }
 
-    public DeviceCardBuilder(Context context, String deviceTagId, String deviceType, String deviceDesc,
+    public DeviceCardBuilder(DeviceManagerFragment dmFragment, Context context, String deviceTagId, String deviceType, String deviceDesc,
             String deviceLocation, Integer currentUsers, Double totalTime, Double userTime,
             Double totalPower, Double userPower, Double percentage) {
         mContext = context;
@@ -64,6 +76,12 @@ public class DeviceCardBuilder {
         mTotalPower = totalPower;
         mUserPower = userPower;
         mPercentage = percentage;
+        mDeviceManagerFragment = dmFragment;
+
+
+        mUsername = PreferenceManager
+                .getDefaultSharedPreferences(mContext)
+                .getString(UserPreferences.USERNAME, null);
 
         hasExpandInfo = true;
     }
@@ -92,6 +110,19 @@ public class DeviceCardBuilder {
 
 
         mDeviceCardHeader.setButtonExpandVisible(true);
+
+        mDeviceCard.setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener(){
+            @Override
+            public void onExpandStart(Card card) {
+                //Toast.makeText(mContext, mUsername + " clicked on " + mDeviceTagId, Toast.LENGTH_SHORT).show();
+                DeviceUsageByUserRequestAsyncTask deviceUsageByUserRequestAsyncTask = new DeviceUsageByUserRequestAsyncTask();
+                deviceUsageByUserRequestAsyncTask.delegate = mDeviceManagerFragment;
+                deviceUsageByUserRequestAsyncTask.execute(mDeviceTagId, mUsername);
+            }
+        });
+
+
+
         mDeviceCard.addCardHeader(mDeviceCardHeader);
         mDeviceCard.setShadow(true);
 

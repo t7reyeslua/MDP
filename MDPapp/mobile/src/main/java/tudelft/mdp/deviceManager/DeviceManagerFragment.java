@@ -1,5 +1,6 @@
 package tudelft.mdp.deviceManager;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.preference.PreferenceManager;
@@ -10,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,9 @@ import tudelft.mdp.ui.DeviceCardBuilder;
 
 
 public class DeviceManagerFragment extends Fragment implements
-        DeviceListRequestAsyncTask.RequestDeviceListAsyncResponse {
+        DeviceListRequestAsyncTask.RequestDeviceListAsyncResponse,
+        DeviceUsageByUserRequestAsyncTask.RequestDeviceUsageByUserAsyncResponse{
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -42,6 +46,10 @@ public class DeviceManagerFragment extends Fragment implements
     private ArrayList<Card> mCardsArrayList;
     private CardArrayAdapter mCardArrayAdapter;
     private CardListView mCardListView;
+
+    private List<NfcRecord> deviceList = new ArrayList<NfcRecord>();
+
+    private ProgressDialog pd = null;
 
     private static final String TAG = "MDP-DeviceManager";
 
@@ -104,10 +112,12 @@ public class DeviceManagerFragment extends Fragment implements
 
     public void processFinishRequestDeviceList(List<NfcRecord> outputList) {
         mCardsArrayList = new ArrayList<Card>();
+        deviceList = outputList;
 
-        for (NfcRecord device : outputList) {
+        for (NfcRecord device : deviceList) {
 
             DeviceCardBuilder dcBuilder = new DeviceCardBuilder(
+                    this,
                     rootView.getContext(),
                     device.getNfcId(),
                     device.getType(),
@@ -131,11 +141,67 @@ public class DeviceManagerFragment extends Fragment implements
             mCardListView.setAdapter(mCardArrayAdapter);
         }
         requestInProcess = false;
+
+        if (this.pd != null) {
+            this.pd.dismiss();
+        }
     }
 
+    public void processFinishRequestDeviceUsageByUser(List<Object> outputList){
+        int cardIndex = -1 ;
+
+        String nfcTag = (String) outputList.get(0);
+        Double totalTime = (Double) outputList.get(1);
+        Double userTime = (Double) outputList.get(2);
+        Double totalPower = (Double) outputList.get(3);
+        Double userPower = (Double) outputList.get(4);
+        Double percentage = (Double) outputList.get(5);
+
+
+        /*
+        Toast.makeText(rootView.getContext(), mUsername + " finished " + nfcTag,
+                Toast.LENGTH_SHORT).show();*/
+
+        Boolean indexFound = false;
+        while (!indexFound){
+            if (deviceList.get(++cardIndex).getNfcId().equals(nfcTag)){
+                indexFound = true;
+            }
+        }
+
+
+        if (cardIndex > -1) {
+            NfcRecord device = deviceList.get(cardIndex);
+
+            DeviceCardBuilder dcBuilder = new DeviceCardBuilder(
+                    this,
+                    rootView.getContext(),
+                    device.getNfcId(),
+                    device.getType(),
+                    device.getDescription(),
+                    device.getLocation(),
+                    device.getState(),
+                    totalTime,
+                    userTime,
+                    totalPower,
+                    userPower,
+                    percentage
+            );
+
+            Card card = dcBuilder.buildDeviceCard();
+            card.setExpanded(true);
+
+            mCardsArrayList.set(cardIndex, card);
+            mCardArrayAdapter.notifyDataSetChanged();
+        }
+
+
+    }
 
     private void refreshList(){
         if (!requestInProcess) {
+            this.pd = ProgressDialog.show(rootView.getContext(), "Working...", "Getting devices information...", true, false);
+
             DeviceListRequestAsyncTask deviceListAsyncTask = new DeviceListRequestAsyncTask();
             deviceListAsyncTask.delegate = this;
             deviceListAsyncTask.execute();

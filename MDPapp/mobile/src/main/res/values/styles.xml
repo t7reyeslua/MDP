@@ -5,4 +5,9 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <!-- Other Button in Header -->
+    <style name="card.header_button_base.other">
+        <item name="android:background">@drawable/card_menu_button_other</item>
+    </style>
+
 </resources>
