@@ -9,19 +9,20 @@ clearvars
 
 %% Settings
     % Defined path of Sets and output file, Folder of Sets must not contain
-    % anything else than Sets
+    % anything else than Sets, the data should be  '%d %d %f %f %f' or else
+    % to be changed in line 65
 
-    setspath  = 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Datasets\SS';
+    setspath  = 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Datasets\SS_AA';
     resultspath = 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Results.txt';
 
     %Precision of the results Int and decimal point and FFT
     pNum='4';
-    pDec='8';
+    pDec='4';
     fftN=200; % FFT resolution biggger the more resolution
 
     % Sample window
-    LowerLimit=100; %Min 1
-    WindowSize=1000;
+    LowerLimit=1; %Min 1
+    WindowSize=500;
     
     %Choose Features 1 is Enable
     ftTDomain=1;        %mean 3x, std dev 3x, variance 3,x & Magnitudes of this values
@@ -54,15 +55,15 @@ else
 end
     fprintf(fileID,'\n');
 fclose(fileID);
-
+fprintf('Processed: \n');
 for k = 1:nFiles
   filename = list(k).name;
 %% Proper function analyzed
 FileToRead=fullfile(setspath,filename);
 
 fileID = fopen(FileToRead,'r');
-formatSpec = '%d %f %f %f';
-sizeM = [4 Inf];
+formatSpec = '%d %d %f %f %f';
+sizeM = [5 Inf];
 
 % Matrix_R, contains the dataset.
 Matrix_R = fscanf(fileID,formatSpec,sizeM);
@@ -72,9 +73,18 @@ fclose(fileID);
 Matrix_R = Matrix_R';  
 
 % All features 
-Sample = zeros(UpperLimit-LowerLimit+1,4);
-for i=(1:UpperLimit-LowerLimit+1)
-    Sample(i,:) = Matrix_R(LowerLimit+1+i,:);
+
+if(size(Matrix_R)<UpperLimit)
+    LimitSize=size(Matrix_R);
+    UpperLimit=LimitSize(1);
+end
+
+Sample = zeros(UpperLimit-LowerLimit,4);
+for i=(1:UpperLimit-LowerLimit)
+    Sample(i,1) = Matrix_R(LowerLimit+i,2);
+    Sample(i,2) = Matrix_R(LowerLimit+i,3);
+    Sample(i,3) = Matrix_R(LowerLimit+i,4);
+    Sample(i,4) = Matrix_R(LowerLimit+i,5);
     
     NormalSample(i) = sqrt(power(Sample(i,2),2)+power(Sample(i,3),2)+power(Sample(i,4),2));
     
@@ -117,16 +127,16 @@ stdMagnitude=sqrt(power(stdX,2)+power(stdY,2)+power(stdZ,2));
 varMagnitude=sqrt(power(varianceX,2)+power(varianceY,2)+power(varianceZ,2));
 
 
-fileID = fopen('C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Results.txt','a');
+fileID = fopen(resultspath,'a');
 
 
 precisionprint=strcat('%',pNum,'.',pDec,'f\t','%',pNum,'.',pDec,'f\t','%',pNum,'.',pDec,'f\t');
 
 
 %Printing First name of file and therefore the identifier (output Y)
-Yfile=strsplit(filename,'  ');
+Yfile=strsplit(filename,'_');
 
-fprintf(fileID,'%s\t',char(Yfile(1)));
+fprintf(fileID,'%s\t',char(Yfile(2)));
 
 if(ftTDomain==1)
     fprintf(fileID,precisionprint,meanX,meanY,meanZ);
@@ -161,7 +171,18 @@ fclose(fileID);
 % ftplotZ=fftshift(abs(fftZ));
 
 
-fprintf('Processed: %s\n', filename);
+% %%TO CHECK
+%Spectral Entropy
+%    P=sum(abs(fft(data-window)).^2)
+%    %Normalization
+%    d=P(:);
+%    d=d/sum(d+ 1e-12);
+% 
+%    %Entropy Calculation
+%    logd = log2(d + 1e-12);
+%    Entropy(inc) = -sum(d.*logd)/log2(length(d));
+
+fprintf('%s\t With\t %d lines \n', filename,UpperLimit);
 
 end
 

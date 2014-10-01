@@ -6,11 +6,12 @@
 % Returns 'Results.txt'
 
 clearvars -except EXA EXB EXC EXD;
-clf
+clf( figure(1))
+clf( figure(2))
 
 % Change the .txt to be readed
-
-FileToRead='C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Datasets\SS\Walking  1061018013.txt';
+FileToRead='C:\Users\LG\Dropbox\MDP_LAG\Galaxy nexus\log_typetype_20140925_171756.txt';
+% FileToRead='C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Datasets\SS\Walking  1061018013.txt';
 
 %Precision of the results Int and decimal point and FFT
 pNum='4';
@@ -19,7 +20,7 @@ fftN=200; %biggger the more resolution
 
 %2) After a first run,check fig, change limits to desired sample to get std dev
 LowerLimit=500; %Min 1
-WindowSample=LowerLimit+1000;
+WindowSample=LowerLimit+300;
 
 
 fileID = fopen(FileToRead,'r');
