@@ -114,32 +114,40 @@ public class DeviceManagerFragment extends Fragment implements
         mCardsArrayList = new ArrayList<Card>();
         deviceList = outputList;
 
-        for (NfcRecord device : deviceList) {
+        if (deviceList != null) {
 
-            DeviceCardBuilder dcBuilder = new DeviceCardBuilder(
-                    this,
-                    rootView.getContext(),
-                    device.getNfcId(),
-                    device.getType(),
-                    device.getDescription(),
-                    device.getLocation(),
-                    device.getState(),
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-            );
+            for (NfcRecord device : deviceList) {
 
-            Card card = dcBuilder.buildDeviceCard();
-            mCardsArrayList.add(card);
+                DeviceCardBuilder dcBuilder = new DeviceCardBuilder(
+                        this,
+                        rootView.getContext(),
+                        device.getNfcId(),
+                        device.getType(),
+                        device.getDescription(),
+                        device.getLocation(),
+                        device.getState(),
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                );
+
+                Card card = dcBuilder.buildDeviceCard();
+                mCardsArrayList.add(card);
+            }
+
+            mCardArrayAdapter = new CardArrayAdapter(rootView.getContext(), mCardsArrayList);
+            mCardListView = (CardListView) rootView.findViewById(R.id.myList);
+            if (mCardListView != null) {
+                mCardListView.setAdapter(mCardArrayAdapter);
+            }
+        } else {
+
+            Toast.makeText(rootView.getContext(), "Oops! There aren't any registered devices yet.",
+                    Toast.LENGTH_SHORT).show();
         }
 
-        mCardArrayAdapter = new CardArrayAdapter(rootView.getContext() ,mCardsArrayList);
-        mCardListView = (CardListView) rootView.findViewById(R.id.myList);
-        if (mCardListView!=null){
-            mCardListView.setAdapter(mCardArrayAdapter);
-        }
         requestInProcess = false;
 
         if (this.pd != null) {

@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import tudelft.mdp.DeviceRegistrationDialog;
 import tudelft.mdp.backend.endpoints.deviceEndpoint.DeviceEndpoint;
 import tudelft.mdp.backend.endpoints.deviceEndpoint.model.NfcRecord;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.DeviceLogEndpoint;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcLogRecord;
+import tudelft.mdp.enums.Constants;
 
 /**
  * AsyncTask that is called after a NFC tag is detected
@@ -78,13 +78,21 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             }
 
             Log.d(TAG, "Inserting new nfc log record.");
-            mDeviceLogEndpointService.insertDeviceLog(newLogRecord).execute();
+            NfcLogRecord insertedDeviceLog = mDeviceLogEndpointService.insertDeviceLog(newLogRecord).execute();
 
             Log.d(TAG, "Updating device info.");
+            NfcRecord deviceInfoUpdated;
             if (newLogRecord.getState()){
-                mDeviceEndpointService.increaseDeviceUsers(nfcTag).execute();
+                deviceInfoUpdated = mDeviceEndpointService.increaseDeviceUsers(nfcTag).execute();
             } else {
-                mDeviceEndpointService.decreaseDeviceUsers(nfcTag).execute();
+                deviceInfoUpdated = mDeviceEndpointService.decreaseDeviceUsers(nfcTag).execute();
+            }
+
+            /* Check if there was a OFF/ON-ON/OFF transition of the device */
+            if (deviceInfoUpdated.getState() <= 1){
+                insertedDeviceLog.setId(null);
+                insertedDeviceLog.setUser(Constants.ANYUSER);
+                mDeviceLogEndpointService.insertDeviceLog(insertedDeviceLog).execute();
             }
 
 
@@ -105,7 +113,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         } else {
             //Toast.makeText(context, "Tag does not exists", Toast.LENGTH_LONG).show();
             Logger.getLogger(TAG).log(Level.INFO, "Tag does not exists");
-            DeviceRegistrationDialog dialog = new DeviceRegistrationDialog();
+            DeviceRegistrationAlertDialog dialog = new DeviceRegistrationAlertDialog();
             dialog.setNfcTag(nfcTag);
             dialog.show(mFragmentManager, "newDeviceDialog");
         }

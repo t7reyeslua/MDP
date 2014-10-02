@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import tudelft.mdp.Utils;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.DeviceLogEndpoint;
+import tudelft.mdp.enums.UserPreferences;
 
 /**
  * AsyncTask that handles the request for the device usage from a specific user
@@ -23,13 +25,19 @@ public class DeviceUsageByUserRequestAsyncTask extends AsyncTask<Object, Void, B
 
     private String nfcTag;
     private String username;
-    private List<Object> mUserDeviceInfo;
+    private List<Object> mUserDeviceInfo = new ArrayList<Object>();
 
     protected Boolean doInBackground(Object... params) {
         nfcTag  = (String)  params[0];
         username = (String) params[1];
 
-        mUserDeviceInfo = new ArrayList<Object>();
+        Double d1 = 0.0;
+        Double d2 = 0.0;
+        Double d3 = 0.0;
+        Double d4 = 0.0;
+        Double d5 = 0.0;
+
+        List<Double> result = new ArrayList<Double>();
 
         if (mDeviceLogEndpointService == null) {
             /* For testing against a deployed backend */
@@ -37,34 +45,35 @@ public class DeviceUsageByUserRequestAsyncTask extends AsyncTask<Object, Void, B
             mDeviceLogEndpointService = builder.build();
         }
 
+        Double maxDate = Double.valueOf(Utils.getCurrentTimestamp());
+        Double minDate = Utils.getMinTimestamp(UserPreferences.ALLTIME);
 
 
-        /*
         try {
-            Log.e(TAG, "Requesting list of registered devices");
-            mDevices = mDeviceEndpointService.listindexFoundDevices(100).execute().getItems();
+            Log.e(TAG, "Requesting device usage (" + nfcTag +") by user " + username);
+            result  = mDeviceLogEndpointService.getUserStatsOfDevice(maxDate, minDate, nfcTag, username).execute().getItems();
+
+            if (result.size() >= 0) {
+                d1 = result.get(0);
+                d2 = result.get(1);
+                d3 = result.get(2);
+                d4 = result.get(3);
+                d5 = result.get(4) * 100;
+            }
+
+            mUserDeviceInfo.add(nfcTag);
+            mUserDeviceInfo.add(d1);
+            mUserDeviceInfo.add(d2);
+            mUserDeviceInfo.add(d3);
+            mUserDeviceInfo.add(d4);
+            mUserDeviceInfo.add(d5);
+
             return true;
         } catch (IOException e) {
             Log.e(TAG, "Some error while requesting list of registered devices");
             return false;
         }
-        */
 
-        Double d1 = 3601.00;
-        Double d2 = 3599.00;
-        Double d3 = 21.42;
-        Double d4 = 19.88;
-        Double d5 = 76.89;
-
-
-        mUserDeviceInfo.add(nfcTag);
-        mUserDeviceInfo.add(d1);
-        mUserDeviceInfo.add(d2);
-        mUserDeviceInfo.add(d3);
-        mUserDeviceInfo.add(d4);
-        mUserDeviceInfo.add(d5);
-
-        return true;
     }
 
     @Override

@@ -111,9 +111,10 @@ public class DeviceCardBuilder {
 
         mDeviceCardHeader.setButtonExpandVisible(true);
 
-        mDeviceCard.setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener(){
+
+        mDeviceCard.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener(){
             @Override
-            public void onExpandStart(Card card) {
+            public void onExpandEnd(Card card) {
                 //Toast.makeText(mContext, mUsername + " clicked on " + mDeviceTagId, Toast.LENGTH_SHORT).show();
                 DeviceUsageByUserRequestAsyncTask deviceUsageByUserRequestAsyncTask = new DeviceUsageByUserRequestAsyncTask();
                 deviceUsageByUserRequestAsyncTask.delegate = mDeviceManagerFragment;

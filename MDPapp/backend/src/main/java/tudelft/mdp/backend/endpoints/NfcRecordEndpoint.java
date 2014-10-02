@@ -12,6 +12,9 @@ import java.util.logging.Logger;
 
 import javax.inject.Named;
 
+import tudelft.mdp.backend.Constants;
+import tudelft.mdp.backend.Utils;
+import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
 
 import static tudelft.mdp.backend.OfyService.ofy;
@@ -96,6 +99,7 @@ public class NfcRecordEndpoint {
         }
         nfcRecord.setState(nfcRecord.getState()+1);
         ofy().save().entity(nfcRecord).now();
+
         return nfcRecord;
     }
 
@@ -115,6 +119,8 @@ public class NfcRecordEndpoint {
         }
         nfcRecord.setState(nfcRecord.getState()-1);
         ofy().save().entity(nfcRecord).now();
+
+
         return nfcRecord;
     }
 

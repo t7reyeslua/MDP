@@ -8,12 +8,16 @@ import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.NotFoundException;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
 
+import tudelft.mdp.backend.Constants;
+import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
 
@@ -117,7 +121,11 @@ public class NfcLogRecordEndpoint {
     }
 
     @ApiMethod(name = "listUserDeviceLogByDateDevice", path = "list_userDeviceLog_datedevice")
-    public CollectionResponse<NfcLogRecord> listUserDeviceLogByDateDevice(@Named("nfcId") String nfcId, @Named("user") String user, @Named("minDate") Double minDate, @Named("maxDate") Double maxDate) {
+    public CollectionResponse<NfcLogRecord> listUserDeviceLogByDateDevice(
+            @Named("nfcId") String nfcId,
+            @Named("user") String user,
+            @Named("minDate") Double minDate,
+            @Named("maxDate") Double maxDate) {
 
         LOG.info("Calling listUserDeviceLogByDateDevice method");
 
@@ -131,6 +139,93 @@ public class NfcLogRecordEndpoint {
         return CollectionResponse.<NfcLogRecord>builder().setItems(records).build();
 
     }
+
+    @ApiMethod(name = "getUserStatsOfDevice", path = "get_user_stats_device")
+    public CollectionResponse<Double> getUserStatsOfDevice (
+            @Named("nfcId") String nfcId,
+            @Named("user") String user,
+            @Named("minDate") Double minDate,
+            @Named("maxDate") Double maxDate) {
+
+        LOG.info("Calling getUserStatsOfDevice method");
+
+        Double totalTime = 0.0;/**
+ * Created by t7 on 30-9-14.
+ */
+        Double totalPower = 0.0;
+        Double userTime = 0.0;
+        Double userPower = 0.0;
+        Double percentage = 0.0;
+
+        List<NfcLogRecord> userRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
+                user, minDate, maxDate).getItems());
+
+        String nowTimeString = Utils.getCurrentTimestamp();
+        Double nowTime = Double.valueOf(nowTimeString);
+
+        /* ========================================================*/
+        /* Calculate the time the user has made use of the device */
+        for (int i = userRecords.size() - 1; i >= 0; i--) {
+
+            /* An ON step is detected -> Measure how long it lasted */
+            if (userRecords.get(i).getState()){
+                userTime += (nowTime - userRecords.get(i).getTimestamp());
+            }
+            nowTime = userRecords.get(i).getTimestamp();
+        }
+
+        /* The first transition was a Falling Edge.
+           It was already ON when the time window started */
+        if(userRecords.size() > 0) {
+            if (!userRecords.get(0).getState()) {
+                userTime += (userRecords.get(0).getTimestamp() - minDate);
+            }
+        }
+
+
+        /* ========================================================*/
+        /* Calculate the time the device has been used by all users */
+
+       List<NfcLogRecord> deviceRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
+               Constants.ANYUSER, minDate, maxDate).getItems());
+
+        nowTime = Double.valueOf(nowTimeString);
+
+        /* Calculate the time the user has made use of the device */
+        for (int i = deviceRecords.size() - 1; i >= 0; i--) {
+
+            /* An ON step is detected -> Measure how long it lasted */
+            if (deviceRecords.get(i).getState()){
+                totalTime += (nowTime - deviceRecords.get(i).getTimestamp());
+            }
+            nowTime = deviceRecords.get(i).getTimestamp();
+        }
+
+        /* The first transition was a Falling Edge.
+           It was already ON when the time window started */
+        if (deviceRecords.size() > 0) {
+            if (!deviceRecords.get(0).getState()) {
+                totalTime += (deviceRecords.get(0).getTimestamp() - minDate);
+            }
+        }
+
+
+        /* ========================================================*/
+
+        if (totalTime > 0 ){
+            percentage = userTime/totalTime;
+        }
+
+        List<Double> result = new ArrayList<Double>();
+        result.add(totalTime);
+        result.add(userTime);
+        result.add(totalPower);
+        result.add(userPower);
+        result.add(percentage);
+
+        return CollectionResponse.<Double>builder().setItems(result).build();
+    }
+
 
     /**
      * This inserts a new <code>NfcLogRecord</code> object.
@@ -150,17 +245,11 @@ public class NfcLogRecordEndpoint {
             }
         }
 
-        // 1) create a java calendar instance
-        Calendar calendar = Calendar.getInstance();
-        // 2) get a java.util.Date from the calendar instance.
-        //    this date will represent the current instant, or "now".
-        java.util.Date now = calendar.getTime();
-        // 3) a java current time (now) instance
-        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
 
-        String stringTS = new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
-
-        nfcLogRecord.setTimestamp(Double.valueOf(stringTS));
+        if (!nfcLogRecord.getUser().equals(Constants.ANYUSER)) {
+            String stringTS = Utils.getCurrentTimestamp();
+            nfcLogRecord.setTimestamp(Double.valueOf(stringTS));
+        }
 
         //Since our @Id field is a Long, Objectify will generate a unique value for us
         //when we use put
@@ -168,6 +257,7 @@ public class NfcLogRecordEndpoint {
 
         return nfcLogRecord;
     }
+
 
     /**
      * This deletes an existing <code>NfcLogRecord</code> object.
