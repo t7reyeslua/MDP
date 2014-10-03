@@ -36,6 +36,7 @@ public class DeviceUsageByUserRequestAsyncTask extends AsyncTask<Object, Void, B
         Double d3 = 0.0;
         Double d4 = 0.0;
         Double d5 = 0.0;
+        Double d6 = 0.0;
 
         List<Double> result = new ArrayList<Double>();
 
@@ -59,6 +60,7 @@ public class DeviceUsageByUserRequestAsyncTask extends AsyncTask<Object, Void, B
                 d3 = result.get(2);
                 d4 = result.get(3);
                 d5 = result.get(4) * 100;
+                d6 = result.get(5);
             }
 
             mUserDeviceInfo.add(nfcTag);
@@ -67,6 +69,7 @@ public class DeviceUsageByUserRequestAsyncTask extends AsyncTask<Object, Void, B
             mUserDeviceInfo.add(d3);
             mUserDeviceInfo.add(d4);
             mUserDeviceInfo.add(d5);
+            mUserDeviceInfo.add(d6);
 
             return true;
         } catch (IOException e) {

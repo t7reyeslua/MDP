@@ -6,6 +6,7 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.appengine.api.datastore.ReadPolicy;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -98,7 +99,7 @@ public class NfcRecordEndpoint {
             throw new NotFoundException("NFC Record does not exist");
         }
         nfcRecord.setState(nfcRecord.getState()+1);
-        ofy().save().entity(nfcRecord).now();
+        ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nfcRecord).now();
 
         return nfcRecord;
     }
@@ -118,7 +119,7 @@ public class NfcRecordEndpoint {
             throw new NotFoundException("NFC Record does not exist");
         }
         nfcRecord.setState(nfcRecord.getState()-1);
-        ofy().save().entity(nfcRecord).now();
+        ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nfcRecord).now();
 
 
         return nfcRecord;

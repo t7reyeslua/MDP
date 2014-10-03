@@ -130,7 +130,8 @@ public class DeviceManagerFragment extends Fragment implements
                         0.0,
                         0.0,
                         0.0,
-                        0.0
+                        0.0,
+                        0
                 );
 
                 Card card = dcBuilder.buildDeviceCard();
@@ -164,11 +165,16 @@ public class DeviceManagerFragment extends Fragment implements
         Double totalPower = (Double) outputList.get(3);
         Double userPower = (Double) outputList.get(4);
         Double percentage = (Double) outputList.get(5);
+        Integer userStatus = ((Double) outputList.get(6)).intValue();
 
 
-        /*
-        Toast.makeText(rootView.getContext(), mUsername + " finished " + nfcTag,
-                Toast.LENGTH_SHORT).show();*/
+        String currentlyUsing = "You are currently using this device.";
+        if (userStatus == 0){
+            currentlyUsing = "You are not currently using this device";
+        }
+
+        Toast.makeText(rootView.getContext(), currentlyUsing,
+                Toast.LENGTH_SHORT).show();
 
         Boolean indexFound = false;
         while (!indexFound){
@@ -193,7 +199,8 @@ public class DeviceManagerFragment extends Fragment implements
                     userTime,
                     totalPower,
                     userPower,
-                    percentage
+                    percentage,
+                    userStatus
             );
 
             Card card = dcBuilder.buildDeviceCard();

@@ -149,13 +149,12 @@ public class NfcLogRecordEndpoint {
 
         LOG.info("Calling getUserStatsOfDevice method");
 
-        Double totalTime = 0.0;/**
- * Created by t7 on 30-9-14.
- */
+        Double totalTime = 0.0;
         Double totalPower = 0.0;
         Double userTime = 0.0;
         Double userPower = 0.0;
         Double percentage = 0.0;
+        Double userStatus = 0.0;
 
         List<NfcLogRecord> userRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
                 user, minDate, maxDate).getItems());
@@ -216,12 +215,22 @@ public class NfcLogRecordEndpoint {
             percentage = userTime/totalTime;
         }
 
+        NfcLogRecord lastUserInteractionWithDevice = getLastUserLogOfDevice(nfcId, user);
+
+        if (lastUserInteractionWithDevice != null){
+            if (lastUserInteractionWithDevice.getState()){
+                userStatus = 1.0;
+            }
+        }
+
+
         List<Double> result = new ArrayList<Double>();
         result.add(totalTime);
         result.add(userTime);
         result.add(totalPower);
         result.add(userPower);
         result.add(percentage);
+        result.add(userStatus);
 
         return CollectionResponse.<Double>builder().setItems(result).build();
     }

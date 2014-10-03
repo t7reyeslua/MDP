@@ -80,6 +80,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             Log.d(TAG, "Inserting new nfc log record.");
             NfcLogRecord insertedDeviceLog = mDeviceLogEndpointService.insertDeviceLog(newLogRecord).execute();
 
+
             Log.d(TAG, "Updating device info.");
             NfcRecord deviceInfoUpdated;
             if (newLogRecord.getState()){
@@ -89,11 +90,14 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             }
 
             /* Check if there was a OFF/ON-ON/OFF transition of the device */
+
             if (deviceInfoUpdated.getState() <= 1){
                 insertedDeviceLog.setId(null);
                 insertedDeviceLog.setUser(Constants.ANYUSER);
+                Log.e(TAG, "Inserting ANYUSER log record. " + insertedDeviceLog.getState().toString() );
                 mDeviceLogEndpointService.insertDeviceLog(insertedDeviceLog).execute();
             }
+
 
 
             return true;

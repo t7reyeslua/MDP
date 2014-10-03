@@ -68,6 +68,7 @@ public class MainActivity extends GoogleLoginManager {
     private TextView mUsernamePic;
     private ImageView imgProfilePic;
     private NfcAdapter mNfcAdapter;
+    private String mUsername;
 
     private Person currentUser;
 
@@ -76,7 +77,7 @@ public class MainActivity extends GoogleLoginManager {
         super.onCreate(savedInstanceState);
 
 
-        String mUsername = PreferenceManager.getDefaultSharedPreferences(this)
+        mUsername = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(UserPreferences.USERNAME, null);
         if (mUsername == null) {
             showLoginScreen();
@@ -596,7 +597,10 @@ public class MainActivity extends GoogleLoginManager {
             if (!mGoogleApiClient.isConnected()){
                 login_signin();
             }
-            new DeviceDetectionAsyncTask().execute(this, nfcUID, currentUser.getDisplayName(), getFragmentManager());
+
+
+
+            new DeviceDetectionAsyncTask().execute(this, nfcUID, mUsername, getFragmentManager());
             Vibrator v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
             v.vibrate(500);
 

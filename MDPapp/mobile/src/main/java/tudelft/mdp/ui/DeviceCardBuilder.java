@@ -5,6 +5,8 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
+
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
@@ -44,6 +46,7 @@ public class DeviceCardBuilder {
     private Double mUserPower;
 
     private Double mPercentage;
+    private Integer mUserStatus;
 
     private Boolean hasExpandInfo = false;
 
@@ -64,7 +67,7 @@ public class DeviceCardBuilder {
 
     public DeviceCardBuilder(DeviceManagerFragment dmFragment, Context context, String deviceTagId, String deviceType, String deviceDesc,
             String deviceLocation, Integer currentUsers, Double totalTime, Double userTime,
-            Double totalPower, Double userPower, Double percentage) {
+            Double totalPower, Double userPower, Double percentage, Integer userStatus) {
         mContext = context;
         mDeviceTagId = deviceTagId;
         mDeviceType = deviceType;
@@ -77,6 +80,7 @@ public class DeviceCardBuilder {
         mUserPower = userPower;
         mPercentage = percentage;
         mDeviceManagerFragment = dmFragment;
+        mUserStatus = userStatus;
 
 
         mUsername = PreferenceManager
@@ -93,7 +97,7 @@ public class DeviceCardBuilder {
         }
 
         Boolean activeDevice = false;
-        if (mCurrentUsers > 0){
+        if (mUserStatus > 0){
             activeDevice = true;
         }
 
@@ -123,6 +127,14 @@ public class DeviceCardBuilder {
         });
 
 
+        mDeviceCard.setOnCollapseAnimatorEndListener(new Card.OnCollapseAnimatorEndListener(){
+            @Override
+            public void onCollapseEnd(Card card) {
+                //Toast.makeText(mContext, mUsername + " clicked on " + mDeviceTagId, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
 
         mDeviceCard.addCardHeader(mDeviceCardHeader);
         mDeviceCard.setShadow(true);
@@ -141,13 +153,15 @@ public class DeviceCardBuilder {
             return;
         }
 
+        DecimalFormat df = new DecimalFormat("#.#");
+
         mDeviceCardExpand = new DeviceCardExpand(
                 mContext,
                 formatTime(mTotalTime),
                 formatTime(mUserTime),
                 mTotalPower.toString() + " kw",
                 mUserPower.toString()  + " kw ",
-                mPercentage.toString() + "%");
+                df.format(mPercentage) + "%");
 
         mDeviceCard.addCardExpand(mDeviceCardExpand);
     }
