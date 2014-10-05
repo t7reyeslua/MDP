@@ -26,7 +26,7 @@ clearvars
     WindowSize=inf; %"inf" for using the whole set
     
     %Filter properties
-    cutfreq=2.5; %Cutt off frequency (low pass Butterworth filter)
+    cutfreq=2.6; %Cutt off frequency (low pass Butterworth filter)
     
     %Choose Features 1 is Enable
     ftTDomain=1;        %mean 3x, std dev 3x, variance 3,x & Magnitudes of this values

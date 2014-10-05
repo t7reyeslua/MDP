@@ -6,8 +6,8 @@
  *	http://jdongprogramming.com/helpful-code-snippets/how-to-read-a-txt-or-csv-in-java/
  * 
  * See s2ltest() method as an implementation example
- * Working code :)
  * 
+ * ATENTION, only Acc2list should be used instead of AccelString2list for the format of (# TS aX aY aZ)
  */
 
 package ft_test;
@@ -98,6 +98,38 @@ public class Reader_From_Files {
            
         }
     }
+    
+    public void Acc2list(ArrayList<Integer> TimeStamp, ArrayList<Double> Xlist,ArrayList<Double> Ylist,ArrayList<Double> Zlist){
+    	/*Format of txt num timestamp aX aY aZ
+    	 * */
+    	
+    double tX,tY,tZ;
+    int ts;	
+    String tempstr;
+    String[] tmpchararray;
+    
+        for(int i=0; i<fileContent.size(); i++){
+            tempstr = fileContent.get(i);
+            tmpchararray = tempstr.split("	");//carefull if is tab or space between " "
+            
+            //System.out.println(tempstr);
+            
+            ts=Integer.parseInt(tmpchararray[1]); //Timestamp, may have to use doubles
+            tX=Double.parseDouble(tmpchararray[2]);
+            tY=Double.parseDouble(tmpchararray[3]);
+            tZ=Double.parseDouble(tmpchararray[4]);
+                     
+//            System.out.println(ts+"\t"+tX + "\t" + tY + "\t" +tZ);
+
+            TimeStamp.add(ts);
+            Xlist.add(tX);
+            Ylist.add(tY);
+            Zlist.add(tZ);
+
+           
+        }
+    }
+    
     
     public ArrayList<ArrayList<Double>> AccelString2AccelSet(){
     	
