@@ -6,4 +6,5 @@ package tudelft.mdp.backend;
 public class Constants {
 
     public static final String ANYUSER = "ANY USER";
+    public static final Double ALPHA_TRIMMER_FILTER_COEFF = 0.2;
 }

@@ -9,7 +9,9 @@
                 tudelft.mdp.backend.endpoints.RegistrationEndpoint,
                 tudelft.mdp.backend.endpoints.MessagingEndpoint,
                 tudelft.mdp.backend.endpoints.NfcRecordEndpoint,
-                tudelft.mdp.backend.endpoints.NfcLogRecordEndpoint
+                tudelft.mdp.backend.endpoints.NfcLogRecordEndpoint,
+                tudelft.mdp.backend.endpoints.LocationLogRecordEndpoint,
+                tudelft.mdp.backend.endpoints.RadioMapFingerprintEndpoint
             </param-value>
         </init-param>
     </servlet>

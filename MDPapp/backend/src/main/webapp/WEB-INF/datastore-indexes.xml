@@ -23,4 +23,49 @@
         <property name="user" direction="asc"/>
         <property name="timestamp" direction="asc"/>
     </datastore-index>
+
+
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="user" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="place" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+
+
+    <datastore-index kind="ApGaussianRecord" ancestor="false" source="manual">
+        <property name="bssid" direction="asc"/>
+        <property name="device" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="mean" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="ApGaussianRecord" ancestor="false" source="manual">
+        <property name="device" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="mean" direction="asc"/>
+    </datastore-index>
+
+    <datastore-index kind="ApHistogramRecord" ancestor="false" source="manual">
+        <property name="device" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="rssi" direction="asc"/>
+    </datastore-index>
+
+
+
+
+
+
 </datastore-indexes>

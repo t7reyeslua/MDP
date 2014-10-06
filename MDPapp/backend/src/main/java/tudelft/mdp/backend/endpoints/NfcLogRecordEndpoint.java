@@ -117,7 +117,6 @@ public class NfcLogRecordEndpoint {
                 .order("timestamp")
                 .list();
         return CollectionResponse.<NfcLogRecord>builder().setItems(records).build();
-
     }
 
     @ApiMethod(name = "listUserDeviceLogByDateDevice", path = "list_userDeviceLog_datedevice")

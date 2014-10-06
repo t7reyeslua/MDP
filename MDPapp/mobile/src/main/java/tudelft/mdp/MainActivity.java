@@ -4,11 +4,15 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,6 +23,11 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -38,6 +47,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import tudelft.mdp.dashboard.DashboardFragment;
 import tudelft.mdp.deviceManager.DeviceDetectionAsyncTask;
@@ -45,10 +55,11 @@ import tudelft.mdp.deviceManager.DeviceManagerFragment;
 import tudelft.mdp.enums.NavigationDrawer;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
+import tudelft.mdp.locationTracker.LocationDetectionService;
 import tudelft.mdp.ui.ExpandableListAdapter;
 
 
-public class MainActivity extends GoogleLoginManager {
+public class MainActivity extends GoogleLoginManager implements ServiceConnection{
 
     private static final String TAG = "MDP-Main";
     public static final String MIME_TEXT_PLAIN = "text/plain";
@@ -71,6 +82,9 @@ public class MainActivity extends GoogleLoginManager {
     private String mUsername;
 
     private Person currentUser;
+
+    private Messenger mServiceMessengerLocation = null;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,6 +114,8 @@ public class MainActivity extends GoogleLoginManager {
         initDrawer();
 
         verifyNFCenabled();
+
+        automaticBinding();
 
         new GcmRegistrationAsyncTask().execute(this);
     }
@@ -151,7 +167,7 @@ public class MainActivity extends GoogleLoginManager {
     @Override
     public void onConnected(Bundle connectionHint) {
         // Reaching onConnected means we consider the user signed in.
-        Log.i(TAG, "onConnected");
+        Log.i(TAG, "onConnected to Google Play Services");
 
 
         // Retrieve some profile information to personalize our app for the user.
@@ -313,6 +329,8 @@ public class MainActivity extends GoogleLoginManager {
          */
         child = new ArrayList<String>();
         child.add("Location History");
+        child.add("Fingerprinting");
+        child.add("Calibration");
         /*child.add("Fingerprinting");
         child.add("Locator");*/
         childItem.add(child);
@@ -350,6 +368,15 @@ public class MainActivity extends GoogleLoginManager {
                 }
             }else if (groupPosition == NavigationDrawer.LOCATIONTRACKER){
                 switch (childPosition){
+                    case 0:
+                        position = NavigationDrawer.LOCATIONHISTORY;
+                        break;
+                    case 1:
+                        position = NavigationDrawer.LOCATIONTFINGERPRINTING;
+                        break;
+                    case 2:
+                        position = NavigationDrawer.LOCATIONTCALIBRATION;
+                        break;
                     default:
                         break;
                 }
@@ -409,11 +436,6 @@ public class MainActivity extends GoogleLoginManager {
 
 
     }
-
-
-
-
-
 
     /**
      * Fetching user's information name, email, profile pic
@@ -496,6 +518,12 @@ public class MainActivity extends GoogleLoginManager {
         stopForegroundDispatch(this, mNfcAdapter);
 
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        automaticUnbinding();
+        super.onDestroy();
     }
 
     @Override
@@ -724,5 +752,40 @@ public class MainActivity extends GoogleLoginManager {
 
     }
 
+    /* Location Service Routines*/
+    private void automaticBinding() {
+        startServiceLocation();
+    }
+
+    private void automaticUnbinding() {
+        stopServiceLocation();
+    }
+
+    public void startServiceLocation(){
+
+        Log.i(TAG, "Location Service: START");
+        Intent intent = new Intent(this, LocationDetectionService.class);
+        this.startService(intent);
+    }
+
+    public void stopServiceLocation(){
+
+        Log.i(TAG, "Location Service: STOP");
+        this.stopService(new Intent(this, LocationDetectionService.class));
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        Log.i(TAG, "Location Service: onServiceConnected");
+        mServiceMessengerLocation = new Messenger(service);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        Log.i(TAG, "Location Service: onServiceDisconnected");
+        if (mServiceMessengerLocation != null) {
+            mServiceMessengerLocation = null;
+        }
+    }
 
 }

@@ -31,5 +31,6 @@ dependencies {
     compile 'com.github.gabrielemariotti.cards:library-extra:1.9.1'
     compile 'com.github.johnkil.android-robototextview:robototextview:2.1.0'
     compile "com.androidplot:androidplot-core:0.6.1"
+    compile 'com.google.maps.android:android-maps-utils:0.3+'
     compile project(path: ':backend', configuration: 'android-endpoints')
 }

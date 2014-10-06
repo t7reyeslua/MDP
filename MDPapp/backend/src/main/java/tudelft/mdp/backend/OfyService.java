@@ -4,6 +4,9 @@ import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 
+import tudelft.mdp.backend.records.ApGaussianRecord;
+import tudelft.mdp.backend.records.ApHistogramRecord;
+import tudelft.mdp.backend.records.LocationLogRecord;
 import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
 import tudelft.mdp.backend.records.RegistrationRecord;
@@ -19,6 +22,9 @@ public class OfyService {
         ObjectifyService.register(RegistrationRecord.class);
         ObjectifyService.register(NfcRecord.class);
         ObjectifyService.register(NfcLogRecord.class);
+        ObjectifyService.register(ApGaussianRecord.class);
+        ObjectifyService.register(ApHistogramRecord.class);
+        ObjectifyService.register(LocationLogRecord.class);
     }
 
     public static Objectify ofy() {

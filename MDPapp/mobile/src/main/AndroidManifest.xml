@@ -10,8 +10,16 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-feature    android:name="android.hardware.nfc"
-                     android:required="true" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -27,23 +35,25 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <receiver
-                android:name=".gcm.GcmBroadcastReceiver"
-                android:permission="com.google.android.c2dm.permission.SEND" >
+            android:name="tudelft.mdp.gcm.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="tudelft.mdp" />
             </intent-filter>
         </receiver>
-        <service android:name=".gcm.GcmIntentService" />
+
+        <service android:name="tudelft.mdp.gcm.GcmIntentService" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name="tudelft.mdp.LoginActivity"
             android:label="@string/app_name"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="tudelft.mdp.MainActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="tudelft.mdp.MainActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="tudelft.mdp.MainActivity" />
         </activity>
 
         <meta-data
@@ -51,36 +61,41 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="tudelft.mdp.MainActivity"
             android:label="@string/title_activity_main_"
             android:launchMode="singleInstance" >
-
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-
             <meta-data
-                    android:name="android.nfc.action.TECH_DISCOVERED"
-                    android:resource="@xml/nfc_tech_filter" />
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
-
-
         </activity>
+
+        <service
+            android:name="tudelft.mdp.locationTracker.LocationDetectionService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>
