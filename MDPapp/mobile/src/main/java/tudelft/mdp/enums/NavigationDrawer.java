@@ -8,6 +8,7 @@ public class NavigationDrawer {
     public static final int LOCATIONHISTORY = 31;
     public static final int LOCATIONTFINGERPRINTING= 32;
     public static final int LOCATIONTCALIBRATION = 33;
+    public static final int LOCATOR = 34;
     public static final int DEVICEMANAGER = 4;
     public static final int UTILITIES = 5;
 }

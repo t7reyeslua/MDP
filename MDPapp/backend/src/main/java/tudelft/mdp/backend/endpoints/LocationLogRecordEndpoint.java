@@ -72,9 +72,11 @@ public class LocationLogRecordEndpoint {
 
         List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
                 .filter("user", user)
+                .order("timestamp")
+                .order("probability")
                 .list();
 
-        records = sortByTimestamp(records);
+        //records = sortByTimestamp(records);
 
         LOG.info("Records:" + records.size());
 
@@ -93,9 +95,11 @@ public class LocationLogRecordEndpoint {
                 .filter("user", user)
                 .filter("timestamp >=", minDate)
                 .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .order("probability")
                 .list();
 
-        records = sortByTimestamp(records);
+        //records = sortByTimestamp(records);
         LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
@@ -117,9 +121,11 @@ public class LocationLogRecordEndpoint {
                 .filter("zone", zone)
                 .filter("timestamp >=", minDate)
                 .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .order("probability")
                 .list();
 
-        records = sortByTimestamp(records);
+        //records = sortByTimestamp(records);
         LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
@@ -190,9 +196,11 @@ public class LocationLogRecordEndpoint {
                 .filter("zone", zone)
                 .filter("timestamp >=", minDate)
                 .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .order("probability")
                 .list();
 
-        records = sortByTimestamp(records);
+        //records = sortByTimestamp(records);
 
         LOG.info("Records:" + records.size());
 
@@ -209,9 +217,11 @@ public class LocationLogRecordEndpoint {
         List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
                 .filter("place", place)
                 .filter("zone", zone)
+                .order("timestamp")
+                .order("probability")
                 .list();
 
-        records = sortByTimestamp(records);
+        //records = sortByTimestamp(records);
 
         LOG.info("Records:" + records.size());
 

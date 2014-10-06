@@ -118,6 +118,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         automaticBinding();
 
         new GcmRegistrationAsyncTask().execute(this);
+
+        selectItem(NavigationDrawer.DASHBOARD,-1);
+
+
     }
 
 
@@ -331,8 +335,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         child.add("Location History");
         child.add("Fingerprinting");
         child.add("Calibration");
-        /*child.add("Fingerprinting");
-        child.add("Locator");*/
+        child.add("Locator");
         childItem.add(child);
         /**
          * Add Data For Device Manager
