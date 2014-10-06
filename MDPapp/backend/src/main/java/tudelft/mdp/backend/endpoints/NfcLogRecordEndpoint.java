@@ -24,7 +24,11 @@ import tudelft.mdp.backend.records.NfcRecord;
 import static tudelft.mdp.backend.OfyService.ofy;
 
 /** An endpoint class we are exposing */
-@Api(name = "deviceLogEndpoint", description = "An API to manage the historical log of devices usage (NFC tags)", version = "v1", namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft", ownerName = "endpoints.backend.mdp.tudelft", packagePath=""))
+@Api(name = "deviceLogEndpoint",
+        description = "An API to manage the historical log of devices usage (NFC tags)",
+        version = "v1",
+        namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft",
+        ownerName = "endpoints.backend.mdp.tudelft", packagePath=""))
 public class NfcLogRecordEndpoint {
 
 

@@ -9,6 +9,7 @@ import com.googlecode.objectify.annotation.Index;
 public class LocationLogRecord {
     @Id
     private Long id;
+
     @Index
     private String user;
 
@@ -19,8 +20,10 @@ public class LocationLogRecord {
     private String zone;
 
 
+    @Index
     private Double probability;
 
+    @Index
     private Double timestamp;
 
     public LocationLogRecord() {

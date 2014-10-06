@@ -6,7 +6,10 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -17,10 +20,13 @@ import tudelft.mdp.backend.records.LocationLogRecord;
 import static tudelft.mdp.backend.OfyService.ofy;
 
 /** An endpoint class we are exposing */
-@Api(name = "locationLogRecordEndpoint", description = "An API to manage the location history of each user", version = "v1", namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft", ownerName = "endpoints.backend.mdp.tudelft", packagePath=""))
+@Api(name = "locationLogEndpoint",
+        description = "An API to manage the location history of each user",
+        version = "v1",
+        namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft",
+        ownerName = "endpoints.backend.mdp.tudelft", packagePath=""))
 public class LocationLogRecordEndpoint {
 
-    // Make sure to add this endpoint to your web.xml file if this is a web application.
 
     private static final Logger LOG = Logger.getLogger(LocationLogRecordEndpoint.class.getName());
 
@@ -66,8 +72,11 @@ public class LocationLogRecordEndpoint {
 
         List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
                 .filter("user", user)
-                .order("timestamp")
                 .list();
+
+        records = sortByTimestamp(records);
+
+        LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
@@ -84,8 +93,10 @@ public class LocationLogRecordEndpoint {
                 .filter("user", user)
                 .filter("timestamp >=", minDate)
                 .filter("timestamp <=", maxDate)
-                .order("timestamp")
                 .list();
+
+        records = sortByTimestamp(records);
+        LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
@@ -106,8 +117,10 @@ public class LocationLogRecordEndpoint {
                 .filter("zone", zone)
                 .filter("timestamp >=", minDate)
                 .filter("timestamp <=", maxDate)
-                .order("timestamp")
                 .list();
+
+        records = sortByTimestamp(records);
+        LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
@@ -133,6 +146,9 @@ public class LocationLogRecordEndpoint {
             }
         }
 
+
+        LOG.info("Records result:" + result.size());
+
         return CollectionResponse.<LocationLogRecord>builder().setItems(result).build();
     }
 
@@ -155,6 +171,7 @@ public class LocationLogRecordEndpoint {
                 result.add(record);
             }
         }
+        LOG.info("Records result :" + result.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(result).build();
     }
@@ -173,8 +190,11 @@ public class LocationLogRecordEndpoint {
                 .filter("zone", zone)
                 .filter("timestamp >=", minDate)
                 .filter("timestamp <=", maxDate)
-                .order("timestamp")
                 .list();
+
+        records = sortByTimestamp(records);
+
+        LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
@@ -189,14 +209,28 @@ public class LocationLogRecordEndpoint {
         List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
                 .filter("place", place)
                 .filter("zone", zone)
-                .order("timestamp")
                 .list();
+
+        records = sortByTimestamp(records);
+
+        LOG.info("Records:" + records.size());
 
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
 
 
 
+    private List<LocationLogRecord> sortByTimestamp(List<LocationLogRecord> unsortedList){
+        Collections.sort(unsortedList, new Comparator<LocationLogRecord>() {
+            @Override
+            public int compare(LocationLogRecord item1, LocationLogRecord item2) {
+
+                return item1.getTimestamp().compareTo(item2.getTimestamp());
+            }
+        });
+
+        return unsortedList;
+    }
 
 
 }

@@ -25,6 +25,7 @@
     </datastore-index>
 
 
+
     <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
         <property name="place" direction="asc"/>
         <property name="zone" direction="asc"/>
