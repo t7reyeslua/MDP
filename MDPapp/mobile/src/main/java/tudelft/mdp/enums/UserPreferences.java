@@ -6,6 +6,7 @@ package tudelft.mdp.enums;
 public class UserPreferences {
 
     public static final String USERNAME = "USERNAME";
+    public static final String LOCATIONMODE = "LOCATIONMODE";
     public static final String USERID = "USERID";
     public static final String USERMAIL = "USEREMAIL";
     public static final String USERPIC = "USERPIC";

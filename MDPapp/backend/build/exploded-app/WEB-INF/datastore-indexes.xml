@@ -61,6 +61,48 @@
         <property name="probability" direction="asc"/>
     </datastore-index>
 
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="mode" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="mode" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="mode" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="mode" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+        <property name="probability" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="mode" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+        <property name="probability" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
+        <property name="mode" direction="asc"/>
+        <property name="place" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+        <property name="probability" direction="asc"/>
+    </datastore-index>
+
+
 
 
 

@@ -21,12 +21,24 @@ public class LocationLogRecord {
 
 
     @Index
+    private String mode;
+
+
+    @Index
     private Double probability;
 
     @Index
     private Double timestamp;
 
     public LocationLogRecord() {
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 
     public Long getId() {

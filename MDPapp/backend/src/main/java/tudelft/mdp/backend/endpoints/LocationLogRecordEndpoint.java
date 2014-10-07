@@ -228,8 +228,6 @@ public class LocationLogRecordEndpoint {
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
 
-
-
     private List<LocationLogRecord> sortByTimestamp(List<LocationLogRecord> unsortedList){
         Collections.sort(unsortedList, new Comparator<LocationLogRecord>() {
             @Override
@@ -241,6 +239,134 @@ public class LocationLogRecordEndpoint {
 
         return unsortedList;
     }
+
+
+    @ApiMethod(name = "listLocationLogByUserMode", path = "list_location_user_mode")
+    public CollectionResponse<LocationLogRecord> listLocationLogByUserMode(
+            @Named("user") String user,
+            @Named("mode") String mode) {
+
+        LOG.info("Calling listLocationLogByUserMode method");
+
+        List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
+                .filter("user", user)
+                .filter("mode", mode)
+                .order("timestamp")
+                .order("probability")
+                .list();
+
+        //records = sortByTimestamp(records);
+
+        LOG.info("Records:" + records.size());
+
+        return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "listLocationLogByUserDateMode", path = "list_location_user_date_mode")
+    public CollectionResponse<LocationLogRecord> listLocationLogByUserDateMode(
+            @Named("user") String user,
+            @Named("mode") String mode,
+            @Named("minDate") Double minDate,
+            @Named("maxDate") Double maxDate) {
+
+        LOG.info("Calling listLocationLogByUserDateMode method");
+
+        List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
+                .filter("user", user)
+                .filter("mode", mode)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .order("probability")
+                .list();
+
+        //records = sortByTimestamp(records);
+        LOG.info("Records:" + records.size());
+
+        return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "listLocationLogByUserDateZoneMode", path = "list_location_user_date_zone_mode")
+    public CollectionResponse<LocationLogRecord> listLocationLogByUserDateZoneMode(
+            @Named("user") String user,
+            @Named("mode") String mode,
+            @Named("place") String place,
+            @Named("zone") String zone,
+            @Named("minDate") Double minDate,
+            @Named("maxDate") Double maxDate) {
+
+        LOG.info("Calling listLocationLogByUserDateZoneMode method");
+
+        List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
+                .filter("user", user)
+                .filter("mode", mode)
+                .filter("place", place)
+                .filter("zone", zone)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .order("probability")
+                .list();
+
+        //records = sortByTimestamp(records);
+        LOG.info("Records:" + records.size());
+
+        return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "listLocationLogByDateZoneMode", path = "list_location_date_zone_mode")
+    public CollectionResponse<LocationLogRecord> listLocationLogByDateZoneMode(
+            @Named("mode") String mode,
+            @Named("place") String place,
+            @Named("zone") String zone,
+            @Named("minDate") Double minDate,
+            @Named("maxDate") Double maxDate) {
+
+        LOG.info("Calling listLocationLogByDateZoneMode method");
+
+        List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
+                .filter("mode", mode)
+                .filter("place", place)
+                .filter("zone", zone)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .order("probability")
+                .list();
+
+        //records = sortByTimestamp(records);
+
+        LOG.info("Records:" + records.size());
+
+        return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "listLocationLogByZoneMode", path = "list_location_zone_mode")
+    public CollectionResponse<LocationLogRecord> listLocationLogByZoneMode(
+            @Named("mode") String mode,
+            @Named("place") String place,
+            @Named("zone") String zone) {
+
+        LOG.info("Calling listLocationLogByZoneMode method");
+
+        List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
+                .filter("mode", mode)
+                .filter("place", place)
+                .filter("zone", zone)
+                .order("timestamp")
+                .order("probability")
+                .list();
+
+        //records = sortByTimestamp(records);
+
+        LOG.info("Records:" + records.size());
+
+        return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
+    }
+
+
+
+
 
 
 }

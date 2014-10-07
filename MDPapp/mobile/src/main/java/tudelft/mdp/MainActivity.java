@@ -56,6 +56,8 @@ import tudelft.mdp.enums.NavigationDrawer;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
 import tudelft.mdp.locationTracker.LocationDetectionService;
+import tudelft.mdp.locationTracker.LocationFingerprintFragment;
+import tudelft.mdp.locationTracker.LocationHistoryFragment;
 import tudelft.mdp.ui.ExpandableListAdapter;
 
 
@@ -119,7 +121,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
         new GcmRegistrationAsyncTask().execute(this);
 
-        selectItem(NavigationDrawer.DASHBOARD,-1);
+        selectItem(NavigationDrawer.DASHBOARD, -1);
 
 
     }
@@ -380,6 +382,9 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                     case 2:
                         position = NavigationDrawer.LOCATIONTCALIBRATION;
                         break;
+                    case 3:
+                        position = NavigationDrawer.LOCATOR;
+                        break;
                     default:
                         break;
                 }
@@ -419,7 +424,17 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 break;
             case NavigationDrawer.ACTIVITYMONITOR:
                 break;
-            case NavigationDrawer.LOCATIONTRACKER:
+            case NavigationDrawer.LOCATIONHISTORY:
+                fragment =  new LocationHistoryFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_locHistoryManager")
+                        .commit();
+                break;
+            case NavigationDrawer.LOCATIONTFINGERPRINTING:
+                fragment =  new LocationFingerprintFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_locFingerprint")
+                        .commit();
                 break;
             case NavigationDrawer.DEVICEMANAGER:
                 fragment =  new DeviceManagerFragment();

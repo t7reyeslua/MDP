@@ -1,0 +1,123 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginBottom="4dp"
+                android:text="Place:"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="16sp"
+                android:id="@+id/textPlace"/>
+        <AutoCompleteTextView
+                android:id="@+id/acPlace"
+                android:fontFamily="sans-serif-light"
+                android:textSize="15sp"
+                android:inputType="textAutoComplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginBottom="4dp"
+                android:hint="e.g. Home" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginBottom="4dp"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="16sp"
+                android:text="Zone:"
+                android:id="@+id/textZone"/>
+        <AutoCompleteTextView
+                android:id="@+id/acZone"
+                android:fontFamily="sans-serif-light"
+                android:textSize="15sp"
+                android:inputType="textAutoComplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginBottom="16dp"
+                android:hint="e.g. Kitchen"/>
+    </LinearLayout>
+
+    <RelativeLayout
+            android:orientation="horizontal"
+            android:paddingBottom="5dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+
+        <Chronometer
+                android:layout_width="75dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@android:color/darker_gray"
+                android:id="@+id/chronometer"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_vertical"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="24dp"
+                android:layout_centerVertical="true"/>
+
+
+        <ToggleButton
+                android:layout_height="35dp"
+                android:layout_width="120dp"
+                android:background="#fc6767"
+                android:textOn="STOP"
+                android:textOff="START"
+                android:textColor="@color/White"
+                android:textStyle="bold"
+                android:id="@+id/toggleButton"
+                android:fontFamily="sans-serif-light"
+                android:checked="false"
+                android:layout_marginTop="0dp"
+                android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+    </LinearLayout>
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="8dp"
+            android:id="@+id/progressBar"/>
+
+
+</LinearLayout>
