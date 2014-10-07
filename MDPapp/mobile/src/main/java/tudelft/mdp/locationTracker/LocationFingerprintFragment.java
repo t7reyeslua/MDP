@@ -15,13 +15,19 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Chronometer;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.util.ArrayList;
+
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.R;
 import tudelft.mdp.ui.FingerprintControlCard;
+import tudelft.mdp.ui.FingerprintZoneCard;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -48,6 +54,7 @@ public class LocationFingerprintFragment extends Fragment {
     private AutoCompleteTextView mPlaceAutoComplete;
     private AutoCompleteTextView mZoneAutoComplete;
     private Chronometer mChronometer;
+    private TextView mCurrentSample;
     private Vibrator v;
 
 
@@ -72,6 +79,12 @@ public class LocationFingerprintFragment extends Fragment {
     private static final String[] PLACES = new String[] {
             "Home", "Office"
     };
+
+
+    private ArrayList<Card> mCardsArrayList;
+    private CardArrayAdapter mCardArrayAdapter;
+    private CardListView mCardListView;
+
 
     /**
      * Use this factory method to create a new instance of
@@ -125,8 +138,18 @@ public class LocationFingerprintFragment extends Fragment {
 
         configureAutoComplete();
         configureToggleButton();
+        configureCardList();
 
         return rootView;
+    }
+
+    private void configureCardList(){
+        mCardsArrayList = new ArrayList<Card>();
+        mCardArrayAdapter = new CardArrayAdapter(rootView.getContext(), mCardsArrayList);
+        mCardListView = (CardListView) rootView.findViewById(R.id.myList);
+        if (mCardListView != null) {
+            mCardListView.setAdapter(mCardArrayAdapter);
+        }
     }
 
     private void configureAutoComplete(){
@@ -161,6 +184,13 @@ public class LocationFingerprintFragment extends Fragment {
             mZoneAutoComplete.setEnabled(false);
             mProgressBar.setIndeterminate(true);
             //startSensingService();
+
+            Card card = createFingerprintInfoCard(0);
+            mCardsArrayList.add(0, card);
+            mCardArrayAdapter.notifyDataSetChanged();
+
+
+
             startChronometer();
         }else {
 
@@ -171,11 +201,29 @@ public class LocationFingerprintFragment extends Fragment {
         }
     }
 
+    private Card createFingerprintInfoCard(int samples){
+        Card card = new FingerprintZoneCard(rootView.getContext(),
+                mPlaceAutoComplete.getText().toString(),
+                mZoneAutoComplete.getText().toString(),
+                samples);
+        return card;
+    }
+
+    private void replaceFingerprintCard(int samples){
+        Card card = createFingerprintInfoCard(samples);
+        mCardsArrayList.set(0, card);
+        mCardArrayAdapter.notifyDataSetChanged();
+
+    }
+
     private void stopFingerprint(){
         mPlaceAutoComplete.setEnabled(true);
         mZoneAutoComplete.setEnabled(true);
         mChronometer.stop();
         mChronometer.setTextColor(getResources().getColor(R.color.DarkGray));
+
+
+        replaceFingerprintCard(12);
 
         //doUnbindService();
         //this.getActivity().stopService(new Intent(this.getActivity(), FingerprintRSSIrecorder.class));
