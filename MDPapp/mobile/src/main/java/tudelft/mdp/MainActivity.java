@@ -59,6 +59,7 @@ import tudelft.mdp.locationTracker.LocationDetectionService;
 import tudelft.mdp.locationTracker.LocationFingerprintFragment;
 import tudelft.mdp.locationTracker.LocationHistoryFragment;
 import tudelft.mdp.ui.ExpandableListAdapter;
+import tudelft.mdp.utilities.SensorViewerFragment;
 
 
 public class MainActivity extends GoogleLoginManager implements ServiceConnection{
@@ -351,8 +352,8 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
          */
         child = new ArrayList<String>();
         child.add("Data visualizer");
-        /*child.add("Sensors List");
-        child.add("Network RSSI");
+        child.add("Sensors viewer");
+        /*child.add("Network RSSI");
         child.add("Step Counter");
         child.add("Orientation");
         child.add("DB manager");*/
@@ -395,6 +396,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 }
             } else if (groupPosition == NavigationDrawer.UTILITIES){
                 switch (childPosition){
+                    case 0:
+                        position = NavigationDrawer.DATAVISUALIZER;
+                        break;
+                    case 1:
+                        position = NavigationDrawer.SENSORSVIEWER;
+                        break;
                     default:
                         break;
                 }
@@ -440,6 +447,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 fragment =  new DeviceManagerFragment();
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragment, "id_deviceManager")
+                        .commit();
+                break;
+            case NavigationDrawer.SENSORSVIEWER:
+                fragment =  new SensorViewerFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_sensorsviewer")
                         .commit();
                 break;
             default:
@@ -791,6 +804,8 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         Log.i(TAG, "Location Service: STOP");
         this.stopService(new Intent(this, LocationDetectionService.class));
     }
+
+
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {

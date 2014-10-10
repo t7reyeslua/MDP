@@ -6,6 +6,7 @@
     android:id="@+id/watch_view_stub"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     app:rectLayout="@layout/rect_activity_main_screen"
     app:roundLayout="@layout/round_activity_main_screen"
     tools:context=".MainScreen"

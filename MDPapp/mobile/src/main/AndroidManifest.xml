@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
 
     <uses-feature
         android:name="android.hardware.nfc"
@@ -95,6 +96,12 @@
             android:name="tudelft.mdp.locationTracker.LocationDetectionService"
             android:enabled="true"
             android:exported="true" >
+        </service>
+
+        <service android:name=".ListenerService">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
         </service>
     </application>
 

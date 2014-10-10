@@ -7,10 +7,39 @@
     tools:deviceIds="wear_round">
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/textAccelerometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_round" />
+        android:layout_alignParentTop="true"
+        android:text="Accelerometer" />
+    <TextView
+            android:id="@+id/textGravity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/textAccelerometer"
+            android:text="Gravity" />
+    <TextView
+            android:id="@+id/textMagnetometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/textGravity"
+            android:text="Magnetomter" />
+    <TextView
+            android:id="@+id/textStepCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/textMagnetometer"
+            android:text="StepCounter" />
+    <TextView
+            android:id="@+id/textHeartRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/textStepCounter"
+            android:text="HeartRate" />
+    <TextView
+            android:id="@+id/textGyroscope"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/textHeartRate"
+            android:text="Gyroscope" />
 </RelativeLayout>
