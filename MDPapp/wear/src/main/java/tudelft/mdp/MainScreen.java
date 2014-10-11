@@ -140,7 +140,7 @@ public class MainScreen extends Activity implements ServiceConnection {
     public void stopSensingService(){
         Log.i(TAG, "Sensing Service: STOP");
         doUnbindService();
-        this.stopService(new Intent(this, SensorReaderService.class));
+        //this.stopService(new Intent(this, SensorReaderService.class));
     }
 
 

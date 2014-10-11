@@ -5,6 +5,8 @@ package tudelft.mdp.utilities;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import android.content.BroadcastReceiver;
@@ -30,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -165,14 +168,42 @@ public class SensorViewerFragment extends Fragment implements
         });
     }
 
+    private String now() {
+        DateFormat dateFormat = android.text.format.DateFormat.getTimeFormat(rootView.getContext());
+        return dateFormat.format(new Date());
+    }
+
+    private void sendNotification(String command) {
+        if (mGoogleApiClient.isConnected()) {
+            PutDataMapRequest dataMapRequest = PutDataMapRequest.create(MessagesProtocol.NOTIFICATIONPATH);
+            // Make sure the data item is unique. Usually, this will not be required, as the payload
+            // (in this case the title and the content of the notification) will be different for almost all
+            // situations. However, in this example, the text and the content are always the same, so we need
+            // to disambiguate the data item by adding a field that contains teh current time in milliseconds.
+            dataMapRequest.getDataMap().putDouble(MessagesProtocol.NOTIFICATIONTIMESTAMP, System.currentTimeMillis());
+            dataMapRequest.getDataMap().putString(MessagesProtocol.NOTIFICATIONTITLE, "MDP");
+            dataMapRequest.getDataMap().putString(MessagesProtocol.NOTIFICATIONCONTENT, "Retrieving sensor information");
+            dataMapRequest.getDataMap().putString(MessagesProtocol.NOTIFICATIONCOMMAND, command);
+            PutDataRequest putDataRequest = dataMapRequest.asPutDataRequest();
+            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
+        }
+        else {
+            Log.e(LOGTAG, "No connection to wearable available!");
+        }
+    }
+
     private void startRecording(){
         mActionAutoComplete.setEnabled(false);
         mProgressBar.setIndeterminate(true);
 
-        String command = MessagesProtocol.STARTSENSING + "| Start sensing";
-        new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, command);
+
+        //String command = MessagesProtocol.STARTSENSING + "| Start sensing";
+        //new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, command);
 
         // Create a DataMap object and send it to the data layer
+
+        sendNotification(MessagesProtocol.STARTSENSINGSERVICE);
+
         DataMap dataMap = new DataMap();
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STARTSENSING);
@@ -196,6 +227,8 @@ public class SensorViewerFragment extends Fragment implements
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STOPSENSING);
         dataMap.putString(MessagesProtocol.MESSAGE, "Stop sensing");
+
+        sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
 

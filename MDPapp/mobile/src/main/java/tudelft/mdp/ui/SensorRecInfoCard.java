@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
 import tudelft.mdp.R;
 
 
@@ -24,15 +25,39 @@ public class SensorRecInfoCard extends Card {
         this.context = context;
         this.sensorType = sensorType;
         this.values = values;
+
+        CardExpand expand = new CardExpand(context);
+        this.addCardExpand(expand);
+        init();
     }
 
     public SensorRecInfoCard(Context context, int innerLayout) {
         super(context, innerLayout);
         this.context = context;
+        init();
+    }
+
+    private void toggleExpand(){
+        if (this.isExpanded()){
+            this.doCollapse();
+        } else {
+            this.doExpand();
+        }
     }
 
     private void init(){
 
+        //No Header
+
+
+        //Set a OnClickListener listener
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                //Toast.makeText(getContext(), "Click Listener card=", Toast.LENGTH_LONG).show();
+                //toggleExpand();
+            }
+        });
     }
 
     @Override

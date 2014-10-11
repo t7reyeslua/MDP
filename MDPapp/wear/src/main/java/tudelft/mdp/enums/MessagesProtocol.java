@@ -7,6 +7,13 @@ public class MessagesProtocol {
 
     public static final String DATAPATH = "/data_path";
     public static final String MSGPATH = "/message_path";
+    public static final String NOTIFICATIONPATH = "/notification_path";
+
+    public static final String NOTIFICATIONTITLE = "NOTIFICATIONTITLE";
+    public static final String NOTIFICATIONCONTENT = "NOTIFICATIONCONTENT";
+    public static final String NOTIFICATIONTIMESTAMP = "NOTIFICATIONTIMESTAMP";
+    public static final String NOTIFICATIONCOMMAND = "NOTIFICATIONCOMMAND";
+
 
     public static final String TIMESTAMP = "TIMESTAMP";
 
@@ -30,5 +37,8 @@ public class MessagesProtocol {
 
     public static final int STARTSENSING = 0;
     public static final int STOPSENSING = 1;
+
+    public static final String STARTSENSINGSERVICE = "START SENSING SERVICE";
+    public static final String STOPSENSINGSERVICE = "STOP SENSING SERVICE";
 
 }
