@@ -83,8 +83,14 @@ public class SensorReaderService extends Service implements
         buildGoogleClient();
         mTimer.scheduleAtFixedRate(new SnapshotTick(), 0, 1000L);
 
+
         // Register the local broadcast receiver, defined in step 3.
-        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+        IntentFilter bundleFilter = new IntentFilter(MessagesProtocol.WEARSENSORSBUNDLE);
+        DataBundleReceiver dataBundleReceiver = new DataBundleReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(dataBundleReceiver, bundleFilter);
+
+
+        IntentFilter messageFilter = new IntentFilter(MessagesProtocol.WEARSENSORSMSG);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
 
@@ -112,23 +118,6 @@ public class SensorReaderService extends Service implements
     // Send a data object when the data layer connection is successful.
     @Override
     public void onConnected(Bundle connectionHint) {
-
-
-        /*
-        // Create a DataMap object and send it to the data layer
-        DataMap dataMap = new DataMap();
-        dataMap.putLong(MessagesProtocol.TIMESTAMP, new Date().getTime());
-        dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_WEAR);
-        dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.SNDMESSAGE);
-        dataMap.putString(MessagesProtocol.MESSAGE, "Hello from Wear");
-
-        new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
-*/
-
-
-        String msg = "0|Hello from Wear";
-        new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, msg).start();
-
 
 
     }
@@ -236,7 +225,7 @@ public class SensorReaderService extends Service implements
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
 
-        pause = false;
+        pause = true;
     }
 
 
@@ -279,40 +268,25 @@ public class SensorReaderService extends Service implements
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        /*
-            DataMap dataMap = new DataMap();
-            dataMap.putLong(MessagesProtocol.TIMESTAMP, new Date().getTime());
-            dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_WEAR);
-            dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.SENSOREVENT);
-            dataMap.putInt(MessagesProtocol.SENSORTYPE, event.sensor.getType());
-            dataMap.putFloatArray(MessagesProtocol.SENSORVALUE, event.values);
+        if (!pause) {
+            String message = event.sensor.getType() + "|";
 
-            //Requires a new thread to avoid blocking the UI
-            new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
-            */
+            if ((event.sensor.getType() == Constants.SAMSUNG_TILT) || (event.sensor.getType()
+                    == Constants.SAMSUNG_HEART_RATE)) {
+                for (int i = 0; i < 3; i++) {
+                    message += String.format("%.2f", event.values[i]) + " ";
+                }
+            } else {
+                for (int i = 0; i < event.values.length; i++) {
+                    message += String.format("%.2f", event.values[i]) + " ";
+                }
+            }
 
+            new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
 
-        String message = event.sensor.getType() + "|";
-        for (int i = 0; i < event.values.length; i++){
-            message += String.format("%.2f", event.values[i]) + " ";
+            sendMessageSensorEventToUI(event.sensor.getType(), event.values);
+            counter++;
         }
-
-        new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
-
-
-        sendMessageSensorEventToUI(event.sensor.getType(), event.values);
-        counter++;
-
-        /*
-        // Create a DataMap object and send it to the data layer
-        if (mGoogleApiClient.isConnected()) {
-
-
-        } else {
-            Log.e(LOGTAG, "Google API client reconnection");
-            mGoogleApiClient.connect();
-        }*/
-
 
     }
 
@@ -386,6 +360,37 @@ public class SensorReaderService extends Service implements
         }
     }
 
+    private void executeCommand(int command){
+        switch (command){
+            case MessagesProtocol.STARTSENSING:
+                pause = false;
+                break;
+            case MessagesProtocol.STOPSENSING:
+                pause = true;
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void handleMessage(Bundle bundle){
+        Integer sender =bundle.getInt(MessagesProtocol.SENDER, 0);
+        if (sender == MessagesProtocol.ID_MOBILE){
+            int command = bundle.getInt(MessagesProtocol.MSGTYPE, -1);
+            executeCommand(command);
+        }
+
+    }
+
+    private void handleMessage(String msg){
+        String[] parts = msg.split("\\|");
+        String commandStr = parts[0];
+        String message = parts[1];
+
+        Integer command = Integer.valueOf(commandStr);
+        executeCommand(command);
+    }
+
     /**
      * Handle incoming messages from MainActivity
      */
@@ -406,15 +411,25 @@ public class SensorReaderService extends Service implements
         }
     }
 
-    private class MessageReceiver extends BroadcastReceiver {
+
+    private class DataBundleReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle message = intent.getExtras();
+            handleMessage(message);
             sendBundleToUI(message);
-
             // Display message in UI
         }
     }
 
+    private class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message = intent.getStringExtra(MessagesProtocol.MESSAGE);
+            handleMessage(message);
+            // Display message in UI
+        }
+    }
 
 }

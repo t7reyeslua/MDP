@@ -28,6 +28,7 @@ public class MessagesProtocol {
     public static final String WEARSENSORSMSG = "WEARSENSORSMSG";
     public static final String WEARSENSORSBUNDLE = "WEARSENSORSBUNDLE";
 
-
+    public static final int STARTSENSING = 0;
+    public static final int STOPSENSING = 1;
 
 }

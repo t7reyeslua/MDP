@@ -16,6 +16,10 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -41,6 +45,8 @@ public class MainScreen extends Activity implements ServiceConnection {
     private TextView mTwDummy;
     private WatchViewStub stub;
 
+    private ImageView mImageLogo;
+
     private int significantMotionTriggerCounter = 0;
 
 
@@ -57,6 +63,14 @@ public class MainScreen extends Activity implements ServiceConnection {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
+
+        /*
+        final RotateAnimation anim = new RotateAnimation(0f, 350f,   Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        anim.setInterpolator(new LinearInterpolator());
+        anim.setRepeatCount(Animation.INFINITE);
+        anim.setDuration(800);*/
+
+
         stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -73,6 +87,10 @@ public class MainScreen extends Activity implements ServiceConnection {
                 mTwLinearAcceleration = (TextView) stub.findViewById(R.id.textLinearAcceleration);
                 mTwTilt = (TextView) stub.findViewById(R.id.textTilt);
                 mTwDummy = (TextView) stub.findViewById(R.id.textDummy);
+
+                /*
+                mImageLogo = (ImageView) stub.findViewById(R.id.imageLogo);
+                mImageLogo.startAnimation(anim);*/
                 v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
             }

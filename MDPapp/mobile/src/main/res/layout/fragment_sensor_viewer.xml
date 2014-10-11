@@ -1,8 +1,25 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="tudelft.mdp.utilities.SensorViewerFragment">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="tudelft.mdp.utilities.SensorViewerFragment">
+
+    <it.gmariotti.cardslib.library.view.CardView
+            android:id="@+id/cardControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="12dp"/>
+
+    <it.gmariotti.cardslib.library.view.CardListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="5dp"
+            android:id="@+id/myList"/>
 
     <ScrollView
             android:layout_width="wrap_content"
@@ -79,4 +96,5 @@
         </LinearLayout>
     </ScrollView>
 
-</FrameLayout>
+</LinearLayout>
+

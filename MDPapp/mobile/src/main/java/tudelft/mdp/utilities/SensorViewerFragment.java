@@ -14,20 +14,37 @@ import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Chronometer;
+import android.widget.CompoundButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Date;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.R;
+import tudelft.mdp.Utils;
 import tudelft.mdp.communication.SendDataSyncThread;
+import tudelft.mdp.communication.SendMessageThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.ui.SensorRecControlCard;
+import tudelft.mdp.ui.SensorRecInfoCard;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,6 +79,27 @@ public class SensorViewerFragment extends Fragment implements
     private TextView mTwDummy;
 
     private int significantMotionTriggerCounter = 0;
+
+    private static final String[] ACTIONS = new String[] {
+            "Turn knob right", "Turn knob left"
+    };
+
+
+
+    private CardView mCardView;
+    private Card mCardSensorRec;
+
+    private ArrayList<Card> mCardsArrayList;
+    private CardArrayAdapter mCardArrayAdapter;
+    private CardListView mCardListView;
+
+    private ProgressBar mProgressBar;
+    private ToggleButton mToggleButton;
+    private AutoCompleteTextView mActionAutoComplete;
+    private Chronometer mChronometer;
+    private TextView mCurrentSample;
+    private Vibrator v;
+
 
     private View rootView;
     GoogleApiClient mGoogleApiClient;
@@ -102,9 +140,143 @@ public class SensorViewerFragment extends Fragment implements
             mGoogleApiClient.connect();
         }
 
-
-
         buildGoogleClient();
+        configureTextViews();
+        configureBroadcastReceivers();
+        configureCards();
+        configureCardList();
+        configureAutoComplete();
+        configureToggleButton();
+
+        v = (Vibrator) this.getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+
+        return rootView;
+    }
+    private void configureToggleButton(){
+        mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    startRecording();
+
+                } else {
+                    stopRecording();
+                }
+            }
+        });
+    }
+
+    private void startRecording(){
+        mActionAutoComplete.setEnabled(false);
+        mProgressBar.setIndeterminate(true);
+
+        String command = MessagesProtocol.STARTSENSING + "| Start sensing";
+        new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, command);
+
+        // Create a DataMap object and send it to the data layer
+        DataMap dataMap = new DataMap();
+        dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
+        dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STARTSENSING);
+        dataMap.putString(MessagesProtocol.MESSAGE, "Start sensing");
+
+        new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+
+
+        v.vibrate(500);
+        startChronometer();
+    }
+
+    private void stopRecording(){
+
+        mActionAutoComplete.setEnabled(true);
+        mChronometer.stop();
+        mChronometer.setTextColor(getResources().getColor(R.color.DarkGray));
+
+        // Create a DataMap object and send it to the data layer
+        DataMap dataMap = new DataMap();
+        dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
+        dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STOPSENSING);
+        dataMap.putString(MessagesProtocol.MESSAGE, "Stop sensing");
+
+        new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+
+        v.vibrate(500);
+
+        mToggleButton.setEnabled(true);
+        mToggleButton.setChecked(false);
+        mProgressBar.setIndeterminate(false);
+        mProgressBar.setProgress(0);
+    }
+
+    private void startChronometer() {
+        mChronometer.setTextColor(getResources().getColor(R.color.ForestGreen));
+        mChronometer.setText("-00:00");
+        mChronometer.setBase(SystemClock.elapsedRealtime());
+        mChronometer.start();
+    }
+
+    private void configureCards(){
+        mCardView = (CardView) rootView.findViewById(R.id.cardControl);
+
+        mCardSensorRec = new SensorRecControlCard(rootView.getContext());
+        mCardSensorRec.setShadow(true);
+        mCardView.setCard(mCardSensorRec);
+
+        mProgressBar = (ProgressBar) mCardView.findViewById(R.id.progressBar);
+        mToggleButton = (ToggleButton) mCardView.findViewById(R.id.toggleButton);
+        mActionAutoComplete = (AutoCompleteTextView) mCardView.findViewById(R.id.acFile);
+        mChronometer = (Chronometer) mCardView.findViewById(R.id.chronometer);
+
+    }
+
+    private void configureCardList(){
+        mCardsArrayList = new ArrayList<Card>();
+        mCardArrayAdapter = new CardArrayAdapter(rootView.getContext(), mCardsArrayList);
+        mCardListView = (CardListView) rootView.findViewById(R.id.myList);
+        if (mCardListView != null) {
+            mCardListView.setAdapter(mCardArrayAdapter);
+        }
+    }
+
+    private Card createSensorRecInfoCard(String sensorName, String values){
+        Card card = new SensorRecInfoCard(rootView.getContext(),
+                sensorName,
+                values);
+        return card;
+    }
+    private void insertSensorRecInfoCard(Integer sensorType, String values){
+
+        String sensorName = Utils.getSensorName(sensorType);
+        Card card = createSensorRecInfoCard(sensorName, values);
+
+        int index = findCardIndex(sensorName);
+        if (index >= 0) {
+            mCardsArrayList.set(index, card);
+        } else {
+            mCardsArrayList.add(card);
+        }
+        mCardArrayAdapter.notifyDataSetChanged();
+    }
+
+    private int findCardIndex(String sensorName){
+        int index = -1;
+
+        for (int i = 0; i < mCardsArrayList.size(); i++){
+            SensorRecInfoCard tempCard = (SensorRecInfoCard) mCardsArrayList.get(i);
+            if (tempCard.getSensorType().equals(sensorName)){
+                return i;
+            }
+        }
+        return index;
+    }
+
+    private void configureAutoComplete(){
+        ArrayAdapter<String> actionsAdapter   = new ArrayAdapter<String>(rootView.getContext(), android.R.layout.simple_dropdown_item_1line, ACTIONS);
+
+        mActionAutoComplete.setAdapter(actionsAdapter);
+        actionsAdapter.notifyDataSetChanged();
+    }
+
+    private void configureTextViews(){
         mTwDummy = (TextView) rootView.findViewById(R.id.textDummy);
         mTwAccelerometer = (TextView) rootView.findViewById(R.id.textAccelerometer);
         mTwGyroscope = (TextView) rootView.findViewById(R.id.textGyroscope);
@@ -117,8 +289,9 @@ public class SensorViewerFragment extends Fragment implements
         mTwRotationVector = (TextView) rootView.findViewById(R.id.textRotationVector);
         mTwLinearAcceleration = (TextView) rootView.findViewById(R.id.textLinearAcceleration);
         mTwTilt = (TextView) rootView.findViewById(R.id.textTilt);
-        mTwDummy = (TextView) rootView.findViewById(R.id.textDummy);
+    }
 
+    private void configureBroadcastReceivers(){
         // Register the local broadcast receiver, defined in step 3.
         IntentFilter bundleFilter = new IntentFilter(MessagesProtocol.WEARSENSORSBUNDLE);
         DataBundleReceiver dataBundleReceiver = new DataBundleReceiver();
@@ -129,7 +302,6 @@ public class SensorViewerFragment extends Fragment implements
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(rootView.getContext()).registerReceiver(messageReceiver, messageFilter);
 
-        return rootView;
     }
 
     @Override
@@ -154,7 +326,6 @@ public class SensorViewerFragment extends Fragment implements
 
     }
 
-    // Send a data object when the data layer connection is successful.
     @Override
     public void onConnected(Bundle connectionHint) {
 
@@ -168,7 +339,6 @@ public class SensorViewerFragment extends Fragment implements
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
     }
 
-    // Placeholders for required connection callbacks
     @Override
     public void onConnectionSuspended(int cause) { }
 
@@ -181,27 +351,7 @@ public class SensorViewerFragment extends Fragment implements
         String sensorValuesAllStr = parts[1];
 
         Integer sensorType = Integer.valueOf(sensorTypeStr);
-
-        if (sensorType == 0){
-            mTwDummy.setText(sensorValuesAllStr);
-            return;
-        }
-
-        String[] sensorValuesStr = sensorValuesAllStr.split(" ");
-        ArrayList<Float> sensorValuesArray = new ArrayList<Float>();
-
-        for (String value : sensorValuesStr){
-            sensorValuesArray.add(Float.valueOf(value));
-        }
-
-        float [] sensorValues = new float[sensorValuesArray.size()];
-
-        for (int i = 0; i < sensorValuesArray.size(); i++){
-            sensorValues[i] = sensorValuesArray.get(i);
-        }
-
-        updateTextViews(sensorType, sensorValues);
-
+        insertSensorRecInfoCard(sensorType, sensorValuesAllStr);
     }
 
     private void handleMessage(Bundle bundle){
@@ -212,142 +362,7 @@ public class SensorViewerFragment extends Fragment implements
 
                 float[] sensorValues = bundle.getFloatArray(MessagesProtocol.SENSORVALUE);
                 Integer sensorType = bundle.getInt(MessagesProtocol.SENSORTYPE, 0);
-                switch (sensorType){
-                    case Sensor.TYPE_ACCELEROMETER:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwAccelerometer != null){
-                            String text = "Accelerometer: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwAccelerometer.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_GYROSCOPE:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwGyroscope != null){
-                            String text = "Gyroscope: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwGyroscope.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_GRAVITY:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwGravity != null){
-                            String text = "Gravity: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwGravity.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_MAGNETIC_FIELD:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwMagnetometer != null){
-                            String text = "Magnetic: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwMagnetometer.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_STEP_COUNTER:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwStepCounter != null){
-                            String text = "Step Counter: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwStepCounter.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_HEART_RATE:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwHeartRate != null){
-                            String text = "Heart Rate: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwHeartRate.setText(text);
-                        }
-                        break;
-                    case Constants.SAMSUNG_HEART_RATE:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwHeartRate != null){
-                            String text = "Heart Rate: ";
-                            for(int i = 0; i < 3; i++){
-                                float value = sensorValues[i];
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwHeartRate.setText(text);
-                        }
-                        break;
-                    case Constants.SAMSUNG_TILT:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwTilt != null){
-                            String text = "Tilt: ";
-                            for(int i = 0; i < 3; i++){
-                                float value = sensorValues[i];
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwTilt.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_LINEAR_ACCELERATION:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwHeartRate != null){
-                            String text = "Linear Accel: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwLinearAcceleration.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_STEP_DETECTOR:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwHeartRate != null){
-                            String text = "Step Detector: ";
-                            String currentText = mTwStepDetector.getText().toString();
-                            float currentSteps = 0;
-                            if (currentText != null){
-                                currentText = currentText.replace(text, "");
-                                if (currentText.length() > 0){
-                                    currentSteps = Double.valueOf(currentText).intValue();
-                                }
-                            }
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value + currentSteps) + " ";
-                            }
-                            mTwStepDetector.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_SIGNIFICANT_MOTION:
-                        //Log.i(LOGTAG, "Sensed data.");
 
-                        significantMotionTriggerCounter++;
-                        if (mTwHeartRate != null){
-                            String text = "Significant Motion: " + significantMotionTriggerCounter + "|";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwSignificantMotion.setText(text);
-                        }
-                        break;
-                    case Sensor.TYPE_ROTATION_VECTOR:
-                        //Log.i(LOGTAG, "Sensed data.");
-                        if (mTwHeartRate != null){
-                            String text = "RotVect: ";
-                            for(float value : sensorValues){
-                                text += String.format("%.2f", value) + " ";
-                            }
-                            mTwRotationVector.setText(text);
-                        }
-                        break;
-                    default:
-                        break;
-                }
             } else if (msgType == MessagesProtocol.SNDMESSAGE) {
                 mTwDummy.setText(bundle.getString(MessagesProtocol.MESSAGE, "Fail!"));
             }
@@ -355,154 +370,12 @@ public class SensorViewerFragment extends Fragment implements
     }
 
 
-    private void updateTextViews(int sensorType, float[] sensorValues){
-
-        switch (sensorType){
-            case Sensor.TYPE_ACCELEROMETER:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwAccelerometer != null){
-                    String text = "Accelerometer: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwAccelerometer.setText(text);
-                }
-                break;
-            case Sensor.TYPE_GYROSCOPE:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwGyroscope != null){
-                    String text = "Gyroscope: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwGyroscope.setText(text);
-                }
-                break;
-            case Sensor.TYPE_GRAVITY:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwGravity != null){
-                    String text = "Gravity: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwGravity.setText(text);
-                }
-                break;
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwMagnetometer != null){
-                    String text = "Magnetic: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwMagnetometer.setText(text);
-                }
-                break;
-            case Sensor.TYPE_STEP_COUNTER:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwStepCounter != null){
-                    String text = "Step Counter: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwStepCounter.setText(text);
-                }
-                break;
-            case Sensor.TYPE_HEART_RATE:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "Heart Rate: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwHeartRate.setText(text);
-                }
-                break;
-            case Constants.SAMSUNG_HEART_RATE:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "Heart Rate: ";
-                    for(int i = 0; i < 3; i++){
-                        float value = sensorValues[i];
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwHeartRate.setText(text);
-                }
-                break;
-            case Constants.SAMSUNG_TILT:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwTilt != null){
-                    String text = "Tilt: ";
-                    for(int i = 0; i < 3; i++){
-                        float value = sensorValues[i];
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwTilt.setText(text);
-                }
-                break;
-            case Sensor.TYPE_LINEAR_ACCELERATION:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "Linear Accel: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwLinearAcceleration.setText(text);
-                }
-                break;
-            case Sensor.TYPE_STEP_DETECTOR:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "Step Detector: ";
-                    String currentText = mTwStepDetector.getText().toString();
-                    float currentSteps = 0;
-                    if (currentText != null){
-                        currentText = currentText.replace(text, "");
-                        if (currentText.length() > 0){
-                            currentSteps = Double.valueOf(currentText).intValue();
-                        }
-                    }
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value + currentSteps) + " ";
-                    }
-                    mTwStepDetector.setText(text);
-                }
-                break;
-            case Sensor.TYPE_SIGNIFICANT_MOTION:
-                //Log.i(LOGTAG, "Sensed data.");
-
-                significantMotionTriggerCounter++;
-                if (mTwHeartRate != null){
-                    String text = "Significant Motion: " + significantMotionTriggerCounter + "|";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwSignificantMotion.setText(text);
-                }
-                break;
-            case Sensor.TYPE_ROTATION_VECTOR:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "RotVect: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwRotationVector.setText(text);
-                }
-                break;
-            default:
-                break;
-        }
-
-    }
-
     private class DataBundleReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             Bundle message = intent.getExtras();
             handleMessage(message);
-            // Display message in UI
         }
     }
 
@@ -512,7 +385,6 @@ public class SensorViewerFragment extends Fragment implements
 
             String msg = intent.getStringExtra(MessagesProtocol.MESSAGE);
             handleMessage(msg);
-            // Display message in UI
         }
     }
 
