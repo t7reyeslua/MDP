@@ -38,6 +38,7 @@ import java.util.TimerTask;
 
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.SendMessageThread;
+import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 
 public class SensorReaderService extends Service implements
@@ -113,6 +114,7 @@ public class SensorReaderService extends Service implements
     public void onConnected(Bundle connectionHint) {
 
 
+        /*
         // Create a DataMap object and send it to the data layer
         DataMap dataMap = new DataMap();
         dataMap.putLong(MessagesProtocol.TIMESTAMP, new Date().getTime());
@@ -121,12 +123,12 @@ public class SensorReaderService extends Service implements
         dataMap.putString(MessagesProtocol.MESSAGE, "Hello from Wear");
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+*/
 
 
-        /*
         String msg = "0|Hello from Wear";
         new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, msg).start();
-        */
+
 
 
     }
@@ -151,7 +153,7 @@ public class SensorReaderService extends Service implements
                     mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                     //3333);
                     SensorManager.SENSOR_DELAY_NORMAL);
-        }/*
+        }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
             Log.i(LOGTAG, "Sensor registered: Gyroscope");
             mSensorManager.registerListener(this,
@@ -170,7 +172,7 @@ public class SensorReaderService extends Service implements
                     mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null){
+       /* if (mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null){
             Log.i(LOGTAG, "Sensor registered: Step Counter");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
@@ -214,7 +216,7 @@ public class SensorReaderService extends Service implements
                 }
             };
             mSensorManager.requestTriggerSensor(mTriggerEventListener, mSigmotion);
-        }
+        } */
         if (mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT) != null){
             Log.i(LOGTAG, "Sensor registered: Tilt sensor");
             mSensorManager.registerListener(this,
@@ -232,7 +234,7 @@ public class SensorReaderService extends Service implements
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
                     SensorManager.SENSOR_DELAY_NORMAL);
-        }*/
+        }
 
         pause = false;
     }
@@ -276,11 +278,8 @@ public class SensorReaderService extends Service implements
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        sendMessageSensorEventToUI(event.sensor.getType(), event.values);
-        counter++;
 
-        // Create a DataMap object and send it to the data layer
-        if (mGoogleApiClient.isConnected()) {
+        /*
             DataMap dataMap = new DataMap();
             dataMap.putLong(MessagesProtocol.TIMESTAMP, new Date().getTime());
             dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_WEAR);
@@ -290,10 +289,31 @@ public class SensorReaderService extends Service implements
 
             //Requires a new thread to avoid blocking the UI
             new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+            */
+
+
+        String message = event.sensor.getType() + "|";
+        for (int i = 0; i < event.values.length; i++){
+            message += String.format("%.2f", event.values[i]) + " ";
+        }
+
+        new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
+
+
+        sendMessageSensorEventToUI(event.sensor.getType(), event.values);
+        counter++;
+
+        /*
+        // Create a DataMap object and send it to the data layer
+        if (mGoogleApiClient.isConnected()) {
+
+
         } else {
             Log.e(LOGTAG, "Google API client reconnection");
             mGoogleApiClient.connect();
-        }
+        }*/
+
+
     }
 
     private class SnapshotTick extends TimerTask {
