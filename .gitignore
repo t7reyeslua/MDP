@@ -15,7 +15,11 @@ hs_err_pid*
 energypa-master/
 
 #Other files
-*.cvs
+*.csv
 *.model
 *.txt
 *.xlsx
+*.dat
+*.png
+*.jpeg
+*.pdf
