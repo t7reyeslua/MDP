@@ -1,4 +1,4 @@
-package tudelft.mdp;
+package tudelft.mdp.communication;
 
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
@@ -28,7 +28,6 @@ public class ListenerService extends WearableListenerService {
                 messageIntent.setAction(Intent.ACTION_SEND);
                 messageIntent.putExtras(dataMap.toBundle());
                 LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
-
             }
         }
     }

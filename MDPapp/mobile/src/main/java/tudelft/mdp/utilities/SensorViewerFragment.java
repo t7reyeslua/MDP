@@ -30,6 +30,7 @@ import android.widget.TextView;
 import java.util.Date;
 
 import tudelft.mdp.R;
+import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 
@@ -163,6 +164,8 @@ public class SensorViewerFragment extends Fragment implements
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.SNDMESSAGE);
         dataMap.putString(MessagesProtocol.MESSAGE, "Hello from Mobile");
+
+        new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
     }
 
     // Placeholders for required connection callbacks
@@ -323,35 +326,6 @@ public class SensorViewerFragment extends Fragment implements
         }
     }
 
-
-    private class SendToDataLayerThread extends Thread {
-        String path;
-        DataMap dataMap;
-
-        // Constructor for sending data objects to the data layer
-        SendToDataLayerThread(String p, DataMap data) {
-            path = p;
-            dataMap = data;
-        }
-
-        public void run() {
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-            for (Node node : nodes.getNodes()) {
-
-                // Construct a DataRequest and send over the data layer
-                PutDataMapRequest putDMR = PutDataMapRequest.create(path);
-                putDMR.getDataMap().putAll(dataMap);
-                PutDataRequest request = putDMR.asPutDataRequest();
-                DataApi.DataItemResult result = Wearable.DataApi.putDataItem(mGoogleApiClient,request).await();
-                if (result.getStatus().isSuccess()) {
-                    Log.v(LOGTAG, "DataMap: " + dataMap + " sent to: " + node.getDisplayName());
-                } else {
-                    // Log an error
-                    Log.v(LOGTAG, "ERROR: failed to send DataMap");
-                }
-            }
-        }
-    }
 
     private class MessageReceiver extends BroadcastReceiver {
         @Override

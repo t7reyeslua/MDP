@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
-import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +19,10 @@ import android.util.Log;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import tudelft.mdp.enums.Constants;
+import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.services.SensorReaderService;
 
 public class MainScreen extends Activity implements ServiceConnection {
 

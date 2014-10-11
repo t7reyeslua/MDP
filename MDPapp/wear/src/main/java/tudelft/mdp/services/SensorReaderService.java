@@ -1,4 +1,4 @@
-package tudelft.mdp;
+package tudelft.mdp.services;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -19,7 +19,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +35,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import tudelft.mdp.communication.SendDataSyncThread;
+import tudelft.mdp.enums.MessagesProtocol;
 
 public class SensorReaderService extends Service implements
         SensorEventListener,
@@ -116,6 +118,8 @@ public class SensorReaderService extends Service implements
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.SNDMESSAGE);
         dataMap.putString(MessagesProtocol.MESSAGE, "Hello from Wear");
 
+        new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+
 
     }
 
@@ -139,7 +143,7 @@ public class SensorReaderService extends Service implements
                     mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                     //3333);
                     SensorManager.SENSOR_DELAY_NORMAL);
-        }
+        }/*
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
             Log.i(LOGTAG, "Sensor registered: Gyroscope");
             mSensorManager.registerListener(this,
@@ -165,16 +169,16 @@ public class SensorReaderService extends Service implements
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE) != null){
-            /*Log.i(LOGTAG, "Sensor registered: Heart Rate");
+            Log.i(LOGTAG, "Sensor registered: Heart Rate");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE),
-                    SensorManager.SENSOR_DELAY_NORMAL);*/
+                    SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (mSensorManager.getDefaultSensor(Constants.SAMSUNG_HEART_RATE) != null){
-            /*Log.i(LOGTAG, "Sensor registered: Heart Rate");
+           *Log.i(LOGTAG, "Sensor registered: Heart Rate");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Constants.SAMSUNG_HEART_RATE),
-                    SensorManager.SENSOR_DELAY_NORMAL);*/
+                    SensorManager.SENSOR_DELAY_NORMAL);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null){
             Log.i(LOGTAG, "Sensor registered: Light");
@@ -220,7 +224,7 @@ public class SensorReaderService extends Service implements
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
                     SensorManager.SENSOR_DELAY_NORMAL);
-        }
+        }*/
 
         pause = false;
     }
@@ -277,42 +281,11 @@ public class SensorReaderService extends Service implements
             dataMap.putFloatArray(MessagesProtocol.SENSORVALUE, event.values);
 
             //Requires a new thread to avoid blocking the UI
-            new SendToDataLayerThread("/data", dataMap).start();
+            new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
         } else {
             Log.e(LOGTAG, "Google API client reconnection");
             mGoogleApiClient.connect();
         }
-        /*
-        if (!pause){
-            //TRAIN SENSOR READINGS if flag is enabled
-            switch ( event.sensor.getType()) {
-                case Sensor.TYPE_ACCELEROMETER:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                case Sensor.TYPE_GYROSCOPE:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                case Sensor.TYPE_GRAVITY:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                case Sensor.TYPE_MAGNETIC_FIELD:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                case Sensor.TYPE_STEP_COUNTER:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                case Sensor.TYPE_HEART_RATE:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                case Sensor.TYPE_LIGHT:
-                    //Log.i(LOGTAG, "Sensed data.");
-                    break;
-                default:
-                    break;
-            }
-        }
-        */
-
     }
 
     private class SnapshotTick extends TimerTask {
@@ -401,35 +374,6 @@ public class SensorReaderService extends Service implements
                     break;
                 default:
                     super.handleMessage(msg);
-            }
-        }
-    }
-
-    private class SendToDataLayerThread extends Thread {
-        String path;
-        DataMap dataMap;
-
-        // Constructor for sending data objects to the data layer
-        SendToDataLayerThread(String p, DataMap data) {
-            path = p;
-            dataMap = data;
-        }
-
-        public void run() {
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-            for (Node node : nodes.getNodes()) {
-
-                // Construct a DataRequest and send over the data layer
-                PutDataMapRequest putDMR = PutDataMapRequest.create(path);
-                putDMR.getDataMap().putAll(dataMap);
-                PutDataRequest request = putDMR.asPutDataRequest();
-                DataApi.DataItemResult result = Wearable.DataApi.putDataItem(mGoogleApiClient,request).await();
-                if (result.getStatus().isSuccess()) {
-                    Log.v(LOGTAG, "DataMap: " + dataMap + " sent to: " + node.getDisplayName());
-                } else {
-                    // Log an error
-                    Log.v(LOGTAG, "ERROR: failed to send DataMap");
-                }
             }
         }
     }

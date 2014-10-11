@@ -1,4 +1,4 @@
-package tudelft.mdp;
+package tudelft.mdp.enums;
 
 /**
  * Created by t7 on 9-10-14.

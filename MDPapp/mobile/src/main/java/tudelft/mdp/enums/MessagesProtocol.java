@@ -5,6 +5,9 @@ package tudelft.mdp.enums;
  */
 public class MessagesProtocol {
 
+    public static final String DATAPATH = "/data_path";
+    public static final String MSGPATH = "/message_path";
+
     public static final String TIMESTAMP = "TIMESTAMP";
 
     public static final String SENDER = "SENDER";
@@ -21,6 +24,9 @@ public class MessagesProtocol {
     public static final String SENSORTYPE = "SENSORTYPE";
     public static final String SENSORVALUE = "SENSORVALUE";
     public static final String MESSAGE = "MESSAGE";
+
+    public static final String WEARSENSORSMSG = "WEARSENSORSMSG";
+    public static final String WEARSENSORSBUNDLE = "WEARSENSORSBUNDLE";
 
 
 }
