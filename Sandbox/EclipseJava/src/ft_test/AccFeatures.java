@@ -12,6 +12,7 @@
 
 package ft_test;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,38 @@ public class AccFeatures {
 
         return mean;
     }  
+    
+    public static double Variance(List<Double>  data) {
+        // Get the mean of the data set
+        double mean = Mean(data);
+
+        double sumOfSquaredDeviations = 0;
+
+        // Loop through the data set
+        for (int i = 0; i < data.size(); i++) {
+          // sum the difference between the data element and the mean squared
+          sumOfSquaredDeviations += Math.pow(data.get(i) - mean, 2);
+        }
+
+        // Divide the sum by the length of the data set - 1 to get our result
+        return sumOfSquaredDeviations / (data.size() - 1);
+      }
+    
+    public static double Covariance(List<Double>  a, List<Double>  b) {
+        double amean = Mean(a);
+        double bmean = Mean(b);
+
+        double result = 0;
+
+        for (int i = 0; i < a.size(); i++) {
+          result += (a.get(i) - amean) * (b.get(i) - bmean);
+        }
+
+        result /= a.size() - 1;
+
+        return result;
+      }
+    
     
 	public static ArrayList<Double> ZeroNormal(ArrayList<Double> samples) {
         double mean = Mean(samples);
