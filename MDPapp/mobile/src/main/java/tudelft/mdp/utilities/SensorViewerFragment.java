@@ -4,15 +4,9 @@ package tudelft.mdp.utilities;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -125,7 +119,12 @@ public class SensorViewerFragment extends Fragment implements
         mTwDummy = (TextView) rootView.findViewById(R.id.textDummy);
 
         // Register the local broadcast receiver, defined in step 3.
-        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+        IntentFilter bundleFilter = new IntentFilter(MessagesProtocol.WEARSENSORSBUNDLE);
+        DataBundleReceiver dataBundleReceiver = new DataBundleReceiver();
+        LocalBroadcastManager.getInstance(rootView.getContext()).registerReceiver(dataBundleReceiver, bundleFilter);
+
+
+        IntentFilter messageFilter = new IntentFilter(MessagesProtocol.WEARSENSORSMSG);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(rootView.getContext()).registerReceiver(messageReceiver, messageFilter);
 
@@ -327,14 +326,23 @@ public class SensorViewerFragment extends Fragment implements
     }
 
 
-    private class MessageReceiver extends BroadcastReceiver {
+    private class DataBundleReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             Bundle message = intent.getExtras();
             handleMessage(message);
             // Display message in UI
         }
     }
 
+    private class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String msg = intent.getStringExtra(MessagesProtocol.MESSAGE);
+            // Display message in UI
+        }
+    }
 
 }

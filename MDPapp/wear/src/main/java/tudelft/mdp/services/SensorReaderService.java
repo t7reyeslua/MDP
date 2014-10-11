@@ -37,6 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import tudelft.mdp.communication.SendDataSyncThread;
+import tudelft.mdp.communication.SendMessageThread;
 import tudelft.mdp.enums.MessagesProtocol;
 
 public class SensorReaderService extends Service implements
@@ -111,6 +112,7 @@ public class SensorReaderService extends Service implements
     @Override
     public void onConnected(Bundle connectionHint) {
 
+
         // Create a DataMap object and send it to the data layer
         DataMap dataMap = new DataMap();
         dataMap.putLong(MessagesProtocol.TIMESTAMP, new Date().getTime());
@@ -119,6 +121,12 @@ public class SensorReaderService extends Service implements
         dataMap.putString(MessagesProtocol.MESSAGE, "Hello from Wear");
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+
+
+        /*
+        String msg = "0|Hello from Wear";
+        new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, msg).start();
+        */
 
 
     }
