@@ -351,8 +351,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
          * Add Data For Utilities
          */
         child = new ArrayList<String>();
-        child.add("Data visualizer");
-        child.add("Sensors viewer");
+        child.add("Sensors recorder");
         /*child.add("Network RSSI");
         child.add("Step Counter");
         child.add("Orientation");
@@ -397,9 +396,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             } else if (groupPosition == NavigationDrawer.UTILITIES){
                 switch (childPosition){
                     case 0:
-                        position = NavigationDrawer.DATAVISUALIZER;
-                        break;
-                    case 1:
                         position = NavigationDrawer.SENSORSVIEWER;
                         break;
                     default:

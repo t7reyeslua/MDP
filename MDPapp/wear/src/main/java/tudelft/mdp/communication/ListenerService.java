@@ -57,10 +57,7 @@ public class ListenerService extends WearableListenerService {
                         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
                         notificationManagerCompat.cancel(notificationId);
 
-                        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                        v.vibrate(500);
-
-                        //this.stopService(new Intent(this, SensorReaderService.class));
+                        this.stopService(new Intent(this, SensorReaderService.class));
                     }
 
 

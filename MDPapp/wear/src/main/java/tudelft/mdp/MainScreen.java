@@ -126,9 +126,6 @@ public class MainScreen extends Activity implements ServiceConnection {
 
     private void automaticUnbinding() {
         stopSensingService();
-        if (v != null) {
-            v.vibrate(500);
-        }
     }
 
     public void startSensingService(){

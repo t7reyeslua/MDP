@@ -39,6 +39,7 @@ public class MessagesProtocol {
 
     public static final int STARTSENSING = 0;
     public static final int STOPSENSING = 1;
+    public static final int KILLSERVICE = 2;
 
     public static final int SENDSENSEORSNAPSHOTREC = 1000;
     public static final int SENDSENSEORSNAPSHOTREC_START  = 1001;

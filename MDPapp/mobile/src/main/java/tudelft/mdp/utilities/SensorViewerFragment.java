@@ -234,8 +234,6 @@ public class SensorViewerFragment extends Fragment implements
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STOPSENSING);
         dataMap.putString(MessagesProtocol.MESSAGE, filename);
 
-        sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
-
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
 
         v.vibrate(500);
@@ -405,6 +403,15 @@ public class SensorViewerFragment extends Fragment implements
                 if (mActionAutoComplete.getText().length() > 0){
                     mFileCreator.closeFileWriter();
                     Toast.makeText(rootView.getContext(),"File created: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
+
+
+                    DataMap dataMap = new DataMap();
+                    dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
+                    dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.KILLSERVICE);
+                    dataMap.putString(MessagesProtocol.MESSAGE, "Kill service");
+
+                    new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+                    sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
                 }
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:

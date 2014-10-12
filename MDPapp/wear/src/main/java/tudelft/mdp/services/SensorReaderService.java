@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -46,6 +47,7 @@ import tudelft.mdp.communication.SendFileByMessagesThread;
 import tudelft.mdp.communication.SendMessageThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.enums.UserPreferences;
 
 public class SensorReaderService extends Service implements
         SensorEventListener,
@@ -87,7 +89,7 @@ public class SensorReaderService extends Service implements
     private float [] mRotatioVector = {0f,0f,0f,0f,0f};
     private float [] mLinearAccelerometer = {0f,0f,0f};
 
-    private ArrayList<String> snapshotArray =  new ArrayList<String>();
+    private ArrayList<String> snapshotArray;
 
     private String filename;
 
@@ -459,11 +461,15 @@ public class SensorReaderService extends Service implements
             case MessagesProtocol.STARTSENSING:
 
                 Log.e(LOGTAG,"Start sensing");
+                snapshotArray  =  new ArrayList<String>();
                 mTimer  = new Timer();
                 mTimer.scheduleAtFixedRate(new SnapshotTick(), 0, 50L);
                 pause = false;
                 break;
             case MessagesProtocol.STOPSENSING:
+
+                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(500);
 
                 Log.e(LOGTAG,"Stop sensing");
                 if (mTimer != null) {
@@ -480,6 +486,8 @@ public class SensorReaderService extends Service implements
                 pause = true;
                 //stopSelf();
                 break;
+            case MessagesProtocol.KILLSERVICE:
+                stopSelf();
             default:
                 break;
         }
@@ -493,23 +501,6 @@ public class SensorReaderService extends Service implements
 
         if (sendType == 0){
             new SendFileByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH, snapshotArray).start();
-            /*
-            String message = MessagesProtocol.SENDSENSEORSNAPSHOTREC_START + "| Start saving file";
-            new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
-
-            List<String> syncSnapshot = Collections.synchronizedList(snapshotArray);
-            for(String record : syncSnapshot){
-                Log.e(LOGTAG,"Send record: " + record);
-                message = MessagesProtocol.SENDSENSEORSNAPSHOTREC + "|" + record;
-                new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
-            }
-
-
-            Log.e(LOGTAG,"Stop sending file");
-            message = MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH + "| Finish saving file";
-
-            new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
-            */
         } else if (sendType == 1) {
 
             DataMap dataMap = new DataMap();
@@ -550,9 +541,6 @@ public class SensorReaderService extends Service implements
             PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
                     .putDataItem(mGoogleApiClient, request);
         }
-
-
-
     }
 
 
@@ -561,6 +549,7 @@ public class SensorReaderService extends Service implements
         if (sender == MessagesProtocol.ID_MOBILE){
             filename = bundle.getString(MessagesProtocol.MESSAGE, "");
             if (filename.length() > 0){
+                Log.e(LOGTAG, "Filename:" + filename);
                 saveFileRequired = true;
             }
             int command = bundle.getInt(MessagesProtocol.MSGTYPE, -1);
