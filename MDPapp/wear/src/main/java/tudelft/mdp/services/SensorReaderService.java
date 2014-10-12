@@ -19,7 +19,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,13 +29,9 @@ import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
@@ -47,7 +42,6 @@ import tudelft.mdp.communication.SendFileByMessagesThread;
 import tudelft.mdp.communication.SendMessageThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
-import tudelft.mdp.enums.UserPreferences;
 
 public class SensorReaderService extends Service implements
         SensorEventListener,
@@ -61,22 +55,19 @@ public class SensorReaderService extends Service implements
     private SensorManager mSensorManager;
 
     private static boolean isRunning = false;
+    private static boolean isStarted = false;
+    private static boolean isConnected = false;
     private Timer mTimer;
-    private int counter = 0;
     private int snapshotCounter = 0;
+    private int counter = 0;
     private boolean saveFileRequired = false;
 
     private static final String LOGTAG = "MDP-Wear SensorReaderService";
-    private Sensor mSigmotion;
 
     GoogleApiClient mGoogleApiClient;
 
-    private TriggerEventListener mTriggerEventListener;
-
     public static final int MSG_REGISTER_CLIENT = 1;
     public static final int MSG_UNREGISTER_CLIENT = 2;
-    public static final int MSG_SET_INT_VALUE = 3;
-    public static final int MSG_SET_STRING_VALUE = 4;
     public static final int MSG_SET_SENSOR_EVENT_VALUE = 5;
     public static final int MSG_SET_BUNDLE_VALUE = 6;
 
@@ -89,9 +80,11 @@ public class SensorReaderService extends Service implements
     private float [] mRotatioVector = {0f,0f,0f,0f,0f};
     private float [] mLinearAccelerometer = {0f,0f,0f};
 
-    private ArrayList<String> snapshotArray;
+    private ArrayList<String> snapshotArray = new ArrayList<String>();
 
     private String filename;
+
+
 
     public SensorReaderService() {
     }
@@ -99,22 +92,48 @@ public class SensorReaderService extends Service implements
 
     @Override
     public void onCreate() {
-
         Log.i(LOGTAG, "Service Created.");
-        configureSensing();
+        //configureSensing();
+        configureBroadcastReceivers();
         buildGoogleClient();
 
-        // Register the local broadcast receiver, defined in step 3.
-        IntentFilter bundleFilter = new IntentFilter(MessagesProtocol.WEARSENSORSBUNDLE);
-        DataBundleReceiver dataBundleReceiver = new DataBundleReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(dataBundleReceiver, bundleFilter);
-
-
-        IntentFilter messageFilter = new IntentFilter(MessagesProtocol.WEARSENSORSMSG);
-        MessageReceiver messageReceiver = new MessageReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
-
         isRunning = true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (mTimer != null) {
+            mTimer.cancel();
+        }
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+
+        isRunning = false;
+        isStarted = false;
+        isConnected = false;
+
+        mSensorManager.unregisterListener(this);
+
+        Log.i(LOGTAG, "Service Stopped.");
+        Log.i(LOGTAG, "Unregistered Sensor Listener.");
+    }
+
+
+    public static boolean isRunning()
+    {
+        return isRunning;
+    }
+    public static boolean isStarted()
+    {
+        return isStarted;
+    }
+    public static boolean isConnected()
+    {
+        return isConnected;
     }
 
     @Override
@@ -122,6 +141,15 @@ public class SensorReaderService extends Service implements
         Log.i(LOGTAG, "onBind");
         return mMessenger.getBinder();
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
+        isStarted = true;
+        return START_NOT_STICKY;
+    }
+
+
 
     private void buildGoogleClient(){
         // Build a new GoogleApiClient
@@ -132,22 +160,28 @@ public class SensorReaderService extends Service implements
                 .build();
 
         mGoogleApiClient.connect();
-
     }
 
-    // Send a data object when the data layer connection is successful.
     @Override
     public void onConnected(Bundle connectionHint) {
-
-
+        isConnected = true;
     }
 
-    // Placeholders for required connection callbacks
     @Override
-    public void onConnectionSuspended(int cause) { }
+    public void onConnectionSuspended(int cause) { isConnected = false; }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) { }
+    public void onConnectionFailed(ConnectionResult connectionResult) { isConnected = false; }
+
+
+
+    private void configureBroadcastReceivers(){
+        // Register the local broadcast receiver, defined in step 3.
+        IntentFilter bundleFilter = new IntentFilter(MessagesProtocol.WEARSENSORSBUNDLE);
+        DataBundleReceiver dataBundleReceiver = new DataBundleReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(dataBundleReceiver, bundleFilter);
+    }
+
 
 
 
@@ -179,6 +213,24 @@ public class SensorReaderService extends Service implements
             Log.i(LOGTAG, "Sensor registered: Magnetic Field");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT) != null){
+            Log.i(LOGTAG, "Sensor registered: Tilt sensor");
+            mSensorManager.registerListener(this,
+                    mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT),
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null){
+            Log.i(LOGTAG, "Sensor registered: Rotation Vector");
+            mSensorManager.registerListener(this,
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        if (mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null){
+            Log.i(LOGTAG, "Sensor registered: Linear Acceleration");
+            mSensorManager.registerListener(this,
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
        /* if (mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null){
@@ -226,33 +278,8 @@ public class SensorReaderService extends Service implements
             };
             mSensorManager.requestTriggerSensor(mTriggerEventListener, mSigmotion);
         } */
-        if (mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT) != null){
-            Log.i(LOGTAG, "Sensor registered: Tilt sensor");
-            mSensorManager.registerListener(this,
-                    mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null){
-            Log.i(LOGTAG, "Sensor registered: Rotation Vector");
-            mSensorManager.registerListener(this,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null){
-            Log.i(LOGTAG, "Sensor registered: Linear Acceleration");
-            mSensorManager.registerListener(this,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
 
         pause = true;
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
-        return START_STICKY; // Run until explicitly stopped.
     }
 
     @Override
@@ -260,39 +287,14 @@ public class SensorReaderService extends Service implements
 
     }
 
-    public static boolean isRunning()
-    {
-        return isRunning;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mTimer != null) {
-            mTimer.cancel();
-        }
-
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-
-        Log.i(LOGTAG, "Service Stopped.");
-        isRunning = false;
-        mSensorManager.unregisterListener(this);
-        if (mTriggerEventListener != null) {
-            mSensorManager.cancelTriggerSensor(mTriggerEventListener, mSigmotion);
-        }
-        Log.i(LOGTAG, "Unregistered Sensor Listener.");
-    }
-
     @Override
     public void onSensorChanged(SensorEvent event) {
-
+        Log.i(LOGTAG, "New sensor event " + counter);
         if (!pause) {
             String message = event.sensor.getType() + "|";
 
-            if ((event.sensor.getType() == Constants.SAMSUNG_TILT) || (event.sensor.getType()
-                    == Constants.SAMSUNG_HEART_RATE)) {
+            if ((event.sensor.getType() == Constants.SAMSUNG_TILT) ||
+                (event.sensor.getType() == Constants.SAMSUNG_HEART_RATE)) {
                 for (int i = 0; i < 3; i++) {
                     message += String.format("%.2f", event.values[i]) + " ";
                 }
@@ -304,9 +306,9 @@ public class SensorReaderService extends Service implements
 
             new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
 
-            if (saveFileRequired) {
-                copySensorValues(event);
-            }
+
+            copySensorValues(event);
+
             sendMessageSensorEventToUI(event.sensor.getType(), event.values);
             counter++;
         }
@@ -342,7 +344,6 @@ public class SensorReaderService extends Service implements
             default:
                 break;
         }
-
     }
 
     private void saveSnapshot(){
@@ -377,49 +378,12 @@ public class SensorReaderService extends Service implements
             record += String.format("%.2f", value) + "\t";
         }
         */
-
         snapshotArray.add(record);
-
-
     }
 
-    private class SnapshotTick extends TimerTask {
-        @Override
-        public void run() {
-            //Log.i(LOGTAG, "Taking Snapshot " + counter);
-            try {
-                //sendMessageIntToUI(counter);
-                if (saveFileRequired) {
-                    saveSnapshot();
-                }
-
-            } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
-                Log.e("SnapshotTick", "SnapshotTick Failed.", t);
-            }
-        }
-    }
-
-
-    private void sendMessageIntToUI(int intvaluetosend) {
-        Iterator<Messenger> messengerIterator = mClients.iterator();
-        while(messengerIterator.hasNext()) {
-            Messenger messenger = messengerIterator.next();
-            try {
-                // Send data as an Integer
-                messenger.send(Message.obtain(null, MSG_SET_INT_VALUE, intvaluetosend, 0));
-
-
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list.
-                mClients.remove(messenger);
-            }
-        }
-    }
 
     private void sendMessageSensorEventToUI(Integer sensorType, float[] sensorEvent) {
-        Iterator<Messenger> messengerIterator = mClients.iterator();
-        while(messengerIterator.hasNext()) {
-            Messenger messenger = messengerIterator.next();
+        for (Messenger messenger : mClients){
             try {
 
                 ArrayList<Object> valuesToSend = new ArrayList<Object>();
@@ -437,14 +401,12 @@ public class SensorReaderService extends Service implements
                 mClients.remove(messenger);
             }
         }
+
     }
 
     private void sendBundleToUI(Bundle bundle) {
-        Iterator<Messenger> messengerIterator = mClients.iterator();
-        while(messengerIterator.hasNext()) {
-            Messenger messenger = messengerIterator.next();
+        for (Messenger messenger : mClients){
             try {
-
                 Message msg = Message.obtain(null, MSG_SET_BUNDLE_VALUE);
                 msg.setData(bundle);
                 messenger.send(msg);
@@ -456,35 +418,58 @@ public class SensorReaderService extends Service implements
         }
     }
 
+    private void sendRecordsToMobile(){
+        ArrayList<String> records = new ArrayList<String>(snapshotArray);
+        Log.e(LOGTAG,"Start sending file. Number of records: " + snapshotArray.size() + "-" + records.size());
+
+        new SendFileByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH, records).start();
+        snapshotArray.clear();
+    }
+
+    private void sensingInit(){
+
+        Log.e(LOGTAG,"Start sensing");
+
+        configureSensing();
+        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(500);
+
+        counter = 0;
+        snapshotCounter = 0;
+        snapshotArray.clear();
+        mTimer  = new Timer();
+        mTimer.scheduleAtFixedRate(new SnapshotTick(), 0, 50L);
+        pause = false;
+    }
+
+    private void sensingFinish(){
+
+        Log.e(LOGTAG,"Stop sensing");
+        mSensorManager.unregisterListener(this);
+
+        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(500);
+
+        if (mTimer != null) {
+            Log.e(LOGTAG,"Stop Timer");
+            mTimer.cancel();
+        }
+        if (saveFileRequired){
+            Log.e(LOGTAG,"Call sendRecordsToMobile()");
+            sendRecordsToMobile();
+        }
+        saveFileRequired = false;
+        pause = true;
+    }
+
+
     private void executeCommand(int command){
         switch (command){
             case MessagesProtocol.STARTSENSING:
-
-                Log.e(LOGTAG,"Start sensing");
-                snapshotArray  =  new ArrayList<String>();
-                mTimer  = new Timer();
-                mTimer.scheduleAtFixedRate(new SnapshotTick(), 0, 50L);
-                pause = false;
+                sensingInit();
                 break;
             case MessagesProtocol.STOPSENSING:
-
-                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(500);
-
-                Log.e(LOGTAG,"Stop sensing");
-                if (mTimer != null) {
-
-                    Log.e(LOGTAG,"Stop Timer");
-                    mTimer.cancel();
-                }
-                if (saveFileRequired){
-
-                    Log.e(LOGTAG,"Call sendRecordsToMobile()");
-                    sendRecordsToMobile();
-                }
-                saveFileRequired = false;
-                pause = true;
-                //stopSelf();
+                sensingFinish();
                 break;
             case MessagesProtocol.KILLSERVICE:
                 stopSelf();
@@ -493,63 +478,12 @@ public class SensorReaderService extends Service implements
         }
     }
 
-    private void sendRecordsToMobile(){
-
-        Log.e(LOGTAG,"Start sending file");
-
-        int sendType = 0;
-
-        if (sendType == 0){
-            new SendFileByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH, snapshotArray).start();
-        } else if (sendType == 1) {
-
-            DataMap dataMap = new DataMap();
-
-            dataMap.putDouble(MessagesProtocol.NOTIFICATIONTIMESTAMP, System.currentTimeMillis());
-            dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_WEAR);
-            dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.SENDSENSEORSNAPSHOTREC);
-            dataMap.putStringArrayList(MessagesProtocol.RECORDEDSENSORS, snapshotArray);
-
-
-            new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
-        } else if (sendType == 2) {
-            // write to byte array
-
-            int length = 0;
-            for (String record : snapshotArray){
-                length += record.getBytes(Charset.forName("UTF-8")).length;
-            }
-
-            byte[] byteArray = new byte[length];
-            int i = 0;
-            for (String record : snapshotArray){
-                int recordLength = record.getBytes(Charset.forName("UTF-8")).length;
-                System.arraycopy(
-                        record.getBytes(Charset.forName("UTF-8")), 0,
-                        byteArray, i,
-                        recordLength);
-                i += recordLength;
-            }
-
-
-
-            Asset asset = Asset.createFromBytes(byteArray);
-            PutDataMapRequest dataMap = PutDataMapRequest.create(MessagesProtocol.FILEPATH);
-            dataMap.getDataMap().putAsset(MessagesProtocol.RECORDEDSENSORS, asset);
-            dataMap.getDataMap().putString(MessagesProtocol.MESSAGE, filename);
-            PutDataRequest request = dataMap.asPutDataRequest();
-            PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
-                    .putDataItem(mGoogleApiClient, request);
-        }
-    }
-
-
     private void handleMessage(Bundle bundle){
         Integer sender =bundle.getInt(MessagesProtocol.SENDER, 0);
         if (sender == MessagesProtocol.ID_MOBILE){
             filename = bundle.getString(MessagesProtocol.MESSAGE, "");
             if (filename.length() > 0){
-                Log.e(LOGTAG, "Filename:" + filename);
+                Log.e(LOGTAG, "Message received from mobile:" + filename);
                 saveFileRequired = true;
             }
             int command = bundle.getInt(MessagesProtocol.MSGTYPE, -1);
@@ -558,19 +492,17 @@ public class SensorReaderService extends Service implements
 
     }
 
-    private void handleMessage(String msg){
-        String[] parts = msg.split("\\|");
-        String commandStr = parts[0];
-        String message = parts[1];
 
-        Integer command = Integer.valueOf(commandStr);
-        executeCommand(command);
+    private class DataBundleReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle message = intent.getExtras();
+            handleMessage(message);
+            sendBundleToUI(message);
+        }
     }
 
-    /**
-     * Handle incoming messages from MainActivity
-     */
-    private class IncomingMessageHandler extends Handler { // Handler of incoming messages from clients.
+    private class IncomingMessageHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG,"handleMessage: " + msg.what);
@@ -587,25 +519,17 @@ public class SensorReaderService extends Service implements
         }
     }
 
-
-    private class DataBundleReceiver extends BroadcastReceiver {
+    private class SnapshotTick extends TimerTask {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            Bundle message = intent.getExtras();
-            handleMessage(message);
-            sendBundleToUI(message);
-            // Display message in UI
+        public void run() {
+            Log.i(LOGTAG, "Taking Snapshot " + counter);
+            try {
+                saveSnapshot();
+            } catch (Throwable t) {
+                Log.e("SnapshotTick", "SnapshotTick Failed.", t);
+            }
         }
     }
 
-    private class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String message = intent.getStringExtra(MessagesProtocol.MESSAGE);
-            handleMessage(message);
-            // Display message in UI
-        }
-    }
 
 }

@@ -1,6 +1,5 @@
 package tudelft.mdp.communication;
 
-import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataMap;
@@ -11,15 +10,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-
-import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
-import tudelft.mdp.fileManagement.FileCreator;
 
 public class ListenerService extends WearableListenerService {
 

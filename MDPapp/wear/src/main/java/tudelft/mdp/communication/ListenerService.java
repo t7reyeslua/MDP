@@ -28,6 +28,7 @@ import tudelft.mdp.services.SensorReaderService;
 
 public class ListenerService extends WearableListenerService {
 
+    private Intent mSensorReaderService;
 
     private int notificationId = 001;
     private static final String LOGTAG = "MDP-Wear WearableListenerService";
@@ -35,7 +36,6 @@ public class ListenerService extends WearableListenerService {
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
 
-        DataMap dataMap;
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
                 if (MessagesProtocol.NOTIFICATIONPATH.equals(event.getDataItem().getUri().getPath())) {
@@ -45,24 +45,25 @@ public class ListenerService extends WearableListenerService {
                     String command = dataMapItem.getDataMap().getString(MessagesProtocol.NOTIFICATIONCOMMAND);
 
                     if (command.equals(MessagesProtocol.STARTSENSINGSERVICE)) {
-                        sendNotification(title, content);
-
-                        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                        v.vibrate(500);
 
                         Log.i(LOGTAG, "Sensing Service: START");
-                        Intent intent = new Intent(this, SensorReaderService.class);
-                        this.startService(intent);
+                        sendNotification(title, content);
+
+                        if (!SensorReaderService.isRunning()) {
+                            mSensorReaderService = new Intent(this, SensorReaderService.class);
+                            this.startService(mSensorReaderService);
+                        }
+
                     } else if (command.equals(MessagesProtocol.STOPSENSINGSERVICE)){
+
+                        Log.i(LOGTAG, "Sensing Service: STOP");
                         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
                         notificationManagerCompat.cancel(notificationId);
 
-                        this.stopService(new Intent(this, SensorReaderService.class));
                     }
 
-
                 } else {
-                    dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
+                    DataMap dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
                     Log.v(LOGTAG, "DataMap received from mobile: " + dataMap);
                     // Broadcast message to wearable activity for display
                     Intent messageIntent = new Intent(MessagesProtocol.WEARSENSORSBUNDLE);
@@ -74,29 +75,11 @@ public class ListenerService extends WearableListenerService {
         }
     }
 
-    @Override
-    public void onMessageReceived(MessageEvent messageEvent) {
-
-        if (messageEvent.getPath().equals(MessagesProtocol.MSGPATH)) {
-            final String message = new String(messageEvent.getData());
-
-            Log.i(LOGTAG, "Message received from watch: " + message);
-
-            // Broadcast message to wearable activity for display
-            Intent messageIntent = new Intent(MessagesProtocol.WEARSENSORSMSG);
-            messageIntent.putExtra(MessagesProtocol.MESSAGE, message);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
-        } else {
-            super.onMessageReceived(messageEvent);
-        }
-    }
-
     private void sendNotification(String title, String content) {
 
         // this intent will open the activity when the user taps the "open" action on the notification
         Intent viewIntent = new Intent(this, MainScreen.class);
         PendingIntent pendingViewIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
-
 
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.map);
 
