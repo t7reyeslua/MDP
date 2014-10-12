@@ -28,7 +28,7 @@ public class SendDataSyncThread extends Thread {
     public void run() {
         NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
         for (Node node : nodes.getNodes()) {
-
+            Log.e(LOGTAG,"Start sending dataMap");
             // Construct a DataRequest and send over the data layer
             PutDataMapRequest putDMR = PutDataMapRequest.create(path);
             putDMR.getDataMap().putAll(dataMap);

@@ -25,15 +25,18 @@ public class SendMessageThread extends Thread {
 
     public void run() {
         NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-        for (Node node : nodes.getNodes()) {
+        if (nodes.getNodes() != null) {
+            for (Node node : nodes.getNodes()) {
 
-            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes()).await();
-            if (result.getStatus().isSuccess()) {
-                Log.v(LOGTAG, "Message: {" + message + "} sent to: " + node.getDisplayName());
-            }
-            else {
-                // Log an error
-                Log.v(LOGTAG, "ERROR: failed to send Message");
+                MessageApi.SendMessageResult result = Wearable.MessageApi
+                        .sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes())
+                        .await();
+                if (result.getStatus().isSuccess()) {
+                    Log.v(LOGTAG, "Message: {" + message + "} sent to: " + node.getDisplayName());
+                } else {
+                    // Log an error
+                    Log.v(LOGTAG, "ERROR: failed to send Message");
+                }
             }
         }
     }

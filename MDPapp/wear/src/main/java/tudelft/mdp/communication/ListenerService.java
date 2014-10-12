@@ -9,10 +9,12 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -45,6 +47,9 @@ public class ListenerService extends WearableListenerService {
                     if (command.equals(MessagesProtocol.STARTSENSINGSERVICE)) {
                         sendNotification(title, content);
 
+                        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                        v.vibrate(500);
+
                         Log.i(LOGTAG, "Sensing Service: START");
                         Intent intent = new Intent(this, SensorReaderService.class);
                         this.startService(intent);
@@ -52,13 +57,16 @@ public class ListenerService extends WearableListenerService {
                         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
                         notificationManagerCompat.cancel(notificationId);
 
-                        this.stopService(new Intent(this, SensorReaderService.class));
+                        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                        v.vibrate(500);
+
+                        //this.stopService(new Intent(this, SensorReaderService.class));
                     }
 
 
                 } else {
                     dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
-                    Log.v(LOGTAG, "DataMap received from watch: " + dataMap);
+                    Log.v(LOGTAG, "DataMap received from mobile: " + dataMap);
                     // Broadcast message to wearable activity for display
                     Intent messageIntent = new Intent(MessagesProtocol.WEARSENSORSBUNDLE);
                     messageIntent.putExtras(dataMap.toBundle());

@@ -46,6 +46,7 @@ import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.SendMessageThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.fileManagement.FileCreator;
 import tudelft.mdp.ui.SensorRecControlCard;
 import tudelft.mdp.ui.SensorRecInfoCard;
 
@@ -102,6 +103,7 @@ public class SensorViewerFragment extends Fragment implements
     private Chronometer mChronometer;
     private TextView mCurrentSample;
     private Vibrator v;
+    private FileCreator mFileCreator;
 
 
     private View rootView;
@@ -202,12 +204,14 @@ public class SensorViewerFragment extends Fragment implements
 
         // Create a DataMap object and send it to the data layer
 
+        String filename = mActionAutoComplete.getText().toString();
+
         sendNotification(MessagesProtocol.STARTSENSINGSERVICE);
 
         DataMap dataMap = new DataMap();
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STARTSENSING);
-        dataMap.putString(MessagesProtocol.MESSAGE, "Start sensing");
+        dataMap.putString(MessagesProtocol.MESSAGE, filename);
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
 
@@ -222,11 +226,13 @@ public class SensorViewerFragment extends Fragment implements
         mChronometer.stop();
         mChronometer.setTextColor(getResources().getColor(R.color.DarkGray));
 
+
+        String filename = mActionAutoComplete.getText().toString();
         // Create a DataMap object and send it to the data layer
         DataMap dataMap = new DataMap();
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, MessagesProtocol.STOPSENSING);
-        dataMap.putString(MessagesProtocol.MESSAGE, "Stop sensing");
+        dataMap.putString(MessagesProtocol.MESSAGE, filename);
 
         sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
 
@@ -380,11 +386,50 @@ public class SensorViewerFragment extends Fragment implements
 
     private void handleMessage(String msg){
         String[] parts = msg.split("\\|");
-        String sensorTypeStr = parts[0];
-        String sensorValuesAllStr = parts[1];
+        Integer msgType = Integer.valueOf(parts[0]);
+        String msgLoad = parts[1];
 
-        Integer sensorType = Integer.valueOf(sensorTypeStr);
-        insertSensorRecInfoCard(sensorType, sensorValuesAllStr);
+
+        switch (msgType){
+            case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
+                Log.w(LOGTAG,"Start saving file");
+                if (mActionAutoComplete.getText().length() > 0){
+                    mFileCreator = new FileCreator(mActionAutoComplete.getText().toString(), Constants.DIRECTORY_SENSORS);
+                    mFileCreator.openFileWriter();
+
+                    Toast.makeText(rootView.getContext(),"Start saving file", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
+                Log.w(LOGTAG,"Stop saving file");
+                if (mActionAutoComplete.getText().length() > 0){
+                    mFileCreator.closeFileWriter();
+                    Toast.makeText(rootView.getContext(),"File created: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
+                Log.i(LOGTAG, msgLoad);
+                if (mActionAutoComplete.getText().length() > 0){
+                    mFileCreator.saveData(msgLoad + mActionAutoComplete.getText().toString() +"\n");
+                }
+                break;
+            default:
+                insertSensorRecInfoCard(msgType, msgLoad);
+                break;
+        }
+
+    }
+
+    private void saveFile(ArrayList<String> list) {
+        mFileCreator = new FileCreator(mActionAutoComplete.getText().toString(), Constants.DIRECTORY_SENSORS);
+        mFileCreator.openFileWriter();
+
+        for (String s : list){
+            mFileCreator.saveData(s + "\n");
+        }
+
+        mFileCreator.closeFileWriter();
+        Toast.makeText(rootView.getContext(),"File saved: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
     }
 
     private void handleMessage(Bundle bundle){
@@ -398,6 +443,10 @@ public class SensorViewerFragment extends Fragment implements
 
             } else if (msgType == MessagesProtocol.SNDMESSAGE) {
                 mTwDummy.setText(bundle.getString(MessagesProtocol.MESSAGE, "Fail!"));
+            } else if (msgType == MessagesProtocol.SENDSENSEORSNAPSHOTREC) {
+                ArrayList<String> recordedSensors = bundle.getStringArrayList(MessagesProtocol.RECORDEDSENSORS);
+                Toast.makeText(rootView.getContext(),"Samples taken: " + recordedSensors.size(), Toast.LENGTH_SHORT).show();
+                saveFile(recordedSensors);
             }
         }
     }
