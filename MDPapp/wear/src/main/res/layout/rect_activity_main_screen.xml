@@ -9,6 +9,13 @@
     tools:context=".MainScreen"
     tools:deviceIds="wear_square">
 
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:textSize="26sp"
+              android:fontFamily="sans-serif-condensed"
+              android:textStyle="normal"
+              android:textColor="@color/white"
+              android:text="Sensors"/>
     <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -19,10 +26,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+
+
             <android.support.wearable.view.CardFrame
                     android:id="@+id/cardFrame"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="50 dp">
 
                 <LinearLayout
                         android:orientation="vertical"
@@ -39,7 +48,7 @@
                             android:id="@+id/textAccelerometer1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/light_grey"
+                            android:textColor="@android:color/darker_gray"
                             android:textStyle="bold"
                             android:text="Accelerometer" />
                     <TextView
@@ -53,7 +62,7 @@
                             android:id="@+id/textGyroscope1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/light_grey"
+                            android:textColor="@android:color/darker_gray"
                             android:textStyle="bold"
                             android:text="Gyroscope" />
                     <TextView
@@ -67,7 +76,7 @@
                             android:id="@+id/textLinearAcceleration1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/light_grey"
+                            android:textColor="@android:color/darker_gray"
                             android:textStyle="bold"
                             android:text="LinearAcceleration" />
                     <TextView
@@ -81,7 +90,7 @@
                             android:id="@+id/textMagnetometer1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/light_grey"
+                            android:textColor="@android:color/darker_gray"
                             android:textStyle="bold"
                             android:paddingBottom="3dp"
                             android:text="Magnetomter" />
@@ -107,7 +116,7 @@
                                 android:id="@+id/textTilt1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/light_grey"
+                                android:textColor="@android:color/darker_gray"
                                 android:textStyle="bold"
                                 android:text="Tilt" />
                         <TextView
@@ -131,7 +140,7 @@
                                  android:id="@+id/textRotationVector1"
                                  android:layout_width="wrap_content"
                                  android:layout_height="wrap_content"
-                                 android:textColor="@color/light_grey"
+                                 android:textColor="@android:color/darker_gray"
                                  android:textStyle="bold"
                                  android:text="RotationVector" />
                         <TextView
@@ -145,7 +154,7 @@
                                 android:id="@+id/textGravity1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/light_grey"
+                                android:textColor="@android:color/darker_gray"
                                 android:textStyle="bold"
                                 android:text="Gravity" />
                          <TextView
