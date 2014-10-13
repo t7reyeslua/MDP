@@ -4,84 +4,165 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="5dp"
+    android:background="@drawable/map"
     tools:context=".MainScreen"
     tools:deviceIds="wear_square">
 
-
     <ScrollView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/scrollView">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/scrollView">
 
-        <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-            <TextView
-                    android:id="@+id/textDummy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dummy" />
+            <android.support.wearable.view.CardFrame
+                    android:id="@+id/cardFrame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-            <TextView
-                    android:id="@+id/textAccelerometer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Accelerometer" />
-            <TextView
-                    android:id="@+id/textGyroscope"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gyroscope" />
-            <TextView
-                    android:id="@+id/textLinearAcceleration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="LinearAcceleration" />
-            <TextView
-                    android:id="@+id/textMagnetometer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Magnetomter" />
-            <TextView
-                    android:id="@+id/textStepCounter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="StepCounter" />
+                <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
 
-            <TextView
-                    android:id="@+id/textStepDetector"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Step Detector: " />
-            <TextView
-                    android:id="@+id/textTilt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tilt" />
-            <TextView
-                    android:id="@+id/textHeartRate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="HeartRate" />
-            <TextView
-                    android:id="@+id/textSignificantMotion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="SignificantMotion" />
-            <TextView
-                    android:id="@+id/textRotationVector"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="RotationVector" />
-            <TextView
-                    android:id="@+id/textGravity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gravity" />
-        </LinearLayout>
-    </ScrollView>
+                    <!--
+                    <TextView
+                            android:id="@+id/textDummy"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Dummy" /> -->
+                    <TextView
+                            android:id="@+id/textAccelerometer1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:textStyle="bold"
+                            android:text="Accelerometer" />
+                    <TextView
+                            android:id="@+id/textAccelerometer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:paddingBottom="3dp"
+                            android:text="0.00 0.00 0.00" />
+                    <TextView
+                            android:id="@+id/textGyroscope1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:textStyle="bold"
+                            android:text="Gyroscope" />
+                    <TextView
+                            android:id="@+id/textGyroscope"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:paddingBottom="3dp"
+                            android:text="0.00 0.00 0.00"/>
+                    <TextView
+                            android:id="@+id/textLinearAcceleration1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:textStyle="bold"
+                            android:text="LinearAcceleration" />
+                    <TextView
+                            android:id="@+id/textLinearAcceleration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:paddingBottom="3dp"
+                            android:text="0.00 0.00 0.00" />
+                    <TextView
+                            android:id="@+id/textMagnetometer1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:textStyle="bold"
+                            android:paddingBottom="3dp"
+                            android:text="Magnetomter" />
+                    <TextView
+                            android:id="@+id/textMagnetometer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/light_grey"
+                            android:paddingBottom="3dp"
+                            android:text="0.00 0.00 0.00" />
+                    <!--    <TextView
+                                android:id="@+id/textStepCounter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="StepCounter" />
+
+                        <TextView
+                                android:id="@+id/textStepDetector"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Step Detector: " /> -->
+                        <TextView
+                                android:id="@+id/textTilt1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/light_grey"
+                                android:textStyle="bold"
+                                android:text="Tilt" />
+                        <TextView
+                                android:id="@+id/textTilt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/light_grey"
+                                android:paddingBottom="3dp"
+                                android:text="0.00 0.00 0.00"/>
+                    <!--     <TextView
+                                 android:id="@+id/textHeartRate"
+                                 android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 android:text="HeartRate" />
+                         <TextView
+                                 android:id="@+id/textSignificantMotion"
+                                 android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 android:text="SignificantMotion" /> -->
+                         <TextView
+                                 android:id="@+id/textRotationVector1"
+                                 android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 android:textColor="@color/light_grey"
+                                 android:textStyle="bold"
+                                 android:text="RotationVector" />
+                        <TextView
+                                android:id="@+id/textRotationVector"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/light_grey"
+                                android:paddingBottom="3dp"
+                                android:text="0.00 0.00 0.00 0.00 0.00" />
+                        <TextView
+                                android:id="@+id/textGravity1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/light_grey"
+                                android:textStyle="bold"
+                                android:text="Gravity" />
+                         <TextView
+                                 android:id="@+id/textGravity"
+                                 android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 android:textColor="@color/light_grey"
+                                 android:paddingBottom="3dp"
+                                 android:text="0.00 0.00 0.00" />
+                     </LinearLayout>
+
+                 </android.support.wearable.view.CardFrame>
+
+             </FrameLayout>
+
+         </ScrollView>
 
 
-</LinearLayout>
+
+     </LinearLayout>

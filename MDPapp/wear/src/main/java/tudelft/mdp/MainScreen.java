@@ -14,6 +14,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.Vibrator;
+import android.support.wearable.view.CardFrame;
+import android.support.wearable.view.CardScrollView;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.animation.Animation;
@@ -45,6 +47,8 @@ public class MainScreen extends Activity implements ServiceConnection {
     private TextView mTwDummy;
     private WatchViewStub stub;
 
+    private CardFrame mCardFrame;
+
     private ImageView mImageLogo;
 
     private int significantMotionTriggerCounter = 0;
@@ -62,6 +66,7 @@ public class MainScreen extends Activity implements ServiceConnection {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main_screen);
 
         /*
@@ -79,18 +84,23 @@ public class MainScreen extends Activity implements ServiceConnection {
                 mTwGyroscope = (TextView) stub.findViewById(R.id.textGyroscope);
                 mTwGravity = (TextView) stub.findViewById(R.id.textGravity);
                 mTwMagnetometer = (TextView) stub.findViewById(R.id.textMagnetometer);
+                mTwRotationVector = (TextView) stub.findViewById(R.id.textRotationVector);
+                mTwLinearAcceleration = (TextView) stub.findViewById(R.id.textLinearAcceleration);
+                mTwTilt = (TextView) stub.findViewById(R.id.textTilt);
+
+
+                /*
                 mTwStepCounter = (TextView) stub.findViewById(R.id.textStepCounter);
                 mTwHeartRate = (TextView) stub.findViewById(R.id.textHeartRate);
                 mTwSignificantMotion = (TextView) stub.findViewById(R.id.textSignificantMotion);
                 mTwStepDetector = (TextView) stub.findViewById(R.id.textStepDetector);
-                mTwRotationVector = (TextView) stub.findViewById(R.id.textRotationVector);
-                mTwLinearAcceleration = (TextView) stub.findViewById(R.id.textLinearAcceleration);
-                mTwTilt = (TextView) stub.findViewById(R.id.textTilt);
                 mTwDummy = (TextView) stub.findViewById(R.id.textDummy);
+                */
 
                 /*
                 mImageLogo = (ImageView) stub.findViewById(R.id.imageLogo);
                 mImageLogo.startAnimation(anim);*/
+                mCardFrame = (CardFrame) stub.findViewById(R.id.cardFrame);
                 v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
             }
@@ -197,7 +207,7 @@ public class MainScreen extends Activity implements ServiceConnection {
             case Sensor.TYPE_ACCELEROMETER:
                 //Log.i(LOGTAG, "Sensed data.");
                 if (mTwAccelerometer != null){
-                    String text = "Accelerometer: ";
+                    String text = "";
                     for(float value : sensorValues){
                         text += String.format("%.2f", value) + " ";
                     }
@@ -207,7 +217,7 @@ public class MainScreen extends Activity implements ServiceConnection {
             case Sensor.TYPE_GYROSCOPE:
                 //Log.i(LOGTAG, "Sensed data.");
                 if (mTwGyroscope != null){
-                    String text = "Gyroscope: ";
+                    String text = "";
                     for(float value : sensorValues){
                         text += String.format("%.2f", value) + " ";
                     }
@@ -217,7 +227,7 @@ public class MainScreen extends Activity implements ServiceConnection {
             case Sensor.TYPE_GRAVITY:
                 //Log.i(LOGTAG, "Sensed data.");
                 if (mTwGravity != null){
-                    String text = "Gravity: ";
+                    String text = "";
                     for(float value : sensorValues){
                         text += String.format("%.2f", value) + " ";
                     }
@@ -227,14 +237,46 @@ public class MainScreen extends Activity implements ServiceConnection {
             case Sensor.TYPE_MAGNETIC_FIELD:
                 //Log.i(LOGTAG, "Sensed data.");
                 if (mTwMagnetometer != null){
-                    String text = "Magnetic: ";
+                    String text = "";
                     for(float value : sensorValues){
                         text += String.format("%.2f", value) + " ";
                     }
                     mTwMagnetometer.setText(text);
                 }
                 break;
-            case Sensor.TYPE_STEP_COUNTER:
+            case Constants.SAMSUNG_TILT:
+                //Log.i(LOGTAG, "Sensed data.");
+                if (mTwTilt != null){
+                    String text = "";
+                    for(int i = 0; i < 3; i++){
+                        float value = sensorValues[i];
+                        text += String.format("%.2f", value) + " ";
+                    }
+                    mTwTilt.setText(text);
+                }
+                break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                //Log.i(LOGTAG, "Sensed data.");
+                if (mTwLinearAcceleration != null){
+                    String text = "";
+                    for(float value : sensorValues){
+                        text += String.format("%.2f", value) + " ";
+                    }
+                    mTwLinearAcceleration.setText(text);
+                }
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
+                //Log.i(LOGTAG, "Sensed data.");
+                if (mTwRotationVector != null){
+                    String text = "";
+                    for(float value : sensorValues){
+                        text += String.format("%.2f", value) + " ";
+                    }
+                    mTwRotationVector.setText(text);
+                }
+                break;
+
+          /*  case Sensor.TYPE_STEP_COUNTER:
                 //Log.i(LOGTAG, "Sensed data.");
                 if (mTwStepCounter != null){
                     String text = "Step Counter: ";
@@ -265,27 +307,7 @@ public class MainScreen extends Activity implements ServiceConnection {
                     mTwHeartRate.setText(text);
                 }
                 break;
-            case Constants.SAMSUNG_TILT:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwTilt != null){
-                    String text = "Tilt: ";
-                    for(int i = 0; i < 3; i++){
-                        float value = sensorValues[i];
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwTilt.setText(text);
-                }
-                break;
-            case Sensor.TYPE_LINEAR_ACCELERATION:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "Linear Accel: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwLinearAcceleration.setText(text);
-                }
-                break;
+
             case Sensor.TYPE_STEP_DETECTOR:
                 //Log.i(LOGTAG, "Sensed data.");
                 if (mTwHeartRate != null){
@@ -315,17 +337,7 @@ public class MainScreen extends Activity implements ServiceConnection {
                     }
                     mTwSignificantMotion.setText(text);
                 }
-                break;
-            case Sensor.TYPE_ROTATION_VECTOR:
-                //Log.i(LOGTAG, "Sensed data.");
-                if (mTwHeartRate != null){
-                    String text = "RotVect: ";
-                    for(float value : sensorValues){
-                        text += String.format("%.2f", value) + " ";
-                    }
-                    mTwRotationVector.setText(text);
-                }
-                break;
+                break;*/
             default:
                 break;
         }
@@ -346,7 +358,7 @@ public class MainScreen extends Activity implements ServiceConnection {
                     Bundle bundle = msg.getData();
                     Integer sender =bundle.getInt(MessagesProtocol.SENDER, 0);
                     if (sender == MessagesProtocol.ID_MOBILE){
-                        mTwDummy.setText(bundle.getString(MessagesProtocol.MESSAGE,"Fail!"));
+                       // mTwDummy.setText(bundle.getString(MessagesProtocol.MESSAGE,"Fail!"));
                     }
                     break;
                 default:
