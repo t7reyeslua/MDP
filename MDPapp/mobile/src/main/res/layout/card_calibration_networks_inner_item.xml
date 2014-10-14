@@ -13,7 +13,7 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="25">
+            android:layout_weight="30">
         <com.devspark.robototextview.widget.RobotoTextView
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
@@ -41,7 +41,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="match_parent" android:layout_weight="25">
+            android:layout_height="match_parent" android:layout_weight="30">
         <com.devspark.robototextview.widget.RobotoTextView
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
@@ -73,7 +73,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="match_parent" android:layout_weight="25">
+            android:layout_height="match_parent" android:layout_weight="10">
         <com.devspark.robototextview.widget.RobotoTextView
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
@@ -81,7 +81,7 @@
                 android:textColor="@android:color/darker_gray"
                 app:fontFamily="roboto"
                 android:textSize="12sp"
-                android:text="50 samples"
+                android:text="50"
                 android:id="@+id/twCount" android:gravity="center_vertical|right"
                 app:textWeight="bold"/>
     </LinearLayout>

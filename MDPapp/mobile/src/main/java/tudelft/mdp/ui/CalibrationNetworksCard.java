@@ -1,7 +1,6 @@
 package tudelft.mdp.ui;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -17,13 +16,13 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.prototypes.CardWithList;
 import it.gmariotti.cardslib.library.prototypes.LinearListView;
 import tudelft.mdp.R;
-import tudelft.mdp.locationTracker.CalibrationNetworkObject;
+import tudelft.mdp.locationTracker.NetworkInfoObject;
 
 /**
  * Created by t7 on 13-10-14.
  */
 public class CalibrationNetworksCard extends CardWithList {
-    public ArrayList<CalibrationNetworkObject> networks;
+    public ArrayList<NetworkInfoObject> networks;
 
     private Button mButton;
 
@@ -32,12 +31,12 @@ public class CalibrationNetworksCard extends CardWithList {
 
     public CalibrationNetworksCard(Context context){
         super(context, R.layout.card_calibration_networks);
-        this.networks = new ArrayList<CalibrationNetworkObject>();
+        this.networks = new ArrayList<NetworkInfoObject>();
     }
 
-    public CalibrationNetworksCard(Context context, ArrayList<CalibrationNetworkObject> networks){
+    public CalibrationNetworksCard(Context context, ArrayList<NetworkInfoObject> networks){
         super(context, R.layout.card_calibration_networks);
-        this.networks = new ArrayList<CalibrationNetworkObject>(networks);
+        this.networks = new ArrayList<NetworkInfoObject>(networks);
     }
 
     @Override
@@ -56,10 +55,12 @@ public class CalibrationNetworksCard extends CardWithList {
         TextView twCount = (TextView) convertView.findViewById(R.id.twCount);
 
         CalibrationNetworks networkObject = (CalibrationNetworks) object;
+
+        String mean = String.format("%.2f", networkObject.getMean());
         twSsid.setText(networkObject.getSSID());
         twBssid.setText(networkObject.getBSSID());
-        twMean.setText(networkObject.getMean().toString() + " db");
-        twCount.setText(networkObject.getCount().toString() + " samples");
+        twMean.setText(mean + " db");
+        twCount.setText(networkObject.getCount().toString() + "");
 
         return  convertView;
     }
@@ -97,7 +98,7 @@ public class CalibrationNetworksCard extends CardWithList {
 
         List<ListObject> mObjects = new ArrayList<ListObject>();
 
-        for (CalibrationNetworkObject singleNetwork : networks){
+        for (NetworkInfoObject singleNetwork : networks){
             CalibrationNetworks network = new CalibrationNetworks(this);
             network.setBSSID(singleNetwork.getBSSID());
             network.setSSID(singleNetwork.getSSID());
@@ -109,14 +110,14 @@ public class CalibrationNetworksCard extends CardWithList {
         return mObjects;
     }
 
-    public void updateItems(ArrayList<CalibrationNetworkObject> myList) {
+    public void updateItems(ArrayList<NetworkInfoObject> myList) {
         initCardHeader();
 
         networks.clear();
-        networks = new ArrayList<CalibrationNetworkObject>(myList);
+        networks = new ArrayList<NetworkInfoObject>(myList);
 
         ArrayList<CalibrationNetworks> objs = new ArrayList<CalibrationNetworks>();
-        for (CalibrationNetworkObject singleNetwork : myList){
+        for (NetworkInfoObject singleNetwork : myList){
             CalibrationNetworks network = new CalibrationNetworks(this);
             network.setBSSID(singleNetwork.getBSSID());
             network.setSSID(singleNetwork.getSSID());
@@ -129,11 +130,30 @@ public class CalibrationNetworksCard extends CardWithList {
         getLinearListAdapter().addAll(objs);
     }
 
-    public ArrayList<CalibrationNetworkObject> getNetworks() {
+    public ArrayList<NetworkInfoObject> getNetworks() {
         return networks;
     }
 
-    public void setNetworks(ArrayList<CalibrationNetworkObject> networks) {
+    public void removeFromNetworksList(CalibrationNetworks removedNetwork){
+        int prevSize = networks.size();
+        String bssid = removedNetwork.getBSSID();
+        int index = -1;
+        for (int i = 0; i < networks.size(); i++){
+            NetworkInfoObject network = networks.get(i);
+            if (network.getBSSID().equals(bssid)){
+                index = i;
+                break;
+            }
+        }
+        if (index > -1) {
+            networks.remove(index);
+        }
+
+        int postSize = networks.size();
+        //Toast.makeText(getContext(), "List size: " + prevSize + " " + postSize, Toast.LENGTH_SHORT).show();
+    }
+
+    public void setNetworks(ArrayList<NetworkInfoObject> networks) {
         this.networks = networks;
     }
 
@@ -205,6 +225,8 @@ public class CalibrationNetworksCard extends CardWithList {
                 @Override
                 public void onItemSwipe(CardWithList.ListObject object, boolean dismissRight) {
                     int i = 0;
+                    CalibrationNetworks swipedNetwork = (CalibrationNetworks) object;
+                    removeFromNetworksList(swipedNetwork);
                     //Toast.makeText(getContext(), "Swipe on " + object.getObjectId(), Toast.LENGTH_SHORT).show();
                 }
             });

@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -48,6 +48,20 @@
         </receiver>
 
         <service android:name="tudelft.mdp.gcm.GcmIntentService" />
+        <service
+            android:name="tudelft.mdp.locationTracker.LocationDetectionService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+        <service android:name="tudelft.mdp.communication.ListenerService" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name="tudelft.mdp.LoginActivity"
@@ -58,11 +72,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="tudelft.mdp.MainActivity" />
         </activity>
-
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-
         <activity
             android:name="tudelft.mdp.MainActivity"
             android:label="@string/title_activity_main_"
@@ -95,15 +104,9 @@
         </activity>
 
         <service
-            android:name="tudelft.mdp.locationTracker.LocationDetectionService"
+            android:name="tudelft.mdp.locationTracker.NetworkScanService"
             android:enabled="true"
             android:exported="true" >
-        </service>
-
-        <service android:name=".communication.ListenerService">
-            <intent-filter>
-                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
-            </intent-filter>
         </service>
     </application>
 

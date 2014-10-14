@@ -15,6 +15,7 @@ public class UserPreferences {
     public static final String CALIBRATED = "CALIBRATED";
     public static final String CALIBRATION_M = "CALIBRATION_M";
     public static final String CALIBRATION_B = "CALIBRATION_B";
+    public static final String CALIBRATION_SCANS = "CALIBRATION_SCANS";
 
     public static final String SCANSAMPLES = "SCANSAMPLES";
 

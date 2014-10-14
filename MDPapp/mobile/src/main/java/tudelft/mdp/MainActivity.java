@@ -113,7 +113,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             login_signin();
         }
 
-
         configureActionBar();
         initDrawer();
 

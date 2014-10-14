@@ -1,21 +1,55 @@
 package tudelft.mdp.locationTracker;
 
 
-public class CalibrationNetworkObject {
+import java.io.Serializable;
+
+public class NetworkInfoObject implements Serializable {
+
+
+    public static final long serialVersionUID = 43L;
+
     public String SSID;
     public String BSSID;
-    public Float mean;
+
+    public Integer RSSI;
     public Integer count;
 
-    public CalibrationNetworkObject(){
+    public Float mean;
+    public Float std;
+
+    public NetworkInfoObject(){
     }
 
-    public CalibrationNetworkObject(String SSID, String BSSID, Float mean,
+    public NetworkInfoObject(String SSID, String BSSID,
+            Integer RSSI) {
+        this.SSID = SSID;
+        this.BSSID = BSSID;
+        this.RSSI = RSSI;
+        this.count = 1;
+    }
+
+    public NetworkInfoObject(String SSID, String BSSID, Float mean,
             Integer count) {
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.mean = mean;
         this.count = count;
+    }
+
+    public Integer getRSSI() {
+        return RSSI;
+    }
+
+    public void setRSSI(Integer RSSI) {
+        this.RSSI = RSSI;
+    }
+
+    public Float getStd() {
+        return std;
+    }
+
+    public void setStd(Float std) {
+        this.std = std;
     }
 
     public String getSSID() {
