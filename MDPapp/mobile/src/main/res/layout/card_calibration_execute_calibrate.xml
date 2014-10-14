@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <com.devspark.robototextview.widget.RobotoTextView
+                    android:layout_width="75dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="M value:"
+                    android:textColor="@android:color/darker_gray"
+                    app:fontFamily="roboto"
+                    app:textWeight="light"
+                    android:textSize="12sp"
+                    android:id="@+id/textM"/>
+            <EditText
+                    android:id="@+id/editMvalue"
+                    android:fontFamily="sans-serif-light"
+                    android:textSize="12sp"
+                    android:inputType="numberDecimal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginBottom="2dp"
+                    android:hint="Master M value" />
+        </LinearLayout>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <com.devspark.robototextview.widget.RobotoTextView
+                    android:layout_width="75dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@android:color/darker_gray"
+                    app:fontFamily="roboto"
+                    app:textWeight="light"
+                    android:textSize="12sp"
+                    android:text="B value:"
+                    android:id="@+id/textB"/>
+            <EditText
+                    android:id="@+id/editBvalue"
+                    android:fontFamily="sans-serif-light"
+                    android:textSize="12sp"
+                    android:inputType="numberDecimal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:hint="Master B value"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" android:gravity="center_horizontal"
+                android:paddingTop="5dp" android:paddingBottom="10dp">
+            <Button
+                    android:layout_height="35dp"
+                    android:layout_width="120dp"
+                    android:text="CALIBRATE"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:textSize="14sp"
+                    android:background="#fc6767"
+                    android:textColor="@color/White"
+                    android:fontFamily="sans-serif-light"
+                    android:id="@+id/buttonCalibration"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

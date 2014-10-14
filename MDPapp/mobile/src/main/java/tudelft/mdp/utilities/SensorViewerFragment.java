@@ -314,7 +314,7 @@ public class SensorViewerFragment extends Fragment implements
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
                 Log.i(LOGTAG, msgLoad);
                 if (mActionAutoComplete.getText().length() > 0){
-                    mFileCreator.saveData(msgLoad + mActionAutoComplete.getText().toString() +"\n");
+                    mFileCreator.saveData(msgLoad + "\n");
                 }
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:

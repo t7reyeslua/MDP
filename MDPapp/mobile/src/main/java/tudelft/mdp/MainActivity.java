@@ -55,6 +55,7 @@ import tudelft.mdp.deviceManager.DeviceManagerFragment;
 import tudelft.mdp.enums.NavigationDrawer;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
+import tudelft.mdp.locationTracker.LocationCalibrationFragment;
 import tudelft.mdp.locationTracker.LocationDetectionService;
 import tudelft.mdp.locationTracker.LocationFingerprintFragment;
 import tudelft.mdp.locationTracker.LocationHistoryFragment;
@@ -437,6 +438,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 fragment =  new LocationFingerprintFragment();
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragment, "id_locFingerprint")
+                        .commit();
+                break;
+            case NavigationDrawer.LOCATIONTCALIBRATION:
+                fragment =  new LocationCalibrationFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_locCalibration")
                         .commit();
                 break;
             case NavigationDrawer.DEVICEMANAGER:

@@ -1,0 +1,32 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              style="@style/card"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content">
+
+    <!-- You can popolate your elements with CardHeader#setupInnerViewElements() method -->
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="15dp"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_header"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:text="Header"
+                android:textColor="#878787"
+                />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

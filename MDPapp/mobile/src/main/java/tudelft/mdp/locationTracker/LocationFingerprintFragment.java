@@ -49,6 +49,10 @@ public class LocationFingerprintFragment extends Fragment {
     private CardView mCardView;
     private Card mCardFingerprint;
 
+    private ArrayList<Card> mCardsArrayList;
+    private CardArrayAdapter mCardArrayAdapter;
+    private CardListView mCardListView;
+
     private ProgressBar mProgressBar;
     private ToggleButton mToggleButton;
     private AutoCompleteTextView mPlaceAutoComplete;
@@ -80,10 +84,6 @@ public class LocationFingerprintFragment extends Fragment {
             "Home", "Office"
     };
 
-
-    private ArrayList<Card> mCardsArrayList;
-    private CardArrayAdapter mCardArrayAdapter;
-    private CardListView mCardListView;
 
 
     /**

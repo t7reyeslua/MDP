@@ -1,0 +1,68 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+
+            <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Master Device"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="15dp"
+                    android:textColor="@android:color/darker_gray"
+                    android:id="@+id/swMaster"
+                    android:checked="false"
+                    android:typeface="sans"
+                    android:layout_gravity="center_horizontal"
+                    android:enabled="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+                android:orientation="horizontal"
+                android:paddingBottom="5dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <ToggleButton
+                    android:layout_height="35dp"
+                    android:layout_width="120dp"
+                    android:textOn="STOP"
+                    android:textOff="START"
+                    android:textStyle="bold"
+                    android:id="@+id/toggleButton"
+                    android:background="#fc6767"
+                    android:textColor="@color/White"
+                    android:fontFamily="sans-serif-light"
+                    android:checked="false"
+                    android:layout_marginTop="0dp"
+                    android:layout_centerInParent="true"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="8dp"
+            android:id="@+id/progressBar"/>
+
+
+</LinearLayout>

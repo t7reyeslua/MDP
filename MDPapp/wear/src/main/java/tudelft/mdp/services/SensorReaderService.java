@@ -116,7 +116,9 @@ public class SensorReaderService extends Service implements
         isStarted = false;
         isConnected = false;
 
-        mSensorManager.unregisterListener(this);
+        if (mSensorManager != null) {
+            mSensorManager.unregisterListener(this);
+        }
 
         Log.i(LOGTAG, "Service Stopped.");
         Log.i(LOGTAG, "Unregistered Sensor Listener.");
@@ -348,7 +350,7 @@ public class SensorReaderService extends Service implements
 
     private void saveSnapshot(){
         String record = String.valueOf(++snapshotCounter) + "\t";
-        record += new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(System.currentTimeMillis()) + "\t";
+        record += new SimpleDateFormat("HHmmssSSS").format(System.currentTimeMillis()) + "\t";
 
         for(float value : mAccelerometer){
             record += String.format("%.2f", value) + "\t";

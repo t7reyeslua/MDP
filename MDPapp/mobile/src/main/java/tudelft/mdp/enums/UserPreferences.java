@@ -11,6 +11,11 @@ public class UserPreferences {
     public static final String USERMAIL = "USEREMAIL";
     public static final String USERPIC = "USERPIC";
 
+
+    public static final String CALIBRATED = "CALIBRATED";
+    public static final String CALIBRATION_M = "CALIBRATION_M";
+    public static final String CALIBRATION_B = "CALIBRATION_B";
+
     public static final String SCANSAMPLES = "SCANSAMPLES";
 
     public static int SCANWINDOW = 5;

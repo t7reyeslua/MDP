@@ -21,6 +21,7 @@
                     app:textWeight="light"
                     android:textSize="22sp"
                     android:layout_marginTop="10dp"
+                    android:text="Header"
                     android:textColor="#878787"
                     />
 
@@ -30,6 +31,7 @@
                     android:textColor="@android:color/darker_gray"
                     app:fontFamily="roboto"
                     app:textWeight="light"
+                    android:text="Subheader"
                     android:id="@+id/text_subtitle"
                     android:textSize="15sp"
                     />
