@@ -41,6 +41,7 @@ import tudelft.mdp.ui.CalibrationControlCard;
 import tudelft.mdp.ui.CalibrationCurrentValuesCard;
 import tudelft.mdp.ui.CalibrationExecuteCard;
 import tudelft.mdp.ui.CalibrationNetworksCard;
+import tudelft.mdp.utils.SLinearRegression;
 
 public class LocationCalibrationFragment extends Fragment implements ServiceConnection {
 
@@ -88,6 +89,9 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
     private boolean mRegressionDone = false;
     private float calibrationM;
     private float calibrationB;
+
+    private float regressionM = 1.0f;
+    private float regressionB = 0.0f;
 
     private int calibrationScans;
     private int calibrationScansCount;
@@ -386,16 +390,20 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
 
         // Use only filtered list
         aggregatedScanResults = mCardNetworks.getNetworks();
+        ArrayList<Float> data = new ArrayList<Float>();
+        for (NetworkInfoObject netowrk : aggregatedScanResults){
+            data.add(netowrk.getMean());
+        }
 
-        //TODO:Regression and calculate m/b values
+        // Regression and calculate m/b values
+        double [] regressionValues = SLinearRegression.SimpleLinearRegression(data);
+
+        regressionM = (float) regressionValues[0];
+        regressionB = (float) regressionValues[1];
+
 
         mRegressionDone = true;
-
-
-        Float m = 1.2f;
-        Float b = 0.345f;
-
-        refreshValuesCard("Regression Results", m ,b);
+        refreshValuesCard("Regression Results", regressionM ,regressionB);
 
         mCardViewValues.setVisibility(View.VISIBLE);
         if (!mSwitch.isChecked()){
@@ -407,11 +415,18 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
 
     private void executeCalibration(){
 
-        //TODO:Calibrate
+        // Calibrate
+        double masterM = Double.valueOf(mEditTextM.getText().toString());
+        double masterB = Double.valueOf(mEditTextB.getText().toString());
 
+        double [] calibrationValues = SLinearRegression.CalibratrionFactor(
+                masterM,
+                masterB,
+                (double) regressionM,
+                (double) regressionB);
 
-        Float m = 2.2f;
-        Float b = 3.345f;
+        Float m = (float) calibrationValues[0];
+        Float b = (float) calibrationValues[1];
 
         refreshValuesCard("Calibration Results", m ,b);
         saveCalibrationValues(true, m, b);
