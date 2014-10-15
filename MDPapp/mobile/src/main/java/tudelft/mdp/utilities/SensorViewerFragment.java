@@ -37,7 +37,7 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.R;
-import tudelft.mdp.Utils;
+import tudelft.mdp.utils.Utils;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;

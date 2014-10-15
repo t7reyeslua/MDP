@@ -1,4 +1,4 @@
-package tudelft.mdp;
+package tudelft.mdp.utils;
 
 
 import android.hardware.Sensor;

@@ -3,16 +3,24 @@ package tudelft.mdp.gcm;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Vibrator;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import android.os.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import tudelft.mdp.enums.MessagesProtocol;
+
 public class GcmIntentService extends IntentService {
+
+    public static final String LOGTAG = "MDP GcmIntentService";
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -31,7 +39,10 @@ public class GcmIntentService extends IntentService {
             if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 Logger.getLogger("GCM_RECEIVED").log(Level.INFO, extras.toString());
 
-                showToast(extras.getString("message"));
+                String message = extras.getString("message");
+
+                showToast(message);
+                handleMessage(message);
             }
         }
         GcmBroadcastReceiver.completeWakefulIntent(intent);
@@ -44,5 +55,50 @@ public class GcmIntentService extends IntentService {
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
+        vibrate();
     }
+
+    protected void vibrate() {
+        Vibrator v = (Vibrator) getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(500);
+    }
+
+    protected void handleMessage(String msg){
+        String[] parts = msg.split("\\|");
+        Integer msgType = Integer.valueOf(parts[0]);
+        String msgLoad = parts[1];
+
+        Intent messageIntent;
+        switch (msgType){
+            case MessagesProtocol.SENDGCM_CMD_LOCATION:
+                Log.i(LOGTAG, "CMD received from GCM: " + MessagesProtocol.COLLECTDATA_LOCATION);
+                // Broadcast message to interested parties
+                messageIntent = new Intent(MessagesProtocol.COLLECTDATA_LOCATION);
+                messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
+                break;
+            case MessagesProtocol.SENDGCM_CMD_MOTION:
+                Log.i(LOGTAG, "CMD received from GCM: " + MessagesProtocol.COLLECTDATA_MOTION);
+                // Broadcast message to interested parties
+                messageIntent = new Intent(MessagesProtocol.COLLECTDATA_MOTION);
+                messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
+                break;
+            case MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION:
+                Log.i(LOGTAG, "CMD received from GCM: " + MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+                // Broadcast message to interested parties
+                messageIntent = new Intent(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+                messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
+                break;
+            case MessagesProtocol.SENDGCM_MSG:
+                showToast(msgLoad);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+
 }

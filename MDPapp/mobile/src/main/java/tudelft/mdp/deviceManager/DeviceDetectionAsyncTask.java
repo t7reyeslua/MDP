@@ -17,6 +17,8 @@ import tudelft.mdp.backend.endpoints.deviceEndpoint.model.NfcRecord;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.DeviceLogEndpoint;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcLogRecord;
 import tudelft.mdp.enums.Constants;
+import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.gcm.GcmMessagingAsyncTask;
 
 /**
  * AsyncTask that is called after a NFC tag is detected
@@ -54,6 +56,11 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         try {
             NfcRecord mDeviceInfo = mDeviceEndpointService.getDevice(nfcTag).execute();
             Log.e(TAG, "Previously registered device: TRUE");
+
+            // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
+            new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
+                                                MessagesProtocol.COLLECTDATA_MOTIONLOCATION,
+                                                context);
 
             /* Tag has been previously registered. Now verify the last thing the user did with the device*/
             NfcLogRecord mUserDeviceStatus = mDeviceLogEndpointService.getLastUserLogOfDevice(nfcTag, user).execute();

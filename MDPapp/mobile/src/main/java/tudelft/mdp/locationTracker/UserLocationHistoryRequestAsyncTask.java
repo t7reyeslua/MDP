@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import tudelft.mdp.Utils;
+import tudelft.mdp.utils.Utils;
 import tudelft.mdp.backend.endpoints.locationLogEndpoint.LocationLogEndpoint;
 import tudelft.mdp.backend.endpoints.locationLogEndpoint.model.LocationLogRecord;
 import tudelft.mdp.enums.Constants;

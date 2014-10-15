@@ -594,7 +594,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         } catch (IntentFilter.MalformedMimeTypeException e) {
             throw new RuntimeException("Check your mime type.");
         }
-
         adapter.enableForegroundDispatch(activity, pendingIntent, filters, techList);
     }
 
@@ -614,7 +613,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
             finish();
             return;
-
         }
 
         if (!mNfcAdapter.isEnabled()) {
