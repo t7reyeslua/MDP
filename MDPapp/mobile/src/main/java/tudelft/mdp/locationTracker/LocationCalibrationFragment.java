@@ -31,11 +31,10 @@ import java.util.Comparator;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.prototypes.CardWithList;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.R;
-import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.Utils;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.ui.CalibrationControlCard;
 import tudelft.mdp.ui.CalibrationCurrentValuesCard;
@@ -134,7 +133,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
 
         getPreviousCalibrationValues();
         calibrationScans = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .getInt(UserPreferences.CALIBRATION_SCANS, 10);
+                .getInt(UserPreferences.CALIBRATION_SCANS, UserPreferences.CALIBRATION_NUM_SCANS);
 
         return rootView;
     }
@@ -341,7 +340,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         automaticUnbinding();
 
         sortArrayList(aggregatedScanResults);
-        calculateScansMean(aggregatedScanResults);
+        calculateScansMeanAndStd(aggregatedScanResults);
         applyCalibrationParams();
 
         mProgressBar.setIndeterminate(false);
@@ -357,12 +356,29 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
 
     }
 
-    private void calculateScansMean(ArrayList<NetworkInfoObject> scans){
+    private void calculateScansMeanAndStd(ArrayList<NetworkInfoObject> scans){
         for (NetworkInfoObject accumulatedScan : scans){
-               Float mean = (float) accumulatedScan.getRSSI() / (float) accumulatedScan.getCount();
-               accumulatedScan.setMean(mean);
+
+            ArrayList<Integer> trimmedList = alphaTrimmerFilter(accumulatedScan.getRSSIarray());
+            Double mean = Utils.getMean(trimmedList);
+            Double std = Utils.getStd(trimmedList);
+
+            accumulatedScan.setStd(std);
+            accumulatedScan.setMean(mean);
+            accumulatedScan.setCount(trimmedList.size());
         }
     }
+
+    private ArrayList<Integer> alphaTrimmerFilter(ArrayList<Integer> unfilteredList){
+        //Apply Alpha Trimmer
+        Collections.sort(unfilteredList);
+        int size = unfilteredList.size();
+        int  elementsToTrimm = (int) Math.floor(size * UserPreferences.ALPHA_TIRIMMER_COEFF);
+        ArrayList<Integer> filteredList = new ArrayList<Integer>(unfilteredList.subList(elementsToTrimm, size - elementsToTrimm ));
+
+        return filteredList;
+    }
+
 
     private void sortArrayList(ArrayList<NetworkInfoObject> unsortedList){
         //Sorting according to BSSID
@@ -375,11 +391,12 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         });
     }
 
+
     private void applyCalibrationParams(){
         //Apply calibration params if you are MASTER (already calibrated)
         if (isMaster){
             for (NetworkInfoObject network : aggregatedScanResults){
-                Float calibratedValue = calibrationM * network.getMean() + calibrationB;
+                Double calibratedValue = calibrationM * network.getMean() + calibrationB;
                 network.setMean(calibratedValue);
             }
             saveCalibrationValues(true, calibrationM, calibrationB);
@@ -390,7 +407,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
 
         // Use only filtered list
         aggregatedScanResults = mCardNetworks.getNetworks();
-        ArrayList<Float> data = new ArrayList<Float>();
+        ArrayList<Double> data = new ArrayList<Double>();
         for (NetworkInfoObject netowrk : aggregatedScanResults){
             data.add(netowrk.getMean());
         }
@@ -461,19 +478,22 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         NetworkInfoObject network1 =  new NetworkInfoObject(
                 "Mierdify",
                 "00:EE:43:FF:12",
-                75.2f,
+                75.2,
+                0.0,
                 35
         );
         NetworkInfoObject network2 =  new NetworkInfoObject(
                 "Eduroam",
                 "00:EE:43:FF:12",
-                85.2f,
+                85.2,
+                0.0,
                 25
         );
         NetworkInfoObject network3 =  new NetworkInfoObject(
                 "Wifi",
                 "00:EE:43:FF:12",
-                25.2f,
+                25.2,
+                0.0,
                 45
         );
 
@@ -506,12 +526,14 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
                     previouslySeen = true;
                     knownNetwork.setCount(knownNetwork.getCount() + 1);
                     knownNetwork.setRSSI(knownNetwork.getRSSI() + networkScan.getRSSI());
+                    knownNetwork.addRSSI(networkScan.getRSSI());
                     break;
                 }
             }
 
             // New network found. Add it.
             if (!previouslySeen){
+                networkScan.addRSSI(networkScan.getRSSI());
                 aggregatedScanResults.add(networkScan);
             }
         }

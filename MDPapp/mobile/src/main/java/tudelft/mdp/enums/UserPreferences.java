@@ -28,6 +28,9 @@ public class UserPreferences {
     public static final Integer YEAR = 2;
     public static final Integer ALLTIME = 3;
 
+    public static double ALPHA_TIRIMMER_COEFF = 0.2;
+    public static int CALIBRATION_NUM_SCANS = 10;
+
 
 
 }

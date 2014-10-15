@@ -2,6 +2,7 @@ package tudelft.mdp.locationTracker;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class NetworkInfoObject implements Serializable {
 
@@ -14,8 +15,10 @@ public class NetworkInfoObject implements Serializable {
     public Integer RSSI;
     public Integer count;
 
-    public Float mean;
-    public Float std;
+    public Double mean;
+    public Double std;
+
+    public ArrayList<Integer> RSSIarray = new ArrayList<Integer>();
 
     public NetworkInfoObject(){
     }
@@ -26,14 +29,29 @@ public class NetworkInfoObject implements Serializable {
         this.BSSID = BSSID;
         this.RSSI = RSSI;
         this.count = 1;
+        this.std = 0.0;
     }
 
-    public NetworkInfoObject(String SSID, String BSSID, Float mean,
+    public NetworkInfoObject(String SSID, String BSSID, Double mean, Double std,
             Integer count) {
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.mean = mean;
+        this.std = std;
         this.count = count;
+    }
+
+    public void addRSSI(Integer level){
+        RSSIarray.add(level);
+    }
+
+    public ArrayList<Integer> getRSSIarray() {
+        return RSSIarray;
+    }
+
+
+    public void setRSSIarray(ArrayList<Integer> RSSIarray) {
+        this.RSSIarray = RSSIarray;
     }
 
     public Integer getRSSI() {
@@ -44,11 +62,11 @@ public class NetworkInfoObject implements Serializable {
         this.RSSI = RSSI;
     }
 
-    public Float getStd() {
+    public Double getStd() {
         return std;
     }
 
-    public void setStd(Float std) {
+    public void setStd(Double std) {
         this.std = std;
     }
 
@@ -68,11 +86,11 @@ public class NetworkInfoObject implements Serializable {
         this.BSSID = BSSID;
     }
 
-    public Float getMean() {
+    public Double getMean() {
         return mean;
     }
 
-    public void setMean(Float mean) {
+    public void setMean(Double mean) {
         this.mean = mean;
     }
 

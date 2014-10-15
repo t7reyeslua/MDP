@@ -13,7 +13,7 @@ public class SLinearRegression {
 	 *
 	 * @return regression [m,b,R^2,err_m,err_b] y=mx+b R^2
 	 */
-	public static double[] SimpleLinearRegression(ArrayList<Float> data){
+	public static double[] SimpleLinearRegression(ArrayList<Double> data){
 	  double[] result=new double[5];
 	  
 	  SimpleRegression regression = new SimpleRegression();

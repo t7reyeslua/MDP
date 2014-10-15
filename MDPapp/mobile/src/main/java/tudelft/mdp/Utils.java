@@ -4,6 +4,7 @@ package tudelft.mdp;
 import android.hardware.Sensor;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import tudelft.mdp.enums.Constants;
@@ -92,6 +93,30 @@ public class Utils {
         }
 
         return minDate;
+    }
+
+    public static Double getStd(ArrayList<Integer> list){
+        Double std = 0.0;
+        if(!list.isEmpty()) {
+            Double mean = getMean(list);
+            for (Integer n : list) {
+                Double delta = n - mean;
+                std += (delta * delta);
+            }
+            std = Math.sqrt(std/list.size());
+        }
+        return std;
+    }
+
+    public static Double getMean(ArrayList<Integer> list){
+        Double sum = 0.0;
+        if(!list.isEmpty()) {
+            for (Integer n : list) {
+                sum += n;
+            }
+            return sum / list.size();
+        }
+        return sum;
     }
 
 }

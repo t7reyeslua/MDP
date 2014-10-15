@@ -24,7 +24,7 @@
                 app:textWeight="bold"
                 android:textSize="12sp"
                 android:id="@+id/twSSID" android:layout_gravity="center_vertical|right"
-                android:textAlignment="center" android:gravity="center|right"/>
+                android:textAlignment="center" android:gravity="center|top"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="vertical"
@@ -51,7 +51,7 @@
                 app:textWeight="light"
                 android:textSize="12sp"
                 android:text="CE:08:A5:02"
-                android:id="@+id/twBSSID" android:gravity="center_vertical|center_horizontal|left"/>
+                android:id="@+id/twBSSID" android:gravity="center_horizontal|left|top"/>
     </LinearLayout>
 
     <LinearLayout
@@ -67,7 +67,19 @@
                 app:textWeight="light"
                 android:textSize="12sp"
                 android:text="75.23 db"
-                android:id="@+id/twMean" android:gravity="center_vertical|right"
+                android:id="@+id/twMean" android:gravity="right|top"
+                android:paddingRight="2dp"/>
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="80"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="8sp"
+                android:text="2.25"
+                android:id="@+id/twStdDev" android:gravity="right|top"
                 android:paddingRight="2dp"/>
     </LinearLayout>
     <LinearLayout
@@ -82,7 +94,7 @@
                 app:fontFamily="roboto"
                 android:textSize="12sp"
                 android:text="50"
-                android:id="@+id/twCount" android:gravity="center_vertical|right"
+                android:id="@+id/twCount" android:gravity="right|top"
                 app:textWeight="bold"/>
     </LinearLayout>
 </LinearLayout>

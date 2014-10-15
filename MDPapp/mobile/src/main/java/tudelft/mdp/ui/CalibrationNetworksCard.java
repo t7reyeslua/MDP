@@ -53,13 +53,16 @@ public class CalibrationNetworksCard extends CardWithList {
         TextView twBssid = (TextView) convertView.findViewById(R.id.twBSSID);
         TextView twMean = (TextView) convertView.findViewById(R.id.twMean);
         TextView twCount = (TextView) convertView.findViewById(R.id.twCount);
+        TextView twStd = (TextView) convertView.findViewById(R.id.twStdDev);
 
         CalibrationNetworks networkObject = (CalibrationNetworks) object;
 
         String mean = String.format("%.2f", networkObject.getMean());
+        String std = String.format("%.2f", networkObject.getStd());
         twSsid.setText(networkObject.getSSID());
         twBssid.setText(networkObject.getBSSID());
         twMean.setText(mean + " db");
+        twStd.setText(std);
         twCount.setText(networkObject.getCount().toString() + "");
 
         return  convertView;
@@ -103,6 +106,7 @@ public class CalibrationNetworksCard extends CardWithList {
             network.setBSSID(singleNetwork.getBSSID());
             network.setSSID(singleNetwork.getSSID());
             network.setMean(singleNetwork.getMean());
+            network.setStd(singleNetwork.getStd());
             network.setCount(singleNetwork.getCount());
             mObjects.add(network);
         }
@@ -122,6 +126,7 @@ public class CalibrationNetworksCard extends CardWithList {
             network.setBSSID(singleNetwork.getBSSID());
             network.setSSID(singleNetwork.getSSID());
             network.setMean(singleNetwork.getMean());
+            network.setStd(singleNetwork.getStd());
             network.setCount(singleNetwork.getCount());
             objs.add(network);
         }
@@ -161,7 +166,8 @@ public class CalibrationNetworksCard extends CardWithList {
 
         public String SSID;
         public String BSSID;
-        public Float mean;
+        public Double mean;
+        public Double std;
         public Integer count;
 
         public CalibrationNetworks(Card parentCard){
@@ -169,13 +175,22 @@ public class CalibrationNetworksCard extends CardWithList {
             init();
         }
 
-        public CalibrationNetworks(Card parentCard, String SSID, String BSSID, Float mean,
+        public CalibrationNetworks(Card parentCard, String SSID, String BSSID, Double mean, Double std,
                 Integer count) {
             super(parentCard);
             this.SSID = SSID;
             this.BSSID = BSSID;
             this.mean = mean;
             this.count = count;
+            this.std = std;
+        }
+
+        public Double getStd() {
+            return std;
+        }
+
+        public void setStd(Double std) {
+            this.std = std;
         }
 
         public String getSSID() {
@@ -194,11 +209,11 @@ public class CalibrationNetworksCard extends CardWithList {
             this.BSSID = BSSID;
         }
 
-        public Float getMean() {
+        public Double getMean() {
             return mean;
         }
 
-        public void setMean(Float mean) {
+        public void setMean(Double mean) {
             this.mean = mean;
         }
 
