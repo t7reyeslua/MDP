@@ -306,7 +306,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         groupItem.add("Activity Monitor");
         groupItem.add("Location Tracker");
         groupItem.add("Device Manager");
-        groupItem.add("Utilities");
+        //groupItem.add("Utilities");
     }
 
 
@@ -327,6 +327,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
          */
         child = new ArrayList<String>();
         child.add("Activity History");
+        child.add("Sensors recorder");
         /*child.add("Training");
         child.add("Confusion Matrix");
         child.add("Timeline");*/
@@ -350,13 +351,13 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         /**
          * Add Data For Utilities
          */
-        child = new ArrayList<String>();
-        child.add("Sensors recorder");
+        //child = new ArrayList<String>();
+        //child.add("Sensors recorder");
         /*child.add("Network RSSI");
         child.add("Step Counter");
         child.add("Orientation");
         child.add("DB manager");*/
-        childItem.add(child);
+        //childItem.add(child);
     }
 
 
@@ -368,6 +369,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         } else {
             if (groupPosition == NavigationDrawer.ACTIVITYMONITOR){
                 switch (childPosition){
+                    case 0:
+                        position = NavigationDrawer.ACTIVITYHISTORY;
+                        break;
+                    case 1:
+                        position = NavigationDrawer.SENSORSVIEWER;
+                        break;
                     default:
                         break;
                 }
@@ -395,9 +402,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 }
             } else if (groupPosition == NavigationDrawer.UTILITIES){
                 switch (childPosition){
-                    case 0:
-                        position = NavigationDrawer.SENSORSVIEWER;
-                        break;
                     default:
                         break;
                 }
@@ -410,7 +414,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
     private void selectItem(int groupPosition, int childPosition) {
 
-        // Create a new fragment and specify the planet to show based on position
+        // Create a new fragment and specify the fragment to show based on position
         Fragment fragment;
         FragmentManager fragmentManager = getFragmentManager();
         Bundle args;

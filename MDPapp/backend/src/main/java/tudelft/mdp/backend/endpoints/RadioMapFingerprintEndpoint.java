@@ -20,6 +20,9 @@ import tudelft.mdp.backend.Constants;
 import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;
+import tudelft.mdp.backend.records.ApHistogramRecordWrapper;
+import tudelft.mdp.backend.records.LocationFingerprintRecord;
+import tudelft.mdp.backend.records.LocationFingerprintRecordWrapper;
 
 import static tudelft.mdp.backend.OfyService.ofy;
 
@@ -235,6 +238,26 @@ public class RadioMapFingerprintEndpoint {
         return currentApHistogramRecord;
     }
 
+    @ApiMethod(name = "increaseApHistogramRssiCountInZoneBulk", path = "increase_histogram_zone_bulk")
+    public void increaseApHistogramRssiCountInZoneBulk(ApHistogramRecordWrapper apHistogramRecordWrapper) {
+
+        LOG.info("Calling increaseApHistogramRssiCountInZoneBulk method."
+                + "Records to update: " + apHistogramRecordWrapper.getLocalHistogram().size());
+
+        for (ApHistogramRecord apHistogramRecord : apHistogramRecordWrapper.getLocalHistogram()){
+
+            LOG.info("Network to update: " +
+                    apHistogramRecord.getSsid()  + "|" +
+                    apHistogramRecord.getBssid() + "|" +
+                    apHistogramRecord.getRssi()  + "|" +
+                    apHistogramRecord.getCount());
+
+            increaseApHistogramRssiCountInZone(apHistogramRecord);
+
+        }
+    }
+
+
     @ApiMethod(name = "calculateZoneGaussians", path = "calculate_zone_gaussians")
     public ApGaussianRecord calculateZoneGaussians(
             @Named("place") String place,
@@ -407,6 +430,29 @@ public class RadioMapFingerprintEndpoint {
 
 
         return apHistogramOriginal;
+    }
+
+    @ApiMethod(name = "insertRawLocationFingerprintForZone", path = "insert_raw_location_fingerprint")
+    public LocationFingerprintRecord insertRawLocationFingerprintForZone(LocationFingerprintRecord locationFingerprintRecord) {
+        // Implement this function
+
+        LOG.info("Calling insertRawLocationFingerprintForZone method");
+
+        //Since our @Id field is a Long, Objectify will generate a unique value for us
+        //when we use put
+        ofy().save().entity(locationFingerprintRecord).now();
+        return locationFingerprintRecord;
+    }
+
+    @ApiMethod(name = "insertRawLocationFingerprintForZoneBulk", path = "insert_raw_location_fingerprint_bulk")
+    public void insertRawLocationFingerprintForZoneBulk(LocationFingerprintRecordWrapper locationFingerprintRecordWrapper) {
+        LOG.info("Calling insertRawLocationFingerprintForZoneBulk method."
+                + " \nRecords to insert: " + locationFingerprintRecordWrapper.getLocationFingerprintRecordWrapperArrayList().size());
+        for (LocationFingerprintRecord locationFingerprintRecord : locationFingerprintRecordWrapper.getLocationFingerprintRecordWrapperArrayList()){
+            //Since our @Id field is a Long, Objectify will generate a unique value for us
+            //when we use put
+            ofy().save().entity(locationFingerprintRecord).now();
+        }
     }
 
 

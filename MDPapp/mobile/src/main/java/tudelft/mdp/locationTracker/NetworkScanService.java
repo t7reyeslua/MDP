@@ -71,6 +71,7 @@ public class NetworkScanService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
+        getNewScanResults();
         return START_STICKY; // Run until explicitly stopped.
     }
 
@@ -91,6 +92,7 @@ public class NetworkScanService extends Service {
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
+            Log.i(LOGTAG, "Received new scan results.");
             scanResult.clear();
             for (ScanResult result : myWifiManager.getScanResults()){
                 NetworkInfoObject networkInfo = new NetworkInfoObject(

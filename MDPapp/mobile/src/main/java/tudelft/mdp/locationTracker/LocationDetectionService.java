@@ -2,9 +2,11 @@ package tudelft.mdp.locationTracker;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -13,7 +15,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -22,32 +26,39 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 
-public class LocationDetectionService extends Service {
+public class LocationDetectionService extends Service implements ServiceConnection {
 
-    private static final String LOGTAG = "LocationDetector";
+    private static final String LOGTAG = "LocationDetectionService";
     private static boolean isRunning = false;
+
+    private Messenger mServiceMessenger = null;
+    private boolean mIsBound;
+    private ServiceConnection mConnection = this;
 
     private final Messenger mMessenger = new Messenger(new IncomingMessageHandler());
     private List<Messenger> mClients = new ArrayList<Messenger>();
 
-    public static final int MSG_REGISTER_CLIENT = 6;
-    public static final int MSG_UNREGISTER_CLIENT = 7;
-    public static final int MSG_SCHEDULE_NEXT = 8;
+    public static final int MSG_REGISTER_CLIENT = 66;
+    public static final int MSG_UNREGISTER_CLIENT = 77;
+    public static final int MSG_SCHEDULE_NEXT = 88;
+    public static final int MSG_LOCATION_ACQUIRED = 99;
+    public static final int MSG_TEST = 20;
 
     public static final String ARG_TEST = "TEST";
     public static final String ARG_SCHEDULE_NEXT = "SCHEDULE NEXT";
+    public static final String ARG_LOCATION_ACQUIRED = "LOCATION ACQUIRED";
     public static final String ARG_SCANMODE = "SCAN MODE";
 
-    public static final int MSG_TEST = 20;
+    private String locationCalculated;
+    private boolean mLocationRequestedByBroadcast = false;
 
-
-    private WifiManager myWifiManager;
-
+    private Vibrator v;
     private SharedPreferences sharedPrefs;
     private int numScans;
-
+    private String deviceBroadcast = "";
 
     private Timer mTimer = new Timer();
 
@@ -65,27 +76,34 @@ public class LocationDetectionService extends Service {
     @Override
     public void onCreate() {
         Log.w(LOGTAG, "Location Service Created.");
-        sendMessageToUI(MSG_SCHEDULE_NEXT);
-        myWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        registerReceivers();
 
+        configureBroadcastReceivers();
 
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplication());
         numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
 
         isRunning = true;
+        automaticBinding();
         mTimer.scheduleAtFixedRate(new DetectLocationTick(), 0, UserPreferences.SCANWINDOW * 1000);
+
 
     }
 
     @Override
     public void onDestroy() {
-        isRunning = false;
-        this.unregisterReceiver(myScanResultsAvailable);
+        super.onDestroy();
 
-        Log.i(LOGTAG, "Unregistered Scan results receiver");
+        isRunning = false;
+        try {
+            if (mIsBound) {
+                automaticUnbinding();
+            }
+        } catch (Throwable t) {
+            Log.e(LOGTAG, "Failed to unbind from the service", t);
+        }
         Log.e(LOGTAG, "Location Service Destroyed.");
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -99,43 +117,150 @@ public class LocationDetectionService extends Service {
         Log.i(LOGTAG, "Location Service Started.");
     }
 
+    /**
+     * isRunning method
+     * @return boolean identifying if the service is running
+     */
     public static boolean isRunning()
     {
         return isRunning;
     }
 
+    //NetworkScanService Routines*************************************************************************
 
-    //Network Scan Routines*************************************************************************
+    /**
+     * Configures the Broadcast receivers that catch a new intent for detecting the current location.
+     */
+    private void configureBroadcastReceivers(){
+        IntentFilter messageFilter = new IntentFilter(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+        MessageReceiver messageReceiver = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver, messageFilter);
 
-    private BroadcastReceiver myScanResultsAvailable
-            = new BroadcastReceiver(){
-
-        @Override
-        public void onReceive(Context arg0, Intent arg1) {
-
-
-
-
-        }};
-
-    private void registerReceivers(){
-        this.registerReceiver(this.myScanResultsAvailable,
-                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        Log.i(LOGTAG, "Registered Scan Results receiver");
+        IntentFilter messageFilter2 = new IntentFilter(MessagesProtocol.COLLECTDATA_LOCATION);
+        MessageReceiver messageReceiver2 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver2, messageFilter2);
     }
 
-    private void getNewScanResults(){
-        Log.i(LOGTAG, "Request for new Scan Results. Starting scan...");
-        myWifiManager.startScan();
+    /* Service connection methods */
+
+    /**
+     * Required method for implementing ServiceConnection
+     * @param name name
+     */
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        Log.i(LOGTAG, "Sensor Service: onServiceDisconnected");
+        if (mServiceMessenger != null) {
+            mServiceMessenger = null;
+        }
     }
 
-    public void detectLocation(){
-        Log.i(LOGTAG, "Detect current location.");
-        getNewScanResults();
+    /**
+     * Required method for implementing ServiceConnection
+     * @param name name
+     * @param service service
+     */
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        Log.i(LOGTAG, "Sensor Service: onServiceConnected");
+        mServiceMessenger = new Messenger(service);
+        try {
+            Message msg = Message.obtain(null, NetworkScanService.MSG_REGISTER_CLIENT);
+            msg.replyTo = mMessenger;
+            mServiceMessenger.send(msg);
+        }
+        catch (RemoteException e) {
+            // In this case the service has crashed before we could even do anything with it
+        }
+    }
+
+    /**
+     * Automatically binds to the service. It starts it if required.
+     */
+    private void automaticBinding() {
+        if (NetworkScanService.isRunning()){
+            doBindService();
+        } else{
+            startServiceNetworkScan();
+            doBindService();
+        }
+        if (v != null) {
+            v.vibrate(500);
+        }
+    }
+
+    /**
+     * Automatically unbinds from the service
+     */
+    private void automaticUnbinding() {
+        stopServiceNetworkScan();
+    }
+
+    /**
+     * Start the service
+     */
+    public void startServiceNetworkScan(){
+        Log.i(LOGTAG, "Network Scan Service: START");
+        Intent intent = new Intent(getApplicationContext(), NetworkScanService.class);
+        getApplicationContext().startService(intent);
+    }
+
+    /**
+     * Unbinds from the service
+     */
+    public void stopServiceNetworkScan(){
+        Log.i(LOGTAG, "Network Scan Service: STOP");
+        doUnbindService();
+    }
+
+    /**
+     * Binds to the service
+     */
+    private void doBindService() {
+        getApplicationContext().bindService(new Intent(getApplicationContext(), NetworkScanService.class),
+                mConnection, 0);
+        mIsBound = true;
+    }
+
+    /**
+     * Unbinds from the service
+     */
+    private void doUnbindService() {
+        if (mIsBound) {
+
+            // If we have received the service, and hence registered with it, then now is the time to unregister.
+            if (mServiceMessenger != null) {
+                try {
+                    Message msg = Message.obtain(null, NetworkScanService.MSG_UNREGISTER_CLIENT);
+                    msg.replyTo = mMessenger;
+                    mServiceMessenger.send(msg);
+                } catch (RemoteException e) {
+                    // There is nothing special we need to do if the service has crashed.
+                }
+            }
+            // Detach our existing connection.
+            getApplicationContext().unbindService(mConnection);
+            mIsBound = false;
+        }
+    }
+
+    //Manage scan results ***********************************************************************
+
+    private void handleScanResult(ArrayList<NetworkInfoObject> recentScanResult){
+        //TODO manage scan result received
+
+
+
+
+
     }
 
     //UI interaction Routines***********************************************************************
 
+    /**
+     * SendMessageToUI
+     * @param id Identifies which type of message to be sent
+     */
     private void sendMessageToUI(int id) {
 
         Log.d(LOGTAG, "sendMessageToUI: " + id);
@@ -158,6 +283,12 @@ public class LocationDetectionService extends Service {
                         msg.setData(bundle);
                         messenger.send(msg);
                         break;
+                    case MSG_LOCATION_ACQUIRED:
+                        bundle.putString(ARG_LOCATION_ACQUIRED, locationCalculated);
+                        msg = Message.obtain(null, MSG_LOCATION_ACQUIRED);
+                        msg.setData(bundle);
+                        messenger.send(msg);
+                        break;
                     default:
                         break;
                 }
@@ -168,6 +299,7 @@ public class LocationDetectionService extends Service {
             }
         }
     }
+
 
 
     private class IncomingMessageHandler extends Handler { // Handler of incoming messages from clients.
@@ -181,6 +313,15 @@ public class LocationDetectionService extends Service {
                 case MSG_UNREGISTER_CLIENT:
                     mClients.remove(msg.replyTo);
                     break;
+                case NetworkScanService.MSG_SCANRESULT_READY:
+                    @SuppressWarnings("unchecked")
+                    ArrayList<NetworkInfoObject> scanResult =
+                            (ArrayList<NetworkInfoObject>) msg.getData()
+                                    .getSerializable(NetworkScanService.ARG_SCANRESULT);
+
+                    handleScanResult(scanResult);
+
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -192,11 +333,24 @@ public class LocationDetectionService extends Service {
         public void run() {
             Log.w(LOGTAG, "DetectLocationTick");
             try {
-                detectLocation();
+                // TODO
+                //detectLocation();
 
             } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
                 Log.e("DetectLocationTick", "DetectLocationTick Failed.", t);
             }
+        }
+    }
+
+
+    private class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            deviceBroadcast = intent.getStringExtra(MessagesProtocol.MESSAGE);
+            mLocationRequestedByBroadcast = true;
+
+            // TODO handle message received from broadcast
+            //handleMessage(msg);
         }
     }
 }

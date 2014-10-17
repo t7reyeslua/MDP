@@ -23,6 +23,27 @@ public class Utils {
         return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
     }
 
+    public static String getCurrentTimeOfDay(){
+        Calendar calendar = Calendar.getInstance();
+        java.util.Date now = calendar.getTime();
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+
+        Integer hourOfDay =  Integer.valueOf(new SimpleDateFormat("HH").format(currentTimestamp));
+
+        String timeOfDay;
+        if (hourOfDay < 6){
+            timeOfDay = "A";
+        } else if (hourOfDay < 12){
+            timeOfDay = "B";
+        } else if (hourOfDay < 18){
+            timeOfDay = "C";
+        } else {
+            timeOfDay = "D";
+        }
+
+        return timeOfDay;
+    }
+
     public static String getSensorName(int sensorType){
         String name = "Other";
 

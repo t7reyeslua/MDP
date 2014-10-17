@@ -59,7 +59,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
 
             // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
             new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
-                                                MessagesProtocol.COLLECTDATA_MOTIONLOCATION,
+                                                nfcTag,
                                                 context);
 
             /* Tag has been previously registered. Now verify the last thing the user did with the device*/

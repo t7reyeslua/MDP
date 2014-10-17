@@ -6,6 +6,7 @@ import com.googlecode.objectify.ObjectifyService;
 
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;
+import tudelft.mdp.backend.records.LocationFingerprintRecord;
 import tudelft.mdp.backend.records.LocationLogRecord;
 import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
@@ -25,6 +26,7 @@ public class OfyService {
         ObjectifyService.register(ApGaussianRecord.class);
         ObjectifyService.register(ApHistogramRecord.class);
         ObjectifyService.register(LocationLogRecord.class);
+        ObjectifyService.register(LocationFingerprintRecord.class);
     }
 
     public static Objectify ofy() {

@@ -19,7 +19,7 @@ public class UserPreferences {
 
     public static final String SCANSAMPLES = "SCANSAMPLES";
 
-    public static int SCANWINDOW = 5;
+    public static int SCANWINDOW = 30;
     public static int FINGERPRINT_SAMPLES = 50;
 
     public static final Integer TODAY = 0;

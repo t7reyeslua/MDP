@@ -14,4 +14,5 @@ public class Constants {
 
     public static String DIRECTORY_APP = "MDP";
     public static String DIRECTORY_SENSORS = "SENSORS";
+    public static String CALIBRATED_DEVICE = "CALIBRATED_DEVICE";
 }

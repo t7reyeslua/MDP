@@ -21,6 +21,7 @@ public class Utils {
         return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
     }
 
+
     public static Double getStd(ArrayList<ApHistogramRecord> list){
         Double std = 0.0;
         if(!list.isEmpty()) {
