@@ -27,12 +27,8 @@ public class ApGaussianRecord {
 
     private Double std;
 
-
     @Index
     private Double mean;
-
-    @Index
-    private String device;
 
 
     public ApGaussianRecord() {
@@ -44,14 +40,6 @@ public class ApGaussianRecord {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getDevice() {
-        return device;
-    }
-
-    public void setDevice(String device) {
-        this.device = device;
     }
 
     public String getBssid() {

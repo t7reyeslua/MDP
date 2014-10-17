@@ -275,7 +275,6 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         newNetworkScanned.setBssid(networkInfo.getBSSID());
         newNetworkScanned.setRssi(networkInfo.getRSSI());
         newNetworkScanned.setCount(1);
-        newNetworkScanned.setDevice(Constants.CALIBRATED_DEVICE);
         newNetworkScanned.setPlace(mPlaceAutoComplete.getText().toString().toLowerCase());
         newNetworkScanned.setZone(mZoneAutoComplete.getText().toString().toLowerCase());
 

@@ -42,26 +42,15 @@ public class RadioMapFingerprintEndpoint {
 
     @ApiMethod(name = "listApGaussiansInPlace", path = "list_gaussians_place")
     public CollectionResponse<ApGaussianRecord> listApGaussiansInPlace(
-            @Named("place") String place,
-            @Named("device") String device) throws NotFoundException {
+            @Named("place") String place) throws NotFoundException {
 
         LOG.info("Calling listApGaussiansInPlace method");
 
-        List<ApGaussianRecord> records;
-        if (device == null) {
-            records = ofy().load().type(ApGaussianRecord.class)
-                    .filter("place", place)
-                    .order("zone")
-                    .order("mean")
-                    .list();
-        } else {
-            records = ofy().load().type(ApGaussianRecord.class)
-                    .filter("place", place)
-                    .filter("device", device)
-                    .order("zone")
-                    .order("mean")
-                    .list();
-        }
+        List<ApGaussianRecord> records = ofy().load().type(ApGaussianRecord.class)
+                .filter("place", place)
+                .order("zone")
+                .order("mean")
+                .list();
 
         if(records == null) {
             throw new NotFoundException("There are no records found with these criteria");
@@ -74,26 +63,15 @@ public class RadioMapFingerprintEndpoint {
     @ApiMethod(name = "listGaussiansInZone", path = "list_gaussians_zone")
     public CollectionResponse<ApGaussianRecord> listGaussiansInZone(
             @Named("place") String place,
-            @Named("zone") String zone,
-            @Named("device") String device) throws NotFoundException {
+            @Named("zone") String zone) throws NotFoundException {
 
         LOG.info("Calling listGaussiansInZone method");
 
-        List<ApGaussianRecord> records;
-        if (device == null) {
-            records = ofy().load().type(ApGaussianRecord.class)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .order("mean")
-                    .list();
-        } else {
-            records = ofy().load().type(ApGaussianRecord.class)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .filter("device", device)
-                    .order("mean")
-                    .list();
-        }
+        List<ApGaussianRecord> records = ofy().load().type(ApGaussianRecord.class)
+                .filter("place", place)
+                .filter("zone", zone)
+                .order("mean")
+                .list();
 
         if(records == null) {
             throw new NotFoundException("There are no records found with these criteria");
@@ -107,28 +85,16 @@ public class RadioMapFingerprintEndpoint {
     public CollectionResponse<ApGaussianRecord> listAPGaussianInZone(
             @Named("bssid") String bssid,
             @Named("place") String place,
-            @Named("zone") String zone,
-            @Named("device") String device) {
+            @Named("zone") String zone) {
 
         LOG.info("Calling listAPGaussianInZone method");
 
-        List<ApGaussianRecord> records;
-        if (device == null) {
-            records = ofy().load().type(ApGaussianRecord.class)
-                    .filter("bssid", bssid)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .order("mean")
-                    .list();
-        } else {
-            records = ofy().load().type(ApGaussianRecord.class)
-                    .filter("bssid", bssid)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .filter("device", device)
-                    .order("mean")
-                    .list();
-        }
+        List<ApGaussianRecord> records= ofy().load().type(ApGaussianRecord.class)
+                .filter("bssid", bssid)
+                .filter("place", place)
+                .filter("zone", zone)
+                .order("mean")
+                .list();
 
         if(records == null) {
             return null;
@@ -141,28 +107,16 @@ public class RadioMapFingerprintEndpoint {
     @ApiMethod(name = "listHistogramInZone", path = "list_histograms_zone")
      public CollectionResponse<ApHistogramRecord> listHistogramInZone(
             @Named("place") String place,
-            @Named("zone") String zone,
-            @Named("device") String device) throws NotFoundException {
+            @Named("zone") String zone) throws NotFoundException {
 
         LOG.info("Calling listHistogramInZone method");
 
-        List<ApHistogramRecord> records = null;
-        if (device == null) {
-            records = ofy().load().type(ApHistogramRecord.class)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .order("zone")
-                    .order("rssi")
-                    .list();
-        } else {
-            records = ofy().load().type(ApHistogramRecord.class)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .filter("device", device)
-                    .order("zone")
-                    .order("rssi")
-                    .list();
-        }
+        List<ApHistogramRecord> records = ofy().load().type(ApHistogramRecord.class)
+                .filter("place", place)
+                .filter("zone", zone)
+                .order("zone")
+                .order("rssi")
+                .list();
 
         if(records == null) {
             throw new NotFoundException("There are no records found with these criteria");
@@ -176,32 +130,19 @@ public class RadioMapFingerprintEndpoint {
             @Named("bssid") String bssid,
             @Named("place") String place,
             @Named("zone") String zone,
-            @Named("rssi") Integer rssi,
-            @Named("device") String device) {
+            @Named("rssi") Integer rssi) {
 
         LOG.info("Calling getApHistogramInZone method");
 
         ApHistogramRecord result = null;
 
-        List<ApHistogramRecord> records;
-        if (device == null) {
-            records = ofy().load().type(ApHistogramRecord.class)
-                    .filter("bssid", bssid)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .filter("rssi", rssi)
-                    .order("zone")
-                    .list();
-        } else {
-            records = ofy().load().type(ApHistogramRecord.class)
-                    .filter("bssid", bssid)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .filter("device", device)
-                    .filter("rssi", rssi)
-                    .order("zone")
-                    .list();
-        }
+        List<ApHistogramRecord> records = ofy().load().type(ApHistogramRecord.class)
+                .filter("bssid", bssid)
+                .filter("place", place)
+                .filter("zone", zone)
+                .filter("rssi", rssi)
+                .order("zone")
+                .list();
 
         if (records.size() > 0) {
             result = records.get(records.size() - 1);
@@ -220,8 +161,7 @@ public class RadioMapFingerprintEndpoint {
                 apHistogramRecord.getBssid(),
                 apHistogramRecord.getPlace(),
                 apHistogramRecord.getZone(),
-                apHistogramRecord.getRssi(),
-                apHistogramRecord.getDevice()
+                apHistogramRecord.getRssi()
         );
 
         if (currentApHistogramRecord != null) {
@@ -261,29 +201,18 @@ public class RadioMapFingerprintEndpoint {
     @ApiMethod(name = "calculateZoneGaussians", path = "calculate_zone_gaussians")
     public ApGaussianRecord calculateZoneGaussians(
             @Named("place") String place,
-            @Named("zone") String zone,
-            @Named("device") String device) throws NotFoundException {
+            @Named("zone") String zone) throws NotFoundException {
 
         LOG.info("Calling calculateZoneGaussians method");
 
         //Request the histogram of all APs in this zone
-        List<ApHistogramRecord> records = null;
-        if (device == null) {
-            records = ofy().load().type(ApHistogramRecord.class)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .order("zone")
-                    .order("rssi")
-                    .list();
-        } else {
-            records = ofy().load().type(ApHistogramRecord.class)
-                    .filter("place", place)
-                    .filter("zone", zone)
-                    .filter("device", device)
-                    .order("zone")
-                    .order("rssi")
-                    .list();
-        }
+        List<ApHistogramRecord> records = ofy().load().type(ApHistogramRecord.class)
+                .filter("place", place)
+                .filter("zone", zone)
+                .order("zone")
+                .order("rssi")
+                .list();
+
         CollectionResponse<ApHistogramRecord> recordCollectionResponse =  CollectionResponse.<ApHistogramRecord>builder().setItems(records).build();
 
         ArrayList<ApHistogramRecord> zoneHistograms =
@@ -331,7 +260,6 @@ public class RadioMapFingerprintEndpoint {
             apGaussian.setMean(Utils.getMean(apHistogramTrimmed));
             apGaussian.setZone(zone);
             apGaussian.setPlace(place);
-            apGaussian.setDevice(device);
             apGaussian.setId(null);
 
             apGaussians.add(apGaussian);
@@ -372,8 +300,7 @@ public class RadioMapFingerprintEndpoint {
         ArrayList<ApGaussianRecord> records = new ArrayList<ApGaussianRecord>(listAPGaussianInZone(
                 apGaussianRecord.getBssid(),
                 apGaussianRecord.getPlace(),
-                apGaussianRecord.getZone(),
-                apGaussianRecord.getDevice()).getItems());
+                apGaussianRecord.getZone()).getItems());
 
         if (records.size() > 0){
             return records.get(0);

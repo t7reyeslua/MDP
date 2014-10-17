@@ -31,8 +31,6 @@ public class ApHistogramRecord {
 
     private Integer count;
 
-    @Index
-    private String device;
 
     public ApHistogramRecord() {
     }
@@ -45,13 +43,6 @@ public class ApHistogramRecord {
         this.id = id;
     }
 
-    public String getDevice() {
-        return device;
-    }
-
-    public void setDevice(String device) {
-        this.device = device;
-    }
 
     public String getBssid() {
         return bssid;
