@@ -26,9 +26,9 @@ public class MainTest {
 		
 		//testmonitor();
 		//testMove();
-//		testFurier();
+		//	testFurier();
 		//testCompass();
-		//testfeatures();
+		testfeatures();
 
 		
 		
