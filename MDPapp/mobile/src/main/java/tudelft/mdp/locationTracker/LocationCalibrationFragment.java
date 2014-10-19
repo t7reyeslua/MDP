@@ -373,7 +373,11 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         //Apply Alpha Trimmer
         Collections.sort(unfilteredList);
         int size = unfilteredList.size();
-        int  elementsToTrimm = (int) Math.floor(size * UserPreferences.ALPHA_TRIMMER_COEFF_VALUE);
+
+        //int  elementsToTrimm = (int) Math.floor(size * UserPreferences.ALPHA_TRIMMER_COEFF_VALUE);
+        double alphaCoeff = Double.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.ALPHA_TRIMMER_COEFFICIENT, "0.2"));
+        int  elementsToTrimm = (int) Math.floor(size * alphaCoeff);
         ArrayList<Integer> filteredList = new ArrayList<Integer>(unfilteredList.subList(elementsToTrimm, size - elementsToTrimm ));
 
         return filteredList;

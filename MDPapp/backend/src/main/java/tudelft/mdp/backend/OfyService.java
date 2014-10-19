@@ -6,11 +6,15 @@ import com.googlecode.objectify.ObjectifyService;
 
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;
+import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecord;
+import tudelft.mdp.backend.records.LocationFingerprintRecordWrapper;
 import tudelft.mdp.backend.records.LocationLogRecord;
 import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
 import tudelft.mdp.backend.records.RegistrationRecord;
+import tudelft.mdp.backend.records.SensorFingerprintRecord;
+import tudelft.mdp.backend.records.SensorFingerprintRecordWrapper;
 
 /**
  * Objectify service wrapper so we can statically register our persistence classes
@@ -27,6 +31,7 @@ public class OfyService {
         ObjectifyService.register(ApHistogramRecord.class);
         ObjectifyService.register(LocationLogRecord.class);
         ObjectifyService.register(LocationFingerprintRecord.class);
+        ObjectifyService.register(DeviceMotionLocationRecord.class);
     }
 
     public static Objectify ofy() {

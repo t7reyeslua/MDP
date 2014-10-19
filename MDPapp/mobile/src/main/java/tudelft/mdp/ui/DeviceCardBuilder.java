@@ -2,20 +2,13 @@ package tudelft.mdp.ui;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
-import android.view.View;
-import android.widget.Toast;
 
 import java.text.DecimalFormat;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import tudelft.mdp.deviceManager.DeviceManagerFragment;
-import tudelft.mdp.deviceManager.DeviceUsageByUserRequestAsyncTask;
+import tudelft.mdp.deviceManager.RequestDeviceUsageByUserAsyncTask;
 import tudelft.mdp.enums.UserPreferences;
-import tudelft.mdp.ui.DeviceCard;
-import tudelft.mdp.ui.DeviceCardExpand;
-import tudelft.mdp.ui.DeviceCardHeader;
 
 /**
  * Class that wraps the functionality to build a Device UI card
@@ -120,7 +113,8 @@ public class DeviceCardBuilder {
             @Override
             public void onExpandEnd(Card card) {
                 //Toast.makeText(mContext, mUsername + " clicked on " + mDeviceTagId, Toast.LENGTH_SHORT).show();
-                DeviceUsageByUserRequestAsyncTask deviceUsageByUserRequestAsyncTask = new DeviceUsageByUserRequestAsyncTask();
+                RequestDeviceUsageByUserAsyncTask
+                        deviceUsageByUserRequestAsyncTask = new RequestDeviceUsageByUserAsyncTask();
                 deviceUsageByUserRequestAsyncTask.delegate = mDeviceManagerFragment;
                 deviceUsageByUserRequestAsyncTask.execute(mDeviceTagId, mUsername);
             }

@@ -27,7 +27,7 @@ import tudelft.mdp.ui.DeviceCardBuilder;
 
 public class DeviceManagerFragment extends Fragment implements
         DeviceListRequestAsyncTask.RequestDeviceListAsyncResponse,
-        DeviceUsageByUserRequestAsyncTask.RequestDeviceUsageByUserAsyncResponse{
+        RequestDeviceUsageByUserAsyncTask.RequestDeviceUsageByUserAsyncResponse{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

@@ -31,7 +31,7 @@ import tudelft.mdp.ui.UserHistoryCard;
  *
  */
 public class LocationHistoryFragment extends Fragment implements
-    UserLocationHistoryRequestAsyncTask.RequestUserLocationHistoryAsyncResponse{
+    RequestUserLocationHistoryAsyncTask.RequestUserLocationHistoryAsyncResponse{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -127,7 +127,8 @@ public class LocationHistoryFragment extends Fragment implements
         if (!requestInProcess) {
             this.pd = ProgressDialog.show(rootView.getContext(), "Working...", "Getting user location history...", true, false);
 
-            UserLocationHistoryRequestAsyncTask userLocationHistoryListAsyncTask = new UserLocationHistoryRequestAsyncTask();
+            RequestUserLocationHistoryAsyncTask
+                    userLocationHistoryListAsyncTask = new RequestUserLocationHistoryAsyncTask();
             userLocationHistoryListAsyncTask.delegate = this;
             userLocationHistoryListAsyncTask.execute(rootView.getContext());
         }

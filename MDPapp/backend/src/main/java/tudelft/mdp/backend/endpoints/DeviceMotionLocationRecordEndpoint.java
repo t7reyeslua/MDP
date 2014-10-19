@@ -1,0 +1,482 @@
+package tudelft.mdp.backend.endpoints;
+
+import com.google.api.server.spi.config.Api;
+import com.google.api.server.spi.config.ApiMethod;
+import com.google.api.server.spi.config.ApiNamespace;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.inject.Named;
+
+import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
+import tudelft.mdp.backend.records.LocationFingerprintRecord;
+import tudelft.mdp.backend.records.LocationFingerprintRecordWrapper;
+import tudelft.mdp.backend.records.SensorFingerprintRecord;
+import tudelft.mdp.backend.records.SensorFingerprintRecordWrapper;
+
+import static tudelft.mdp.backend.OfyService.ofy;
+
+/** An endpoint class we are exposing */
+@Api(name = "deviceMotionLocationRecordEndpoint",
+        description = "An API to manage the records containing location and motion info related to a specific device",
+        version = "v1",
+        namespace = @ApiNamespace(ownerDomain = "endpoints.backend.mdp.tudelft",
+        ownerName = "endpoints.backend.mdp.tudelft",
+        packagePath=""))
+public class DeviceMotionLocationRecordEndpoint {
+
+    // Make sure to add this endpoint to your web.xml file if this is a web application.
+
+    private static final Logger LOG = Logger.getLogger(DeviceMotionLocationRecordEndpoint.class.getName());
+
+    /**
+     * This method gets the <code>DeviceMotionLocationRecord</code> object associated with the specified <code>id</code>.
+     * @param id The id of the object to be returned.
+     * @return The <code>DeviceMotionLocationRecord</code> associated with <code>id</code>.
+     */
+    @ApiMethod(name = "getDeviceMotionLocationRecord")
+    public DeviceMotionLocationRecord getDeviceMotionLocationRecord(@Named("id") Long id) {
+        // Implement this function
+
+        LOG.info("Calling getDeviceMotionLocationRecord method");
+        return null;
+    }
+
+    /**
+     * This inserts a new <code>DeviceMotionLocationRecord</code> object.
+     * @param deviceMotionLocationRecord The object to be added.
+     * @return The object to be added.
+     */
+    @ApiMethod(name = "insertDeviceMotionLocationRecordTest")
+    public DeviceMotionLocationRecord insertDeviceMotionLocationRecordTest(DeviceMotionLocationRecord deviceMotionLocationRecord) {
+        // Implement this function
+
+        LOG.info("Calling insertDeviceMotionLocationRecord method");
+
+        deviceMotionLocationRecord.setDeviceId("testID");
+        deviceMotionLocationRecord.setDeviceName("testName");
+
+        ArrayList<String> sensorValues = new ArrayList<String>();
+        ArrayList<String> networkValues = new ArrayList<String>();
+
+        String sensorRecord1 = "1.001,0.001,0.001|0.001,0.001,0.002|0.001,0.001,0.003|0.001,0.001,0.004|0.001,0.001,0.005|0.001,0.001,0.001,0.006\n";
+        String sensorRecord2 = "2.001,0.001,0.001|0.001,0.001,0.002|0.001,0.001,0.003|0.001,0.001,0.004|0.001,0.001,0.005|0.001,0.001,0.001,0.006\n";
+        String sensorRecord3 = "3.001,0.001,0.001|0.001,0.001,0.002|0.001,0.001,0.003|0.001,0.001,0.004|0.001,0.001,0.005|0.001,0.001,0.001,0.006\n";
+        String sensorRecord4 = "4.001,0.001,0.001|0.001,0.001,0.002|0.001,0.001,0.003|0.001,0.001,0.004|0.001,0.001,0.005|0.001,0.001,0.001,0.006\n";
+        String sensorRecord5 = "5.001,0.001,0.001|0.001,0.001,0.002|0.001,0.001,0.003|0.001,0.001,0.004|0.001,0.001,0.005|0.001,0.001,0.001,0.006\n";
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+        sensorValues.add(sensorRecord1);
+        sensorValues.add(sensorRecord2);
+        sensorValues.add(sensorRecord3);
+        sensorValues.add(sensorRecord4);
+        sensorValues.add(sensorRecord5);
+
+        String networkRecord1 = "01:AA:BB:CC:DD:EE,-10|00:AA:BB:CC:DD:EE,-20|00:AA:BB:CC:DD:EE,-30|00:AA:BB:CC:DD:EE,-40|00:AA:BB:CC:DD:EE,-50\n";
+        String networkRecord2 = "02:AA:BB:CC:DD:EE,-10|00:AA:BB:CC:DD:EE,-30|00:AA:BB:CC:DD:EE,-40|00:AA:BB:CC:DD:EE,-50\n";
+        String networkRecord3 = "03:AA:BB:CC:DD:EE,-10|00:AA:BB:CC:DD:EE,-40|00:AA:BB:CC:DD:EE,-50\n";
+        networkValues.add(networkRecord1);
+        networkValues.add(networkRecord2);
+        networkValues.add(networkRecord3);
+
+
+
+        deviceMotionLocationRecord.setSensorValues(sensorValues);
+        deviceMotionLocationRecord.setNetworkValues(networkValues);
+        ofy().save().entity(deviceMotionLocationRecord).now();
+        return deviceMotionLocationRecord;
+    }
+}

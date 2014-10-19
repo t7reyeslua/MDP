@@ -799,14 +799,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
     }
 
     public void startServiceLocation(){
-
         Log.i(TAG, "Location Service: START");
         Intent intent = new Intent(this, LocationDetectionService.class);
         this.startService(intent);
     }
 
     public void stopServiceLocation(){
-
         Log.i(TAG, "Location Service: STOP");
         this.stopService(new Intent(this, LocationDetectionService.class));
     }

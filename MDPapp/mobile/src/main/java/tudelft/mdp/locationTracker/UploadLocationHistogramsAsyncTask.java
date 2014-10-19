@@ -59,7 +59,7 @@ public class UploadLocationHistogramsAsyncTask extends AsyncTask<Object, Void, B
     protected void onPostExecute(Boolean result) {
         if (result) {
             Toast.makeText(context, "Histograms uploaded successfully", Toast.LENGTH_SHORT).show();
-            new CalculateGaussiansRequestAsyncTask().execute(context, place, zone);
+            new RequestCalculateGaussiansAsyncTask().execute(context, place, zone);
         } else {
             Toast.makeText(context, "Ooops! Some problem occurred while uploading the histograms.", Toast.LENGTH_SHORT).show();
         }

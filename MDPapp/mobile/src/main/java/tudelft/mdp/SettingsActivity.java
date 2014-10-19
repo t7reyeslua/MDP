@@ -2,6 +2,7 @@ package tudelft.mdp;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -18,6 +19,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
@@ -26,7 +28,9 @@ import java.util.List;
 
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.UserPreferences;
+import tudelft.mdp.locationTracker.LocationDetectionService;
 import tudelft.mdp.ui.NumberPickerDialogPreference;
+
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -47,6 +51,7 @@ public class SettingsActivity extends PreferenceActivity {
      * shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    private static final String TAG = "MDP-SettingsScreen";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,7 +255,9 @@ public class SettingsActivity extends PreferenceActivity {
                             .getDefaultSharedPreferences(preference.getContext())
                             .getString(preference.getKey(), ""));
         }
+
     }
+
 
     /**
      * This fragment shows general preferences only. It is used when the

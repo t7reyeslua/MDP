@@ -26,10 +26,13 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 
-public class LocationDetectionService extends Service implements ServiceConnection {
+public class LocationDetectionService extends Service implements
+        ServiceConnection,
+        RequestGaussiansAsyncTask.RequestGaussiansAsyncResponse{
 
     private static final String LOGTAG = "LocationDetectionService";
     private static boolean isRunning = false;
@@ -53,14 +56,17 @@ public class LocationDetectionService extends Service implements ServiceConnecti
     public static final String ARG_SCANMODE = "SCAN MODE";
 
     private String locationCalculated;
+    private boolean mLocationRequestedByTimeTick = false;
     private boolean mLocationRequestedByBroadcast = false;
 
     private Vibrator v;
     private SharedPreferences sharedPrefs;
     private int numScans;
+    private int numScansCount;
     private String deviceBroadcast = "";
 
     private Timer mTimer = new Timer();
+    private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
 
 
     public LocationDetectionService() {
@@ -84,7 +90,11 @@ public class LocationDetectionService extends Service implements ServiceConnecti
 
         isRunning = true;
         automaticBinding();
-        mTimer.scheduleAtFixedRate(new DetectLocationTick(), 0, UserPreferences.SCANWINDOW * 1000);
+
+        int scanWindow = sharedPrefs.getInt(UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS, 30);
+        mTimer.scheduleAtFixedRate(new DetectLocationTick(), 0, scanWindow * 1000);
+
+        updateGaussians();
 
 
     }
@@ -253,11 +263,21 @@ public class LocationDetectionService extends Service implements ServiceConnecti
 
     private void handleScanResult(ArrayList<NetworkInfoObject> recentScanResult){
         //TODO manage scan result received
+        if (numScansCount > numScans){
 
+            numScansCount++;
+        } else {
 
+        }
 
+    }
 
+    private void detectLocation(){
+        //TODO: Initialize all required things for detection routine
 
+        mLocationRequestedByTimeTick = true;
+        numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
+        numScansCount = 0;
     }
 
     //UI interaction Routines***********************************************************************
@@ -338,8 +358,7 @@ public class LocationDetectionService extends Service implements ServiceConnecti
         public void run() {
             Log.w(LOGTAG, "DetectLocationTick");
             try {
-                // TODO
-                //detectLocation();
+                detectLocation();
 
             } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
                 Log.e("DetectLocationTick", "DetectLocationTick Failed.", t);
@@ -349,9 +368,14 @@ public class LocationDetectionService extends Service implements ServiceConnecti
 
 
     private void updateGaussians(){
-        //TODO Update gaussians
+        RequestGaussiansAsyncTask requestGaussiansAsyncTask = new RequestGaussiansAsyncTask();
+        requestGaussiansAsyncTask.delegate = this;
+        requestGaussiansAsyncTask.execute();
     }
 
+    public void processFinishRequestGaussians(List<ApGaussianRecord> outputList){
+        mGaussianRecords = new ArrayList<ApGaussianRecord>(outputList);
+    }
 
 
 
@@ -370,8 +394,6 @@ public class LocationDetectionService extends Service implements ServiceConnecti
                 deviceBroadcast = command;
             }
 
-            // TODO handle message received from broadcast
-            //handleMessage(msg);
         }
     }
 }

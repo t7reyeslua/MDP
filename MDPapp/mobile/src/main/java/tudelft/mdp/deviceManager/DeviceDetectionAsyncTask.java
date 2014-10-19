@@ -5,8 +5,10 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -67,6 +69,16 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
                 new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
                         nfcTag,
                         context);
+            } else {
+                //training phase is ON. Then record the motion and location for the next time window
+
+                Log.i(TAG, "CMD: " + MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+                // Broadcast message to interested parties
+                Intent messageIntent = new Intent(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+                messageIntent.putExtra(MessagesProtocol.MESSAGE, nfcTag + "|" + mDeviceInfo.getType());
+                LocalBroadcastManager.getInstance(context).sendBroadcast(messageIntent);
+
+
             }
 
             /* Tag has been previously registered. Now verify the last thing the user did with the device*/
