@@ -12,8 +12,8 @@ clearvars
     % anything else than Sets, the data should be  '%d %d %f %f %f' or else
     % to be changed in line 65
 
-    setspath  = 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Datasets\SS_AA';
-    resultspath = 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Results.txt';
+    setspath  = 'C:\Users\LG\Dropbox\SENSORS\BrushT1';
+    resultspath = 'C:\Users\LG\Dropbox\SENSORS\BrushResults.txt';
 
     %Precision of the results Int and decimal point and FFT
     pNum='4';
@@ -22,7 +22,7 @@ clearvars
 
     % Sample window
     LowerLimit=1; %Min 1
-    WindowSize=500;
+    WindowSize=200;
     
     %Choose Features 1 is Enable
     ftTDomain=1;        %mean 3x, std dev 3x, variance 3,x & Magnitudes of this values
@@ -62,7 +62,8 @@ for k = 1:nFiles
 FileToRead=fullfile(setspath,filename);
 
 fileID = fopen(FileToRead,'r');
-formatSpec = '%d %d %f %f %f';
+
+formatSpec = strcat('%d %d %f %f %f');
 sizeM = [5 Inf];
 
 % Matrix_R, contains the dataset.
@@ -80,7 +81,9 @@ if(size(Matrix_R)<UpperLimit)
 end
 
 Sample = zeros(UpperLimit-LowerLimit,4);
+ 
 for i=(1:UpperLimit-LowerLimit)
+    
     Sample(i,1) = Matrix_R(LowerLimit+i,2);
     Sample(i,2) = Matrix_R(LowerLimit+i,3);
     Sample(i,3) = Matrix_R(LowerLimit+i,4);
