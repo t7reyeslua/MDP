@@ -153,7 +153,9 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         // Handle your other action bar items...
         switch (item.getItemId()) {
             case R.id.action_settings:
-                return false;
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
             case R.id.action_signout:
                 login_signout();
                 return true;

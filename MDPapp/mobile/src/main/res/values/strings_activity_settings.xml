@@ -1,0 +1,52 @@
+<resources>
+        <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <string name="pref_header_general">General</string>
+
+
+    <string name="pref_title_location_technique">Location Detection Technique</string>
+    <string-array name="pref_location_technique_titles">
+        <item>Bayessian</item>
+        <item>Weka</item>
+    </string-array>
+    <string-array name="pref_location_technique_values">
+        <item>Bayessian</item>
+        <item>Weka</item>
+    </string-array>
+
+    <string name="pref_title_alpha_trimmer_coeff">Alpha Trimmer Filter Coefficient</string>
+    <string-array name="pref_alpha_trimmer_coeff_titles">
+        <item>0.0</item>
+        <item>0.10</item>
+        <item>0.20</item>
+        <item>0.30</item>
+        <item>0.40</item>
+        <item>0.50</item>
+    </string-array>
+    <string-array name="pref_alpha_trimmer_coeff_values">
+        <item>0.0</item>
+        <item>0.10</item>
+        <item>0.20</item>
+        <item>0.30</item>
+        <item>0.40</item>
+        <item>0.50</item>
+    </string-array>
+
+
+    <!-- KEY TAGS -->
+    <string name="training_phase">TRAINING_PHASE</string>
+    <string name="calibration_done">CALIBRATED</string>
+    <string name="calibration_m">CALIBRATION_M_PREF</string>
+    <string name="calibration_b">CALIBRATION_B_PREF</string>
+    <string name="calibration_scans">CALIBRATION_SCANS</string>
+    <string name="location_detection_default">LOCATION_TECHNIQUE</string>
+    <string name="scans_per_sample">SCANS_PER_SAMPLE</string>
+    <string name="time_between_location_detection">TIME_BETWEEN_LOCATION_DETECTIONS</string>
+    <string name="alpha_trimmer_coeff">ALPHA_TRIMMER_COEFFICIENT</string>
+    <string name="motion_sample_seconds">MOTION_SAMPLE_SECONDS</string>
+
+
+
+</resources>

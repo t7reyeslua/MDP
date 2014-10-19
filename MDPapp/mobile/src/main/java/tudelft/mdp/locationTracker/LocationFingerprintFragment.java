@@ -248,6 +248,9 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
     }
 
     private void stopFingerprint(){
+        String place = mPlaceAutoComplete.getText().toString();
+        String zone  = mZoneAutoComplete.getText().toString();
+
         automaticUnbinding();
         mPlaceAutoComplete.setEnabled(true);
         mZoneAutoComplete.setEnabled(true);
@@ -260,6 +263,10 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         mToggleButton.setChecked(false);
         mProgressBar.setIndeterminate(false);
         mProgressBar.setProgress(0);
+
+        new UploadLocationRawDataAsyncTask().execute(rootView.getContext(), rawScans);
+        new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
+
     }
 
 
@@ -305,11 +312,11 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         mCalibrated = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                 .getBoolean(UserPreferences.CALIBRATED, false);
 
-        calibrationM = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .getFloat(UserPreferences.CALIBRATION_M, 1.0f);
+        calibrationM = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.CALIBRATION_M_PREF, "1.0"));
 
-        calibrationB = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .getFloat(UserPreferences.CALIBRATION_B, 0.0f);
+        calibrationB = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.CALIBRATION_B_PREF, "0.0"));
 
     }
 

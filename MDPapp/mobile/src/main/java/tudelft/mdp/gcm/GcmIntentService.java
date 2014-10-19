@@ -91,6 +91,13 @@ public class GcmIntentService extends IntentService {
                 messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
                 break;
+            case MessagesProtocol.SENDGCM_CMD_UPDATEGAUSSIANS:
+                Log.i(LOGTAG, "CMD received from GCM: " + MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+                // Broadcast message to interested parties
+                messageIntent = new Intent(MessagesProtocol.UPDATE_GAUSSIANS);
+                messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
+                break;
             case MessagesProtocol.SENDGCM_MSG:
                 showToast(msgLoad);
                 break;

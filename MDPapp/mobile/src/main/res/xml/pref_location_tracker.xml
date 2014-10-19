@@ -1,0 +1,69 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:custom="http://schemas.android.com/apk/res-auto">
+
+    <CheckBoxPreference
+            android:key="@string/calibration_done"
+            android:title="Calibrated"
+            android:defaultValue="false" />
+
+    <tudelft.mdp.ui.NumberPickerDialogPreference
+            android:key="@string/calibration_scans"
+            android:defaultValue="10"
+            android:title="Scans done during calibration"
+            android:dialogMessage="Please select the number of scans to be done:"
+            android:max="200"
+            custom:min="1" />
+
+    <EditTextPreference
+        android:key="@string/calibration_m"
+        android:dialogTitle="Calibration parameters"
+        android:inputType="numberSigned|numberDecimal"
+        android:defaultValue="1.0"
+        android:title="Calibration M value"      />
+
+    <EditTextPreference
+            android:key="@string/calibration_b"
+            android:dialogTitle="Calibration parameters"
+            android:inputType="numberSigned|numberDecimal"
+            android:defaultValue="0.0"
+            android:title="Calibration B value"   />
+
+    <ListPreference
+            android:key="@string/location_detection_default"
+            android:title="Default location detection technique"
+            android:entries="@array/pref_location_technique_titles"
+            android:entryValues="@array/pref_location_technique_values"
+            android:defaultValue="Bayessian"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
+
+    <ListPreference
+        android:key="@string/alpha_trimmer_coeff"
+        android:title="Alpha Trimmer filter coefficient"
+        android:entries="@array/pref_alpha_trimmer_coeff_titles"
+        android:entryValues="@array/pref_alpha_trimmer_coeff_values"
+        android:defaultValue="0.20"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <tudelft.mdp.ui.NumberPickerDialogPreference
+            android:key="@string/time_between_location_detection"
+            android:defaultValue="30"
+            android:title="Seconds between detections"
+            android:dialogMessage="Please select the seconds to wait between detections:"
+            android:max="600"
+            custom:min="5" />
+
+    <tudelft.mdp.ui.NumberPickerDialogPreference
+            android:key="@string/scans_per_sample"
+            android:defaultValue="1"
+            android:title="Scans required per detection"
+            android:dialogMessage="Please select the no. of scans required for a single detection:"
+            android:max="5"
+            custom:min="1" />
+
+
+
+
+
+</PreferenceScreen>

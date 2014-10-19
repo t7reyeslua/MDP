@@ -373,7 +373,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         //Apply Alpha Trimmer
         Collections.sort(unfilteredList);
         int size = unfilteredList.size();
-        int  elementsToTrimm = (int) Math.floor(size * UserPreferences.ALPHA_TIRIMMER_COEFF);
+        int  elementsToTrimm = (int) Math.floor(size * UserPreferences.ALPHA_TRIMMER_COEFF_VALUE);
         ArrayList<Integer> filteredList = new ArrayList<Integer>(unfilteredList.subList(elementsToTrimm, size - elementsToTrimm ));
 
         return filteredList;
@@ -455,21 +455,25 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
     private void saveCalibrationValues(boolean calibrated, Float calM, Float calB){
         PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                 .edit().putBoolean(UserPreferences.CALIBRATED, calibrated).commit();
+
+        String calM_str = String.valueOf(calM);
+        String calB_str = String.valueOf(calB);
+
         PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .edit().putFloat(UserPreferences.CALIBRATION_M, calM).commit();
+                .edit().putString(UserPreferences.CALIBRATION_M_PREF, calM_str).commit();
         PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .edit().putFloat(UserPreferences.CALIBRATION_B, calB).commit();
+                .edit().putString(UserPreferences.CALIBRATION_B_PREF, calB_str).commit();
     }
 
     private void getPreviousCalibrationValues(){
         mCalibrated = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                 .getBoolean(UserPreferences.CALIBRATED, false);
 
-        calibrationM = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .getFloat(UserPreferences.CALIBRATION_M, 1.0f);
+        calibrationM = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.CALIBRATION_M_PREF, "1.0"));
 
-        calibrationB = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
-                .getFloat(UserPreferences.CALIBRATION_B, 0.0f);
+        calibrationB = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.CALIBRATION_B_PREF, "0.0"));
 
     }
 

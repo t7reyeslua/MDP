@@ -6,6 +6,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import tudelft.mdp.backend.endpoints.deviceLogEndpoint.DeviceLogEndpoint;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcLogRecord;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmMessagingAsyncTask;
 
 /**
@@ -57,10 +59,15 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             NfcRecord mDeviceInfo = mDeviceEndpointService.getDevice(nfcTag).execute();
             Log.e(TAG, "Previously registered device: TRUE");
 
-            // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
-            new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
-                                                nfcTag,
-                                                context);
+            boolean mTraining = PreferenceManager.getDefaultSharedPreferences(context)
+                    .getBoolean(UserPreferences.TRAINING_PHASE, false);
+
+            if (!mTraining) {
+                // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
+                new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
+                        nfcTag,
+                        context);
+            }
 
             /* Tag has been previously registered. Now verify the last thing the user did with the device*/
             NfcLogRecord mUserDeviceStatus = mDeviceLogEndpointService.getLastUserLogOfDevice(nfcTag, user).execute();

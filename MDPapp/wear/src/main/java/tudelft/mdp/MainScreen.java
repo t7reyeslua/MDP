@@ -82,7 +82,6 @@ public class MainScreen extends Activity implements ServiceConnection {
             public void onLayoutInflated(WatchViewStub stub) {
                 mTwAccelerometer = (TextView) stub.findViewById(R.id.textAccelerometer);
                 mTwGyroscope = (TextView) stub.findViewById(R.id.textGyroscope);
-                mTwGravity = (TextView) stub.findViewById(R.id.textGravity);
                 mTwMagnetometer = (TextView) stub.findViewById(R.id.textMagnetometer);
                 mTwRotationVector = (TextView) stub.findViewById(R.id.textRotationVector);
                 mTwLinearAcceleration = (TextView) stub.findViewById(R.id.textLinearAcceleration);
@@ -90,6 +89,7 @@ public class MainScreen extends Activity implements ServiceConnection {
 
 
                 /*
+                mTwGravity = (TextView) stub.findViewById(R.id.textGravity);
                 mTwStepCounter = (TextView) stub.findViewById(R.id.textStepCounter);
                 mTwHeartRate = (TextView) stub.findViewById(R.id.textHeartRate);
                 mTwSignificantMotion = (TextView) stub.findViewById(R.id.textSignificantMotion);
@@ -198,11 +198,72 @@ public class MainScreen extends Activity implements ServiceConnection {
         }
     }
 
+
+    private void updateSensorsValuesFromSingleString (String receivedString){
+        String[] parts = receivedString.split("\t");
+
+        if (mTwAccelerometer != null){
+            String text = "";
+            for(int i = 2; i < 5; i ++){
+                text += parts[i] + " ";
+            }
+            mTwAccelerometer.setText(text);
+        }
+
+        if (mTwGyroscope != null){
+            String text = "";
+            for(int i = 5; i < 8; i ++){
+                text += parts[i] + " ";
+            }
+            mTwGyroscope.setText(text);
+        }
+
+        if (mTwMagnetometer != null){
+            String text = "";
+            for(int i = 8; i < 11; i ++){
+                text += parts[i] + " ";
+            }
+            mTwMagnetometer.setText(text);
+        }
+
+        if (mTwLinearAcceleration != null){
+            String text = "";
+            for(int i = 11; i < 14; i ++){
+                text += parts[i] + " ";
+            }
+            mTwLinearAcceleration.setText(text);
+        }
+
+        if (mTwTilt != null){
+            String text = "";
+            for(int i = 14; i < 17; i ++){
+                text += parts[i] + " ";
+            }
+            mTwTilt.setText(text);
+        }
+
+        if (mTwRotationVector != null){
+            String text = "";
+            for(int i = 17; i < 21; i ++){
+                text += parts[i] + " ";
+            }
+            mTwRotationVector.setText(text);
+        }
+
+    }
+
+
     private void updateValues(ArrayList<Object> values){
 
         Integer sensorType = (Integer) values.get(0);
-        float [] sensorValues = (float[]) values.get(1);
+        if (sensorType == Constants.SNAPSHOT_SENSORS){
+            String sensorValuesRecord = (String) values.get(1);
+            updateSensorsValuesFromSingleString(sensorValuesRecord);
+            return;
+        }
 
+
+        float [] sensorValues = (float[]) values.get(1);
         switch (sensorType) {
             case Sensor.TYPE_ACCELEROMETER:
                 //Log.i(LOGTAG, "Sensed data.");

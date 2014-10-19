@@ -1,0 +1,8 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+            android:key="@string/training_phase"
+            android:title="Training phase"
+            android:defaultValue="true"
+        />
+</PreferenceScreen>

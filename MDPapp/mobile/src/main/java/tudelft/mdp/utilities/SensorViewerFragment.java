@@ -327,6 +327,10 @@ public class SensorViewerFragment extends Fragment implements
                     sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
                 }
                 break;
+
+            case MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE:
+                Log.w(LOGTAG,"Current sensors readings");
+                break;
             default:
                 insertSensorRecInfoCard(msgType, msgLoad);
                 break;

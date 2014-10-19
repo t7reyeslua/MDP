@@ -40,12 +40,14 @@ public class MessagesProtocol {
     public static final int SENDSENSEORSNAPSHOTREC = 1000;
     public static final int SENDSENSEORSNAPSHOTREC_START  = 1001;
     public static final int SENDSENSEORSNAPSHOTREC_FINISH = 1002;
+    public static final int SENDSENSEORSNAPSHOTUPDATE = 1003;
 
     public static final int SENDGCM_MSG = 2000;
     public static final int SENDGCM_CMD = 3000;
     public static final int SENDGCM_CMD_MOTION = 3001;
     public static final int SENDGCM_CMD_LOCATION = 3002;
     public static final int SENDGCM_CMD_MOTIONLOCATION = 3003;
+    public static final int SENDGCM_CMD_UPDATEGAUSSIANS = 4000;
 
     /* MSG Payloads */
     //Data Bundle
@@ -65,6 +67,7 @@ public class MessagesProtocol {
     public static final String COLLECTDATA_MOTION = "COLLECT_DATA_MOTION";
     public static final String COLLECTDATA_LOCATION = "COLLECT_DATA_LOCATION";
     public static final String COLLECTDATA_MOTIONLOCATION = "COLLECT_DATA_MOTIONLOCATION";
+    public static final String UPDATE_GAUSSIANS = "UPDATE_GAUSSIANS";
 
 
 

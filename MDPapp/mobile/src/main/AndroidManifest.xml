@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="tudelft.mdp" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="tudelft.mdp" >
 
     <uses-sdk tools:node="replace" />
 
@@ -21,27 +21,33 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="tudelft.mdp.permission.C2D_MESSAGE" />
-    <permission      android:name="tudelft.mdp.permission.C2D_MESSAGE"
-                     android:protectionLevel="signature" />
-    <uses-feature    android:name="android.hardware.nfc"
-                     android:required="true" />
 
+    <permission
+        android:name="tudelft.mdp.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
 
     <application
-            android:allowBackup="true"
-            android:icon="@drawable/plug"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme" >
+        android:allowBackup="true"
+        android:icon="@drawable/plug"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
 
         <!-- METADATA -->
-        <meta-data   android:name="com.google.android.gms.version"
-                     android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <!-- RECEIVERS -->
-        <receiver    android:name="tudelft.mdp.gcm.GcmBroadcastReceiver"
-                     android:permission="com.google.android.c2dm.permission.SEND" >
+        <receiver
+            android:name="tudelft.mdp.gcm.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="tudelft.mdp" />
             </intent-filter>
         </receiver>
@@ -53,53 +59,66 @@
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
-        <service android:name="tudelft.mdp.locationTracker.LocationDetectionService"
-                 android:enabled="true"
-                 android:exported="true" >
+        <service
+            android:name="tudelft.mdp.locationTracker.LocationDetectionService"
+            android:enabled="true"
+            android:exported="true" >
         </service>
-        <service android:name="tudelft.mdp.locationTracker.NetworkScanService"
-                 android:enabled="true"
-                 android:exported="true" >
+        <service
+            android:name="tudelft.mdp.locationTracker.NetworkScanService"
+            android:enabled="true"
+            android:exported="true" >
         </service>
 
         <!-- ACTIVITIES -->
         <activity
-                android:name="tudelft.mdp.LoginActivity"
-                android:label="@string/app_name"
-                android:parentActivityName="tudelft.mdp.MainActivity"
-                android:theme="@android:style/Theme.NoTitleBar" >
-
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="tudelft.mdp.MainActivity" />
+            android:name="tudelft.mdp.LoginActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="tudelft.mdp.MainActivity"
+            android:theme="@android:style/Theme.NoTitleBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="tudelft.mdp.MainActivity" />
         </activity>
         <activity
-                android:name="tudelft.mdp.MainActivity"
-                android:label="@string/title_activity_main_"
-                android:launchMode="singleInstance" >
-
+            android:name="tudelft.mdp.MainActivity"
+            android:label="@string/title_activity_main_"
+            android:launchMode="singleInstance" >
             <intent-filter>
-                <action   android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!--NFC -->
+            <!-- NFC -->
             <intent-filter>
-                <action   android:name="android.nfc.action.TECH_DISCOVERED" />
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
             <intent-filter>
-                <action   android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data     android:mimeType="text/plain" />
+
+                <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
-                <action   android:name="android.nfc.action.TAG_DISCOVERED" />
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-
-            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
-                       android:resource="@xml/nfc_tech_filter" />
-
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+        </activity>
+        <activity
+            android:name="tudelft.mdp.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="tudelft.mdp.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="tudelft.mdp.MainActivity" />
         </activity>
     </application>
+
 </manifest>

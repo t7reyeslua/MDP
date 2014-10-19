@@ -40,11 +40,11 @@ public class RadioMapFingerprintEndpoint {
     private static final Logger LOG = Logger.getLogger(RadioMapFingerprintEndpoint.class.getName());
 
 
-    @ApiMethod(name = "listApGaussiansInPlace", path = "list_gaussians_place")
-    public CollectionResponse<ApGaussianRecord> listApGaussiansInPlace(
+    @ApiMethod(name = "listGaussiansInPlace", path = "list_gaussians_place")
+    public CollectionResponse<ApGaussianRecord> listGaussiansInPlace(
             @Named("place") String place) throws NotFoundException {
 
-        LOG.info("Calling listApGaussiansInPlace method");
+        LOG.info("Calling listGaussiansInPlace method");
 
         List<ApGaussianRecord> records = ofy().load().type(ApGaussianRecord.class)
                 .filter("place", place)

@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:custom="http://schemas.android.com/apk/res-auto">
+    <tudelft.mdp.ui.NumberPickerDialogPreference
+            android:key="@string/motion_sample_seconds"
+            android:defaultValue="10"
+            android:title="Seconds for motion sample"
+            android:dialogMessage="Please select the no. of seconds:"
+            android:max="12"
+            custom:min="1" />
+
+</PreferenceScreen>

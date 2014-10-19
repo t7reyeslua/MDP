@@ -57,7 +57,8 @@ public class SensorReaderService extends Service implements
     private static boolean isRunning = false;
     private static boolean isStarted = false;
     private static boolean isConnected = false;
-    private Timer mTimer;
+    private Timer mTimerSendSnapshot;
+    private Timer mTimerDoSnapshot;
     private int snapshotCounter = 0;
     private int counter = 0;
     private boolean saveFileRequired = false;
@@ -104,8 +105,12 @@ public class SensorReaderService extends Service implements
     public void onDestroy() {
         super.onDestroy();
 
-        if (mTimer != null) {
-            mTimer.cancel();
+        if (mTimerDoSnapshot != null) {
+            mTimerDoSnapshot.cancel();
+        }
+
+        if (mTimerSendSnapshot != null) {
+            mTimerSendSnapshot.cancel();
         }
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
@@ -196,74 +201,81 @@ public class SensorReaderService extends Service implements
             Log.e(LOGTAG, "Sensor registered: Accelerometer");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                    //3333);
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
             Log.i(LOGTAG, "Sensor registered: Gyroscope");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY) != null){
-            Log.i(LOGTAG, "Sensor registered: Gravity");
-            mSensorManager.registerListener(this,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null){
             Log.i(LOGTAG, "Sensor registered: Magnetic Field");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
         if (mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT) != null){
             Log.i(LOGTAG, "Sensor registered: Tilt sensor");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Constants.SAMSUNG_TILT),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null){
             Log.i(LOGTAG, "Sensor registered: Rotation Vector");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null){
             Log.i(LOGTAG, "Sensor registered: Linear Acceleration");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
        /* if (mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null){
             Log.i(LOGTAG, "Sensor registered: Step Counter");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    SensorManager.SENSOR_DELAY_FASTEST);
+        }
+
+        if (mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY) != null){
+            Log.i(LOGTAG, "Sensor registered: Gravity");
+            mSensorManager.registerListener(this,
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
+                    Constants.SAMPLING_RATE);
+                    //SensorManager.SENSOR_DELAY_GAME);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE) != null){
             Log.i(LOGTAG, "Sensor registered: Heart Rate");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    SensorManager.SENSOR_DELAY_FASTEST);
         }
         if (mSensorManager.getDefaultSensor(Constants.SAMSUNG_HEART_RATE) != null){
            *Log.i(LOGTAG, "Sensor registered: Heart Rate");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Constants.SAMSUNG_HEART_RATE),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    SensorManager.SENSOR_DELAY_FASTEST);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null){
             Log.i(LOGTAG, "Sensor registered: Light");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    SensorManager.SENSOR_DELAY_FASTEST);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR) != null){
             Log.i(LOGTAG, "Sensor registered: Step Detector");
             mSensorManager.registerListener(this,
                     mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR),
-                    SensorManager.SENSOR_DELAY_NORMAL);
+                    SensorManager.SENSOR_DELAY_FASTEST);
         }
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION) != null){
             Log.i(LOGTAG, "Sensor registered: Significant Motion");
@@ -306,12 +318,7 @@ public class SensorReaderService extends Service implements
                 }
             }
 
-            new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, message).start();
-
-
             copySensorValues(event);
-
-            sendMessageSensorEventToUI(event.sensor.getType(), event.values);
             counter++;
         }
 
@@ -357,21 +364,24 @@ public class SensorReaderService extends Service implements
         }
         for(float value : mGyroscope){
             record += String.format("%.2f", value) + "\t";
-        }
+        }/*
         for(float value : mGravity){
             record += String.format("%.2f", value) + "\t";
-        }
+        }*/
         for(float value : mMagneticField){
             record += String.format("%.2f", value) + "\t";
         }
         for(float value : mLinearAccelerometer){
             record += String.format("%.2f", value) + "\t";
         }
-        for(float value : mRotatioVector){
-            record += String.format("%.2f", value) + "\t";
-        }
+
         for(int i = 0; i < 3; i++){
             float value = mTilt[i];
+            record += String.format("%.2f", value) + "\t";
+        }
+        //5th is always 0
+        for(int i = 0; i < 4; i++){
+            float value = mRotatioVector[i];
             record += String.format("%.2f", value) + "\t";
         }
         /*
@@ -383,8 +393,37 @@ public class SensorReaderService extends Service implements
         snapshotArray.add(record);
     }
 
+    private void sendUpdate(){
+        Log.e(LOGTAG, "SEND UPDATE");
+        if (snapshotArray.size() > 0) {
+            //new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE + "|" + snapshotArray.get(snapshotArray.size() - 1)).start();
+            sendMessageToUI(Constants.SNAPSHOT_SENSORS, snapshotArray.get(snapshotArray.size() - 1));
+        }
+    }
 
     private void sendMessageSensorEventToUI(Integer sensorType, float[] sensorEvent) {
+        for (Messenger messenger : mClients){
+            try {
+
+                ArrayList<Object> valuesToSend = new ArrayList<Object>();
+                valuesToSend.add(sensorType);
+                valuesToSend.add(sensorEvent);
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("sensor", valuesToSend);
+                Message msg = Message.obtain(null, MSG_SET_SENSOR_EVENT_VALUE);
+                msg.setData(bundle);
+                messenger.send(msg);
+
+            } catch (RemoteException e) {
+                // The client is dead. Remove it from the list.
+                mClients.remove(messenger);
+            }
+        }
+
+    }
+
+    private void sendMessageToUI(Integer sensorType, String sensorEvent) {
         for (Messenger messenger : mClients){
             try {
 
@@ -439,23 +478,37 @@ public class SensorReaderService extends Service implements
         counter = 0;
         snapshotCounter = 0;
         snapshotArray.clear();
-        mTimer  = new Timer();
-        mTimer.scheduleAtFixedRate(new SnapshotTick(), 0, 50L);
+
+        mTimerSendSnapshot  = new Timer();
+        mTimerSendSnapshot.scheduleAtFixedRate(new SnapshotTick(), 0, Constants.TIMER_UPDATE_RATE);
+
+
+        mTimerDoSnapshot  = new Timer();
+        mTimerDoSnapshot.scheduleAtFixedRate(new UpdateSnapshotTick(), 0, Constants.TIMER_SAMPLING_RATE);
+
+
         pause = false;
     }
 
     private void sensingFinish(){
 
         Log.e(LOGTAG,"Stop sensing");
-        mSensorManager.unregisterListener(this);
+        if (mSensorManager != null){ mSensorManager.unregisterListener(this); }
 
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(500);
 
-        if (mTimer != null) {
-            Log.e(LOGTAG,"Stop Timer");
-            mTimer.cancel();
+        if (mTimerSendSnapshot != null) {
+            Log.e(LOGTAG,"Stop Timer mTimerSendSnapshot");
+            mTimerSendSnapshot.cancel();
         }
+
+        if (mTimerDoSnapshot != null) {
+            Log.e(LOGTAG,"Stop Timer mTimerDoSnapshot");
+            mTimerDoSnapshot.cancel();
+        }
+
+
         if (saveFileRequired){
             Log.e(LOGTAG,"Call sendRecordsToMobile()");
             sendRecordsToMobile();
@@ -524,7 +577,19 @@ public class SensorReaderService extends Service implements
     private class SnapshotTick extends TimerTask {
         @Override
         public void run() {
-            Log.i(LOGTAG, "Taking Snapshot " + counter);
+            Log.w(LOGTAG, "Taking SnapshotTick " + counter);
+            try {
+                sendUpdate();
+            } catch (Throwable t) {
+                Log.e("SnapshotTick", "SnapshotTick Failed.", t);
+            }
+        }
+    }
+
+    private class UpdateSnapshotTick extends TimerTask {
+        @Override
+        public void run() {
+            Log.w(LOGTAG, "Taking UpdateSnapshotTick " + counter);
             try {
                 saveSnapshot();
             } catch (Throwable t) {

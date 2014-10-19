@@ -139,6 +139,11 @@ public class LocationDetectionService extends Service implements ServiceConnecti
         IntentFilter messageFilter2 = new IntentFilter(MessagesProtocol.COLLECTDATA_LOCATION);
         MessageReceiver messageReceiver2 = new MessageReceiver();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver2, messageFilter2);
+
+
+        IntentFilter messageFilter3 = new IntentFilter(MessagesProtocol.UPDATE_GAUSSIANS);
+        MessageReceiver messageReceiver3 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver3, messageFilter3);
     }
 
     /* Service connection methods */
@@ -343,11 +348,27 @@ public class LocationDetectionService extends Service implements ServiceConnecti
     }
 
 
+    private void updateGaussians(){
+        //TODO Update gaussians
+    }
+
+
+
+
     private class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            deviceBroadcast = intent.getStringExtra(MessagesProtocol.MESSAGE);
-            mLocationRequestedByBroadcast = true;
+
+            String command = intent.getStringExtra(MessagesProtocol.MESSAGE);
+            Log.i(LOGTAG, "Broadcast received: " + command);
+
+            if (command.equals(MessagesProtocol.UPDATE_GAUSSIANS)){
+                updateGaussians();
+            } else if (command.equals(MessagesProtocol.COLLECTDATA_MOTIONLOCATION) ||
+                       command.equals(MessagesProtocol.COLLECTDATA_LOCATION)) {
+                mLocationRequestedByBroadcast = true;
+                deviceBroadcast = command;
+            }
 
             // TODO handle message received from broadcast
             //handleMessage(msg);

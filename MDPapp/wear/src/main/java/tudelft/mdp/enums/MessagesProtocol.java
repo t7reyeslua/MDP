@@ -40,6 +40,7 @@ public class MessagesProtocol {
     public static final int SENDSENSEORSNAPSHOTREC = 1000;
     public static final int SENDSENSEORSNAPSHOTREC_START  = 1001;
     public static final int SENDSENSEORSNAPSHOTREC_FINISH = 1002;
+    public static final int SENDSENSEORSNAPSHOTUPDATE = 1003;
 
     /* MSG Payloads */
     //Data Bundle

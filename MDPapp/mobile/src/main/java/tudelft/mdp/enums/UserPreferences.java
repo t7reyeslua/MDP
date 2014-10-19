@@ -15,9 +15,16 @@ public class UserPreferences {
     public static final String CALIBRATED = "CALIBRATED";
     public static final String CALIBRATION_M = "CALIBRATION_M";
     public static final String CALIBRATION_B = "CALIBRATION_B";
+    public static final String CALIBRATION_M_PREF = "CALIBRATION_M_PREF";
+    public static final String CALIBRATION_B_PREF = "CALIBRATION_B_PREF";
     public static final String CALIBRATION_SCANS = "CALIBRATION_SCANS";
+    public static final String TRAINING_PHASE = "TRAINING_PHASE";
+    public static final String LOCATION_TECHNIQUE = "LOCATION_TECHNIQUE";
+    public static final String TIME_BETWEEN_LOCATION_DETECTIONS = "TIME_BETWEEN_LOCATION_DETECTIONS";
+    public static final String ALPHA_TRIMMER_COEFFICIENT = "ALPHA_TRIMMER_COEFFICIENT";
+    public static final String MOTION_SAMPLE_SECONDS = "MOTION_SAMPLE_SECONDS";
 
-    public static final String SCANSAMPLES = "SCANSAMPLES";
+    public static final String SCANSAMPLES = "SCANS_PER_SAMPLE";
 
     public static int SCANWINDOW = 30;
     public static int FINGERPRINT_SAMPLES = 50;
@@ -28,7 +35,7 @@ public class UserPreferences {
     public static final Integer YEAR = 2;
     public static final Integer ALLTIME = 3;
 
-    public static double ALPHA_TIRIMMER_COEFF = 0.2;
+    public static double ALPHA_TRIMMER_COEFF_VALUE = 0.2;
     public static int CALIBRATION_NUM_SCANS = 10;
 
 
