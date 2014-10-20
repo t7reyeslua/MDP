@@ -4,12 +4,10 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -23,11 +21,8 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -47,7 +42,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import tudelft.mdp.dashboard.DashboardFragment;
 import tudelft.mdp.deviceManager.DeviceDetectionAsyncTask;
@@ -56,11 +50,10 @@ import tudelft.mdp.enums.NavigationDrawer;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
 import tudelft.mdp.locationTracker.LocationCalibrationFragment;
-import tudelft.mdp.locationTracker.LocationDetectionService;
 import tudelft.mdp.locationTracker.LocationFingerprintFragment;
 import tudelft.mdp.locationTracker.LocationHistoryFragment;
 import tudelft.mdp.ui.ExpandableListAdapter;
-import tudelft.mdp.utilities.SensorViewerFragment;
+import tudelft.mdp.activityMonitor.SensorViewerFragment;
 
 
 public class MainActivity extends GoogleLoginManager implements ServiceConnection{
@@ -800,13 +793,13 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
     public void startServiceLocation(){
         Log.i(TAG, "Location Service: START");
-        Intent intent = new Intent(this, LocationDetectionService.class);
+        Intent intent = new Intent(this, MdpWorkerService.class);
         this.startService(intent);
     }
 
     public void stopServiceLocation(){
         Log.i(TAG, "Location Service: STOP");
-        this.stopService(new Intent(this, LocationDetectionService.class));
+        this.stopService(new Intent(this, MdpWorkerService.class));
     }
 
 

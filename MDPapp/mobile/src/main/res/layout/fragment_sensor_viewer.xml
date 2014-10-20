@@ -3,7 +3,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              tools:context="tudelft.mdp.utilities.SensorViewerFragment">
+              tools:context="tudelft.mdp.activityMonitor.SensorViewerFragment">
 
     <it.gmariotti.cardslib.library.view.CardView
             android:id="@+id/cardControl"

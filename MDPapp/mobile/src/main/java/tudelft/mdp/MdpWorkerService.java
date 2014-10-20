@@ -1,4 +1,11 @@
-package tudelft.mdp.locationTracker;
+package tudelft.mdp;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -8,7 +15,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,6 +25,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,14 +34,22 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
+import tudelft.mdp.communication.SendDataSyncThread;
+import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
+import tudelft.mdp.fileManagement.FileCreator;
+import tudelft.mdp.locationTracker.NetworkInfoObject;
+import tudelft.mdp.locationTracker.NetworkScanService;
+import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
 
-public class LocationDetectionService extends Service implements
+public class MdpWorkerService extends Service implements
         ServiceConnection,
-        RequestGaussiansAsyncTask.RequestGaussiansAsyncResponse{
+        RequestGaussiansAsyncTask.RequestGaussiansAsyncResponse,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String LOGTAG = "LocationDetectionService";
+    private static final String LOGTAG = "MdpWorkerService";
     private static boolean isRunning = false;
 
     private Messenger mServiceMessenger = null;
@@ -53,24 +68,29 @@ public class LocationDetectionService extends Service implements
     public static final String ARG_TEST = "TEST";
     public static final String ARG_SCHEDULE_NEXT = "SCHEDULE NEXT";
     public static final String ARG_LOCATION_ACQUIRED = "LOCATION ACQUIRED";
-    public static final String ARG_SCANMODE = "SCAN MODE";
 
     private String locationCalculated;
     private boolean mLocationRequestedByTimeTick = false;
     private boolean mLocationRequestedByBroadcast = false;
 
+
+    GoogleApiClient mGoogleApiClient;
     private Vibrator v;
     private SharedPreferences sharedPrefs;
+
+
     private int numScans;
     private int numScansCount;
-    private String deviceBroadcast = "";
-
     private Timer mTimer = new Timer();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
 
 
-    public LocationDetectionService() {
+
+    //Constructor **********************************************************************************
+    public MdpWorkerService() {
     }
+
+
 
     //Lifecycle Routines****************************************************************************
     @Override
@@ -84,6 +104,8 @@ public class LocationDetectionService extends Service implements
         Log.w(LOGTAG, "Location Service Created.");
 
         configureBroadcastReceivers();
+
+        buildGoogleClient();
 
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplication());
         numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
@@ -111,7 +133,12 @@ public class LocationDetectionService extends Service implements
         } catch (Throwable t) {
             Log.e(LOGTAG, "Failed to unbind from the service", t);
         }
-        Log.e(LOGTAG, "Location Service Destroyed.");
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+
+        Log.e(LOGTAG, "MDP Background Worker Service Destroyed.");
     }
 
 
@@ -136,32 +163,13 @@ public class LocationDetectionService extends Service implements
         return isRunning;
     }
 
-    //NetworkScanService Routines*************************************************************************
-
-    /**
-     * Configures the Broadcast receivers that catch a new intent for detecting the current location.
-     */
-    private void configureBroadcastReceivers(){
-        IntentFilter messageFilter = new IntentFilter(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
-        MessageReceiver messageReceiver = new MessageReceiver();
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver, messageFilter);
-
-        IntentFilter messageFilter2 = new IntentFilter(MessagesProtocol.COLLECTDATA_LOCATION);
-        MessageReceiver messageReceiver2 = new MessageReceiver();
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver2, messageFilter2);
 
 
-        IntentFilter messageFilter3 = new IntentFilter(MessagesProtocol.UPDATE_GAUSSIANS);
-        MessageReceiver messageReceiver3 = new MessageReceiver();
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver3, messageFilter3);
-    }
 
-    /* Service connection methods */
 
-    /**
-     * Required method for implementing ServiceConnection
-     * @param name name
-     */
+
+    //Network Scan Service Connection methods*******************************************************
+
     @Override
     public void onServiceDisconnected(ComponentName name) {
         Log.i(LOGTAG, "Sensor Service: onServiceDisconnected");
@@ -170,11 +178,6 @@ public class LocationDetectionService extends Service implements
         }
     }
 
-    /**
-     * Required method for implementing ServiceConnection
-     * @param name name
-     * @param service service
-     */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         Log.i(LOGTAG, "Sensor Service: onServiceConnected");
@@ -259,8 +262,120 @@ public class LocationDetectionService extends Service implements
         }
     }
 
-    //Manage scan results ***********************************************************************
 
+
+
+
+
+
+    //Android Wear Connection methods***************************************************************
+
+    /**
+     * Required for establishing connection with Android Wear
+     */
+    private void buildGoogleClient(){
+        // Build a new GoogleApiClient
+        mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        mGoogleApiClient.connect();
+
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        sendDataMapToWear(MessagesProtocol.SNDMESSAGE, "Hello from Mobile");
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) { }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) { }
+
+
+    /**
+     * Sends a notification to the Wear device with a corresponding command embedded in it.
+     * The command starts and stops the sensing service in the Wear device.
+     * @param command to start or stop the service in the smartwatch.
+     */
+    private void sendNotificationToWear(String command) {
+        if (mGoogleApiClient.isConnected()) {
+            PutDataMapRequest dataMapRequest = PutDataMapRequest.create(MessagesProtocol.NOTIFICATIONPATH);
+            // Make sure the data item is unique. Usually, this will not be required, as the payload
+            // (in this case the title and the content of the notification) will be different for almost all
+            // situations. However, in this example, the text and the content are always the same, so we need
+            // to disambiguate the data item by adding a field that contains teh current time in milliseconds.
+            dataMapRequest.getDataMap().putDouble(MessagesProtocol.NOTIFICATIONTIMESTAMP, System.currentTimeMillis());
+            dataMapRequest.getDataMap().putString(MessagesProtocol.NOTIFICATIONTITLE, "MDP");
+            dataMapRequest.getDataMap().putString(MessagesProtocol.NOTIFICATIONCONTENT, "Retrieving sensor information");
+            dataMapRequest.getDataMap().putString(MessagesProtocol.NOTIFICATIONCOMMAND, command);
+            PutDataRequest putDataRequest = dataMapRequest.asPutDataRequest();
+            Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest);
+        }
+        else {
+            Log.e(LOGTAG, "No connection to wearable available!");
+        }
+    }
+
+    /**
+     * Sens a DataMap item to the Wear device which holds a commands
+     * @param msgType Type of commands
+     * @param message Load
+     */
+    private void sendDataMapToWear(Integer msgType, String message){
+        DataMap dataMap = new DataMap();
+        dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
+        dataMap.putInt(MessagesProtocol.MSGTYPE, msgType);
+        dataMap.putString(MessagesProtocol.MESSAGE, message);
+
+        new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+    }
+
+
+    /**
+     * Handles the data coming from android wear
+     * @param msg received from Android Wear
+     */
+    private void handleWearMessage(String msg){
+        String[] parts = msg.split("\\|");
+        Integer msgType = Integer.valueOf(parts[0]);
+        String msgLoad = parts[1];
+
+        switch (msgType){
+            case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
+                Log.w(LOGTAG,"Start sensor streaming from wear");
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
+                Log.i(LOGTAG, msgLoad);
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
+                Log.w(LOGTAG,"Stop sensor streaming from wear");
+                sendNotificationToWear(MessagesProtocol.STOPSENSINGSERVICE);
+                break;
+
+            case MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE:
+                Log.w(LOGTAG,"Current sensors readings");
+                break;
+            default:
+                break;
+        }
+
+    }
+
+
+
+
+
+    //Location Detection methods *******************************************************************
+
+    /**
+     * Handles the scan result appropriately
+     * @param recentScanResult The last scan result received from the NetworkScanService
+     */
     private void handleScanResult(ArrayList<NetworkInfoObject> recentScanResult){
         //TODO manage scan result received
         if (numScansCount > numScans){
@@ -272,6 +387,9 @@ public class LocationDetectionService extends Service implements
 
     }
 
+    /**
+     * Initializes all required things for detection routine
+     */
     private void detectLocation(){
         //TODO: Initialize all required things for detection routine
 
@@ -280,7 +398,49 @@ public class LocationDetectionService extends Service implements
         numScansCount = 0;
     }
 
-    //UI interaction Routines***********************************************************************
+
+    /**
+     * Timer that runs every (UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS) seconds
+     * and calculates a new location.
+     */
+    private class DetectLocationTick extends TimerTask {
+        @Override
+        public void run() {
+            Log.w(LOGTAG, "DetectLocationTick");
+            try {
+                detectLocation();
+
+            } catch (Throwable t) {
+            //you should always ultimately catch all exceptions in timer tasks.
+                Log.e("DetectLocationTick", "DetectLocationTick Failed.", t);
+            }
+        }
+    }
+
+    /**
+     * Starts the async task to update gaussians from the info in cloud DB
+     */
+    private void updateGaussians(){
+        RequestGaussiansAsyncTask requestGaussiansAsyncTask = new RequestGaussiansAsyncTask();
+        requestGaussiansAsyncTask.delegate = this;
+        requestGaussiansAsyncTask.execute();
+    }
+
+    /**
+     * processFinishRequestGaussians
+     * @param outputList Updated Gaussians
+     */
+    public void processFinishRequestGaussians(List<ApGaussianRecord> outputList){
+        mGaussianRecords = new ArrayList<ApGaussianRecord>(outputList);
+    }
+
+
+
+
+
+
+
+    //Communication interaction routines with other services and threads****************************
 
     /**
      * SendMessageToUI
@@ -325,9 +485,10 @@ public class LocationDetectionService extends Service implements
         }
     }
 
-
-
-    private class IncomingMessageHandler extends Handler { // Handler of incoming messages from clients.
+    /**
+     * Handler of incoming messages from clients or from services it is connected to.
+     */
+    private class IncomingMessageHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             Log.d(LOGTAG, "handleMessage: " + msg.what);
@@ -353,46 +514,52 @@ public class LocationDetectionService extends Service implements
         }
     }
 
-    private class DetectLocationTick extends TimerTask {
-        @Override
-        public void run() {
-            Log.w(LOGTAG, "DetectLocationTick");
-            try {
-                detectLocation();
+    /**
+     * Configures the Broadcast receivers that catch a new intent for detecting the current location.
+     */
+    private void configureBroadcastReceivers(){
+        IntentFilter messageFilter = new IntentFilter(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+        MessageReceiver messageReceiver = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver, messageFilter);
 
-            } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
-                Log.e("DetectLocationTick", "DetectLocationTick Failed.", t);
-            }
-        }
+        IntentFilter messageFilter2 = new IntentFilter(MessagesProtocol.COLLECTDATA_LOCATION);
+        MessageReceiver messageReceiver2 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver2, messageFilter2);
+
+        IntentFilter messageFilter3 = new IntentFilter(MessagesProtocol.UPDATE_GAUSSIANS);
+        MessageReceiver messageReceiver3 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver3, messageFilter3);
+
+        IntentFilter messageFilter4 = new IntentFilter(MessagesProtocol.WEARSENSORSMSG);
+        MessageReceiver messageReceiver4 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver4, messageFilter4);
+
+        IntentFilter messageFilter5 = new IntentFilter(MessagesProtocol.MSG_RECEIVED);
+        MessageReceiver messageReceiver5 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver5, messageFilter5);
+
     }
 
-
-    private void updateGaussians(){
-        RequestGaussiansAsyncTask requestGaussiansAsyncTask = new RequestGaussiansAsyncTask();
-        requestGaussiansAsyncTask.delegate = this;
-        requestGaussiansAsyncTask.execute();
-    }
-
-    public void processFinishRequestGaussians(List<ApGaussianRecord> outputList){
-        mGaussianRecords = new ArrayList<ApGaussianRecord>(outputList);
-    }
-
-
-
+    /**
+     * Receives the Broadcast intents form the rest of the application
+     */
     private class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String command = intent.getStringExtra(MessagesProtocol.MESSAGE);
-            Log.i(LOGTAG, "Broadcast received: " + command);
+            String broadcastFilter = intent.getAction();
+            String msg = intent.getStringExtra(MessagesProtocol.MESSAGE);
+            Log.w(LOGTAG, "Broadcast received: " + broadcastFilter);
 
-            if (command.equals(MessagesProtocol.UPDATE_GAUSSIANS)){
+
+            if        (broadcastFilter.equals(MessagesProtocol.UPDATE_GAUSSIANS)){
                 updateGaussians();
-            } else if (command.equals(MessagesProtocol.COLLECTDATA_MOTIONLOCATION) ||
-                       command.equals(MessagesProtocol.COLLECTDATA_LOCATION)) {
+            } else if (broadcastFilter.equals(MessagesProtocol.COLLECTDATA_MOTIONLOCATION)) {
                 mLocationRequestedByBroadcast = true;
-                deviceBroadcast = command;
+            } else if (broadcastFilter.equals(MessagesProtocol.WEARSENSORSMSG)){
+                handleWearMessage(msg);
             }
+
 
         }
     }

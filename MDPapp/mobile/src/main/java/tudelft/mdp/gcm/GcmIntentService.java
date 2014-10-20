@@ -65,8 +65,13 @@ public class GcmIntentService extends IntentService {
 
     protected void handleMessage(String msg){
         String[] parts = msg.split("\\|");
-        Integer msgType = Integer.valueOf(parts[0]);
-        String msgLoad = parts[1];
+        Integer msgType = 0;
+        String msgLoad = msg;
+
+        if(parts.length > 1) {
+            msgType = Integer.valueOf(parts[0]);
+            msgLoad = parts[1];
+        }
 
         Intent messageIntent;
         switch (msgType){
@@ -100,8 +105,14 @@ public class GcmIntentService extends IntentService {
                 break;
             case MessagesProtocol.SENDGCM_MSG:
                 showToast(msgLoad);
+                Log.i(LOGTAG, "CMD received from GCM: " + MessagesProtocol.SENDGCM_MSG);
+                // Broadcast message to interested parties
+                messageIntent = new Intent(MessagesProtocol.MSG_RECEIVED);
+                messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
                 break;
             default:
+                showToast(msgLoad);
                 break;
         }
     }

@@ -68,6 +68,7 @@ public class MessagesProtocol {
     public static final String COLLECTDATA_LOCATION = "COLLECT_DATA_LOCATION";
     public static final String COLLECTDATA_MOTIONLOCATION = "COLLECT_DATA_MOTIONLOCATION";
     public static final String UPDATE_GAUSSIANS = "UPDATE_GAUSSIANS";
+    public static final String MSG_RECEIVED = "MSG_RECEIVED";
 
 
 

@@ -60,7 +60,7 @@
             </intent-filter>
         </service>
         <service
-            android:name="tudelft.mdp.locationTracker.LocationDetectionService"
+            android:name=".MdpWorkerService"
             android:enabled="true"
             android:exported="true" >
         </service>
