@@ -1,7 +1,7 @@
 % clearvars
-networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan\Location';
+% networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan\Location';
 NetFilelist    = dir(fullfile(networkdatasetspath, '*.txt'));
-nFiles   = length(NetFilelist);
+netFiles   = length(NetFilelist);
 
 %% Get Main header
     filename = NetFilelist(1).name;
@@ -10,7 +10,7 @@ nFiles   = length(NetFilelist);
     headers=ttable.Properties.VariableNames;
 
 
-for k = 2:nFiles
+for k = 2:netFiles
     filename = NetFilelist(k).name;
     FileToRead=fullfile(networkdatasetspath,filename);
     ttable=readtable(FileToRead);
@@ -36,10 +36,10 @@ headers=sort(headers);
 
 %% Get Coincidence Cell Vectors
     sh=size(headers);
-    IntersectionCell=cell(nFiles,sh(2)); %cell array containing the coincident networks, else is zero
-    IntersectionCell(:) = {zeros(nFiles)};
+    IntersectionCell=cell(netFiles,sh(2)); %cell array containing the coincident networks, else is zero
+    IntersectionCell(:) = {zeros(netFiles)};
     
-for k = 1:nFiles
+for k = 1:netFiles
     filename = NetFilelist(k).name;
     FileToRead=fullfile(networkdatasetspath,filename);
     ttable=readtable(FileToRead);

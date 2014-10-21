@@ -12,10 +12,10 @@ clearvars
     %1 file of Sensors with name log_sensors_CUSTOMNAME_TIMESTAMP.txt
     %1 be 1 file of Networks with name log_networks_CUSTOMNAME_TIMESTAMP.txt
 
-    sensordatasetspath  = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan\Motion';
-    networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan\Location';
+    sensordatasetspath  = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan2\Motion';
+    networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan2\Location';
     resultsname='WekaResults.arff';
-    resultspath='C:\Users\LG\Dropbox\MDP_LAG\TestScan\';
+    resultspath='C:\Users\LG\Dropbox\MDP_LAG\TestScan2\';
     
     %% Precision of Other settings
     
@@ -46,7 +46,7 @@ clearvars
     % Tilt         =5
     % Rotation     =6
 %     ActSen=[1,2,3,4,5,6]; 
-     ActSen=[1,2]; 
+     ActSen=[1,2,3,4,5]; 
     
     %% arff Notes; write any coments here
 FileComments='This is a 1 line comment';
@@ -59,7 +59,7 @@ nFiles   = length(Filelist);
 
     %% Get Motion feats from all files
     SizeActSen=size(ActSen);
-    SensorftTable=array2table(zeros(1,1+18*SizeActSen(2)));
+    SensorftTable=array2table(zeros(1,1+21*SizeActSen(2)));
 for k = 1:nFiles
       filename = Filelist(k).name;
       
@@ -69,7 +69,9 @@ for k = 1:nFiles
         
         FileToRead=fullfile(sensordatasetspath,filename);
 
-        MainTable = readtable(FileToRead);
+        MainTable = readtable(FileToRead,'Delimiter','\t','ReadVariableNames',false);
+        MainTable(:,22)=[]; %erase the empty last column
+%         MainTable = readtable(FileToRead);
         Matrix_R = table2array(MainTable);
         sizeofM_R=size(Matrix_R);
 
@@ -85,7 +87,7 @@ for k = 1:nFiles
         end
 
         SampleSize=UpperLimit-LowerLimit;
-        SensorftCell=cell(1,1+18*SizeActSen(2));
+        SensorftCell=cell(1,1+21*SizeActSen(2));
 
        
    %% Sensors Loop of Sample
@@ -116,7 +118,7 @@ for k = 1:nFiles
                 timeSlot = 1;
             elseif timeMean < 120000000
                 timeSlot = 2;
-            elseif timeMean < 180000000
+            elseif timeMean < 210000000
                 timeSlot = 3;
             else
                 timeSlot = 4;
@@ -218,7 +220,7 @@ for k = 1:nFiles
             %% Sensor feats to CellArray
             
       
-            sstep=(Sensorft-1)*18+1;
+            sstep=(Sensorft-1)*21+1;
                        
             
             SensorftCell{1}= timeSlot;
@@ -238,12 +240,15 @@ for k = 1:nFiles
             SensorftCell{10+sstep}=mMagnitude;
             SensorftCell{11+sstep}=stdMagnitude;
             SensorftCell{12+sstep}=varMagnitude;
-            SensorftCell{13+sstep}=double(ZeroCrossX);
-            SensorftCell{14+sstep}=double(ZeroCrossY);
-            SensorftCell{15+sstep}=double(ZeroCrossZ);
-            SensorftCell{16+sstep}=double(FZeroCrossX);
-            SensorftCell{17+sstep}=double(FZeroCrossY);
-            SensorftCell{18+sstep}=double(FZeroCrossZ);
+            SensorftCell{13+sstep}=FundfreqX;
+            SensorftCell{14+sstep}=FundfreqY;
+            SensorftCell{15+sstep}=FundfreqZ;
+            SensorftCell{16+sstep}=double(ZeroCrossX);
+            SensorftCell{17+sstep}=double(ZeroCrossY);
+            SensorftCell{18+sstep}=double(ZeroCrossZ);
+            SensorftCell{19+sstep}=double(FZeroCrossX);
+            SensorftCell{20+sstep}=double(FZeroCrossY);
+            SensorftCell{21+sstep}=double(FZeroCrossZ);
 
 
         end %End of sensor feat extraction of 1 file
@@ -356,10 +361,7 @@ end
     for nnet=(1:sh(2))
     NameNetwork=networktable.Properties.VariableNames(nnet);
 
-        fprintf(fileID,'%s\n',strcat('@attribute',' mean_',char(NameNetwork),' numeric'));
-        fprintf(fileID,'%s\n',strcat('@attribute',' std_',char(NameNetwork),' numeric'));
-        fprintf(fileID,'%s\n',strcat('@attribute',' min_',char(NameNetwork),' numeric'));
-        fprintf(fileID,'%s\n',strcat('@attribute',' max_',char(NameNetwork),' numeric'));
+        fprintf(fileID,'%s\n',strcat('@attribute ',char(NameNetwork),' numeric'));
     end
         %% Print Class Attributes
 
