@@ -90,9 +90,11 @@ public class Utils {
 
         return name;
     }
+
     public static Double getMinTimestamp(int mode) {
         Double minDate = 0.0;
 
+        // TODO
         if (mode == UserPreferences.ALLTIME){
             minDate = 0.0;
         }

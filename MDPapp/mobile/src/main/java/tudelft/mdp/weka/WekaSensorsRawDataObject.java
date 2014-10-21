@@ -1,5 +1,7 @@
 package tudelft.mdp.weka;
 
+import android.util.Log;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -11,6 +13,8 @@ import tudelft.mdp.fileManagement.FileCreator;
  */
 public class WekaSensorsRawDataObject {
 
+
+    private static final String LOGTAG = "WekaSensorsRawDataObject";
     private ArrayList<String> mSensorReadings = new ArrayList<String>();
 
     public WekaSensorsRawDataObject() {
@@ -32,6 +36,8 @@ public class WekaSensorsRawDataObject {
         if (mSensorReadings.size() == 0){
             return;
         }
+
+        Log.i(LOGTAG, "saveToFile");
 
         FileCreator mFileCreator = new FileCreator("MOTION_" + event + "_", Constants.DIRECTORY_TRAINING);
         mFileCreator.openFileWriter();

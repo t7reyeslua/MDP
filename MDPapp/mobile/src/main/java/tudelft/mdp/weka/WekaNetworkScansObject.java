@@ -1,5 +1,7 @@
 package tudelft.mdp.weka;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +13,7 @@ import tudelft.mdp.utils.Utils;
 
 public class WekaNetworkScansObject {
 
+    private static final String LOGTAG = "WekaNetworkScansObject";
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans = new ArrayList<ArrayList<NetworkInfoObject>>();
     private HashMap<String, ArrayList<Double>> mNetworksValues = new HashMap<String, ArrayList<Double>>();
     private HashMap<String, ArrayList<Double>> mNetworksFeatures = new HashMap<String, ArrayList<Double>>();
@@ -32,6 +35,7 @@ public class WekaNetworkScansObject {
     }
 
     public void buildArraysByNetworks(){
+
         for (ArrayList<NetworkInfoObject> singleNetworkScan : mNetworkScans){
             for (NetworkInfoObject networkInfoFromScan : singleNetworkScan){
                 ArrayList<Double> networkInfo = mNetworksValues.get(networkInfoFromScan.getBSSID());
@@ -42,11 +46,16 @@ public class WekaNetworkScansObject {
                 mNetworksValues.put(networkInfoFromScan.getBSSID(), networkInfo);
             }
         }
+
+        Log.i(LOGTAG, "buildArraysByNetworks. No. of networks: " + mNetworksValues.size());
     }
 
 
     public void buildNetworkFeatures(){
+
         buildArraysByNetworks();
+
+        Log.i(LOGTAG, "buildNetworkFeatures");
         for (String networkBSSID : mNetworksValues.keySet()){
             ArrayList<Double> networkFeatures = new ArrayList<Double>();
 
@@ -68,6 +77,8 @@ public class WekaNetworkScansObject {
     public void saveToFile(String event){
         buildNetworkFeatures();
 
+
+        Log.i(LOGTAG, "saveToFile");
         if (mNetworksFeatures.size() == 0){
             return;
         }
@@ -96,7 +107,7 @@ public class WekaNetworkScansObject {
             }
 
         }
-        values = values.substring(0, header.length()-1);
+        values = values.substring(0, values.length()-1);
         mFileCreator.saveData(values + "\n");
 
         mFileCreator.closeFileWriter();

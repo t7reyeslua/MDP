@@ -27,6 +27,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
@@ -37,6 +38,7 @@ import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
+import tudelft.mdp.locationTracker.LocationEstimator;
 import tudelft.mdp.locationTracker.NetworkInfoObject;
 import tudelft.mdp.locationTracker.NetworkScanService;
 import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
@@ -404,30 +406,44 @@ public class MdpWorkerService extends Service implements
 
     }
 
+    private void estimateLocation(ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans){
+        LocationEstimator locationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
+        HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
+
+        // TODO : Save 3 highest values in DB
+
+
+    }
+
+
     /**
      * Handles the scan result appropriately
      * @param recentScanResult The last scan result received from the NetworkScanService
      */
     private void handleScanResult(ArrayList<NetworkInfoObject> recentScanResult){
         // Apply calibration params to received scan.
-        applyCalibrationParams(recentScanResult);
+        ArrayList<NetworkInfoObject> newRecentScanResult = new ArrayList<NetworkInfoObject>(recentScanResult);
+        applyCalibrationParams(newRecentScanResult);
 
         if (mLocationRequestedByTimeTick) {
-            if (numScansCount > numScans) {
-                mNetworkScansTimerTick.add(recentScanResult);
+            if (numScansCount < numScans) {
+                mNetworkScansTimerTick.add(newRecentScanResult);
                 numScansCount++;
             } else {
-                //TODO: Consolidate scan results and determine location
-                mLocationRequestedByTimeTick = false;
 
+                Log.i(LOGTAG, "Finished required scans for determining location by TICK.");
+                estimateLocation(mNetworkScansTimerTick);
+                mLocationRequestedByTimeTick = false;
             }
         }
 
         if (mLocationRequestedByBroadcast){
-            if (numScansCountForMotionLocation > numScansForMotionLocation){
-                mNetworkScansBroadcastTick.add(recentScanResult);
+            if (numScansCountForMotionLocation < numScansForMotionLocation){
+                mNetworkScansBroadcastTick.add(newRecentScanResult);
                 numScansCountForMotionLocation++;
             } else{
+
+                Log.i(LOGTAG, "Finished required scans for determining location by BROADCAST.");
                 mLocationRequestedByBroadcast = false;
                 dataCompleteLocation = true;
                 consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
@@ -439,6 +455,8 @@ public class MdpWorkerService extends Service implements
      * Initializes all required things for detection routine
      */
     private void detectLocation(){
+
+        Log.i(LOGTAG, "Start required scans for determining location by TICK.");
         mLocationRequestedByTimeTick = true;
         numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
         numScansCount = 0;
@@ -462,6 +480,7 @@ public class MdpWorkerService extends Service implements
     public void processFinishRequestGaussians(List<ApGaussianRecord> outputList){
         mGaussianRecords = new ArrayList<ApGaussianRecord>(outputList);
     }
+
 
 
     //Timer Tasks***********************************************************************************
@@ -497,6 +516,8 @@ public class MdpWorkerService extends Service implements
                 if (motionTickDone){
                     sendDataMapToWear(MessagesProtocol.STOPSENSING,
                             "STOP: MOTION DATA REQUESTED BY MOBILE");
+
+                    Log.i(LOGTAG, "Stop Motion Tick.");
                     this.cancel();
                 }
                 if (!motionTickDone){
@@ -519,6 +540,8 @@ public class MdpWorkerService extends Service implements
      */
     private void consolidateMotionLocationData (boolean isDataCompleteMotion, boolean isDataCompleteLocation){
 
+
+        Log.w(LOGTAG, "consolidateMotionLocationData");
         if (isDataCompleteLocation && isDataCompleteMotion){
             //TODO Save/upload both data sets
             WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(mNetworkScansBroadcastTick);
@@ -539,8 +562,11 @@ public class MdpWorkerService extends Service implements
     private void startMotionLocationDataRecollection(String event){
         deviceEvent = event;
 
+        Log.i(LOGTAG, "Start Motion Location Data Recollection by BROADCAST.");
+
         sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
         sendDataMapToWear(MessagesProtocol.STARTSENSING, "START: MOTION DATA REQUESTED BY MOBILE");
+        Log.i(LOGTAG, "Start Motion Tick.");
         motionTickDone = false;
         int motionWindow = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
         mTimerMotion = new Timer();

@@ -61,25 +61,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             NfcRecord mDeviceInfo = mDeviceEndpointService.getDevice(nfcTag).execute();
             Log.e(TAG, "Previously registered device: TRUE");
 
-            boolean mTraining = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getBoolean(UserPreferences.TRAINING_PHASE, false);
 
-            if (!mTraining) {
-                // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
-                new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
-                        nfcTag,
-                        context);
-            } else {
-                //training phase is ON. Then record the motion and location for the next time window
-
-                Log.i(TAG, "CMD: " + MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
-                // Broadcast message to interested parties
-                Intent messageIntent = new Intent(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
-                messageIntent.putExtra(MessagesProtocol.MESSAGE, nfcTag + "|" + mDeviceInfo.getType());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(messageIntent);
-
-
-            }
 
             /* Tag has been previously registered. Now verify the last thing the user did with the device*/
             NfcLogRecord mUserDeviceStatus = mDeviceLogEndpointService.getLastUserLogOfDevice(nfcTag, user).execute();
@@ -98,9 +80,18 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
                 Log.e(TAG, "Previous user interaction with device: TRUE. User: " +
                         mUserDeviceStatus.getUser() + " / Status: " +
                         mUserDeviceStatus.getState().toString());
+
+
                 newLogRecord.setNfcId(nfcTag);
                 newLogRecord.setUser(user);
                 newLogRecord.setState(!mUserDeviceStatus.getState());
+
+                //Ask for motion location data if the user is turning on the device
+                if (newLogRecord.getState()) {
+                    Log.w(TAG, "User is turning ON device. Ask for motion-location data");
+                    askForMotionLocation(mDeviceInfo);
+                }
+
             }
 
             Log.d(TAG, "Inserting new nfc log record.");
@@ -150,4 +141,27 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     }
 
 
+    private void askForMotionLocation(NfcRecord mDeviceInfo){
+        boolean mTraining = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(UserPreferences.TRAINING_PHASE, false);
+
+        if (!mTraining) {
+            // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
+            Log.w(TAG, "Broadcast to ALL users");
+            new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
+                    nfcTag,
+                    context);
+        } else {
+            //training phase is ON. Then record the motion and location for the next time window
+
+            Log.w(TAG, "Training Phase ON. Broadcast to THIS user only");
+            Log.i(TAG, "CMD: " + MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+            // Broadcast message to interested parties
+            Intent messageIntent = new Intent(MessagesProtocol.COLLECTDATA_MOTIONLOCATION);
+            messageIntent.putExtra(MessagesProtocol.MESSAGE, nfcTag + "|" + mDeviceInfo.getType());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(messageIntent);
+
+        }
+
+    }
 }
