@@ -25,7 +25,6 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,10 +37,11 @@ import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
-import tudelft.mdp.fileManagement.FileCreator;
 import tudelft.mdp.locationTracker.NetworkInfoObject;
 import tudelft.mdp.locationTracker.NetworkScanService;
 import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
+import tudelft.mdp.weka.WekaNetworkScansObject;
+import tudelft.mdp.weka.WekaSensorsRawDataObject;
 
 public class MdpWorkerService extends Service implements
         ServiceConnection,
@@ -81,7 +81,18 @@ public class MdpWorkerService extends Service implements
 
     private int numScans;
     private int numScansCount;
-    private Timer mTimer = new Timer();
+    private int numScansForMotionLocation = 4;
+    private int numScansCountForMotionLocation;
+    private boolean motionTickDone;
+    private boolean dataCompleteMotion;
+    private boolean dataCompleteLocation;
+    private String deviceEvent;
+    private Timer mTimerDetection = new Timer();
+    private Timer mTimerMotion = new Timer();
+
+    private ArrayList<String> mSensorReadings = new ArrayList<String>();
+    private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansTimerTick = new ArrayList<ArrayList<NetworkInfoObject>>();
+    private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansBroadcastTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
 
 
@@ -114,7 +125,7 @@ public class MdpWorkerService extends Service implements
         automaticBinding();
 
         int scanWindow = sharedPrefs.getInt(UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS, 30);
-        mTimer.scheduleAtFixedRate(new DetectLocationTick(), 0, scanWindow * 1000);
+        mTimerDetection.scheduleAtFixedRate(new DetectLocationTick(), 0, scanWindow * 1000);
 
         updateGaussians();
 
@@ -351,10 +362,13 @@ public class MdpWorkerService extends Service implements
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
                 Log.i(LOGTAG, msgLoad);
+                mSensorReadings.add(msgLoad);
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
                 Log.w(LOGTAG,"Stop sensor streaming from wear");
                 sendNotificationToWear(MessagesProtocol.STOPSENSINGSERVICE);
+                dataCompleteMotion = true;
+                consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
                 break;
 
             case MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE:
@@ -363,7 +377,6 @@ public class MdpWorkerService extends Service implements
             default:
                 break;
         }
-
     }
 
 
@@ -373,49 +386,65 @@ public class MdpWorkerService extends Service implements
     //Location Detection methods *******************************************************************
 
     /**
+     * applyCalibrationParams to read scans.
+     * @param recentScanResult to be adjusted
+     */
+    private void applyCalibrationParams(ArrayList<NetworkInfoObject> recentScanResult){
+
+        Float calibrationM = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString(UserPreferences.CALIBRATION_M_PREF, "1.0"));
+
+        Float calibrationB = Float.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString(UserPreferences.CALIBRATION_B_PREF, "0.0"));
+
+        for (NetworkInfoObject networkInfo : recentScanResult) {
+            Double calibratedValue = calibrationM * networkInfo.getRSSI() + calibrationB;
+            networkInfo.setMean(calibratedValue);
+        }
+
+    }
+
+    /**
      * Handles the scan result appropriately
      * @param recentScanResult The last scan result received from the NetworkScanService
      */
     private void handleScanResult(ArrayList<NetworkInfoObject> recentScanResult){
-        //TODO manage scan result received
-        if (numScansCount > numScans){
+        // Apply calibration params to received scan.
+        applyCalibrationParams(recentScanResult);
 
-            numScansCount++;
-        } else {
+        if (mLocationRequestedByTimeTick) {
+            if (numScansCount > numScans) {
+                mNetworkScansTimerTick.add(recentScanResult);
+                numScansCount++;
+            } else {
+                //TODO: Consolidate scan results and determine location
+                mLocationRequestedByTimeTick = false;
 
+            }
         }
 
+        if (mLocationRequestedByBroadcast){
+            if (numScansCountForMotionLocation > numScansForMotionLocation){
+                mNetworkScansBroadcastTick.add(recentScanResult);
+                numScansCountForMotionLocation++;
+            } else{
+                mLocationRequestedByBroadcast = false;
+                dataCompleteLocation = true;
+                consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
+            }
+        }
     }
 
     /**
      * Initializes all required things for detection routine
      */
     private void detectLocation(){
-        //TODO: Initialize all required things for detection routine
-
         mLocationRequestedByTimeTick = true;
         numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
         numScansCount = 0;
+        mNetworkScansTimerTick.clear();
     }
 
-
-    /**
-     * Timer that runs every (UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS) seconds
-     * and calculates a new location.
-     */
-    private class DetectLocationTick extends TimerTask {
-        @Override
-        public void run() {
-            Log.w(LOGTAG, "DetectLocationTick");
-            try {
-                detectLocation();
-
-            } catch (Throwable t) {
-            //you should always ultimately catch all exceptions in timer tasks.
-                Log.e("DetectLocationTick", "DetectLocationTick Failed.", t);
-            }
-        }
-    }
 
     /**
      * Starts the async task to update gaussians from the info in cloud DB
@@ -435,9 +464,97 @@ public class MdpWorkerService extends Service implements
     }
 
 
+    //Timer Tasks***********************************************************************************
+
+    /**
+     * Timer that runs every (UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS) seconds
+     * and calculates a new location.
+     */
+    private class DetectLocationTick extends TimerTask {
+        @Override
+        public void run() {
+            Log.w(LOGTAG, "DetectLocationTick");
+            try {
+                detectLocation();
+
+            } catch (Throwable t) {
+                //you should always ultimately catch all exceptions in timer tasks.
+                Log.e("DetectLocationTick", "DetectLocationTick Failed.", t);
+            }
+        }
+    }
 
 
 
+    /**
+     * Timer that runs every time a Motion Request is asked.
+     */
+    private class MotionWearTick extends TimerTask {
+        @Override
+        public void run() {
+            Log.w(LOGTAG, "MotionWearTick");
+            try {
+                if (motionTickDone){
+                    sendDataMapToWear(MessagesProtocol.STOPSENSING,
+                            "STOP: MOTION DATA REQUESTED BY MOBILE");
+                    this.cancel();
+                }
+                if (!motionTickDone){
+                    motionTickDone = true;
+                }
+
+            } catch (Throwable t) {
+                //you should always ultimately catch all exceptions in timer tasks.
+                Log.e("MotionWearTick", "MotionWearTick Failed.", t);
+            }
+        }
+    }
+
+
+    //Motion-Location *********************************************************************
+    /**
+     * consolidateMotionLocationData
+     * @param isDataCompleteMotion True if all motion data has been received from Wear
+     * @param isDataCompleteLocation True if all location data has been received from NetworkScanService
+     */
+    private void consolidateMotionLocationData (boolean isDataCompleteMotion, boolean isDataCompleteLocation){
+
+        if (isDataCompleteLocation && isDataCompleteMotion){
+            //TODO Save/upload both data sets
+            WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(mNetworkScansBroadcastTick);
+            WekaSensorsRawDataObject wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
+
+            boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, false);
+            if (trainingPhase){
+                wekaSensorsRawDataObject.saveToFile(deviceEvent);
+                wekaNetworkScansObject.saveToFile(deviceEvent);
+            }
+        }
+
+    }
+
+    /**
+     * Initializes the required variables for requesting motion and location data
+     */
+    private void startMotionLocationDataRecollection(String event){
+        deviceEvent = event;
+
+        sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
+        sendDataMapToWear(MessagesProtocol.STARTSENSING, "START: MOTION DATA REQUESTED BY MOBILE");
+        motionTickDone = false;
+        int motionWindow = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
+        mTimerMotion = new Timer();
+        mTimerMotion.scheduleAtFixedRate(new MotionWearTick(), 0, motionWindow * 1000);
+
+        mLocationRequestedByBroadcast = true;
+        numScansCountForMotionLocation = 0;
+
+        mSensorReadings.clear();
+        mNetworkScansBroadcastTick.clear();
+
+        dataCompleteLocation = false;
+        dataCompleteMotion = false;
+    }
 
 
     //Communication interaction routines with other services and threads****************************
@@ -555,9 +672,39 @@ public class MdpWorkerService extends Service implements
             if        (broadcastFilter.equals(MessagesProtocol.UPDATE_GAUSSIANS)){
                 updateGaussians();
             } else if (broadcastFilter.equals(MessagesProtocol.COLLECTDATA_MOTIONLOCATION)) {
-                mLocationRequestedByBroadcast = true;
+                startMotionLocationDataRecollection(msg);
             } else if (broadcastFilter.equals(MessagesProtocol.WEARSENSORSMSG)){
                 handleWearMessage(msg);
+            } else if (broadcastFilter.equals(MessagesProtocol.MSG_RECEIVED)){
+                // Test the other ones
+                String[] parts = msg.split("#");
+                Integer msgType = 0;
+                String msgLoad = msg;
+
+                if(parts.length > 1) {
+                    msgType = Integer.valueOf(parts[0]);
+                    msgLoad = parts[1];
+
+                    switch (msgType){
+                        case MessagesProtocol.SENDGCM_CMD_UPDATEGAUSSIANS:
+                            updateGaussians();
+                            break;
+                        case MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION:
+                            startMotionLocationDataRecollection(msgLoad);
+                            break;
+                        case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
+                        case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
+                        case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
+                            String wearMsg = msg.replace("#","\\|");
+                            handleWearMessage(wearMsg);
+                            break;
+                        default:
+                            break;
+                    }
+
+
+
+                }
             }
 
 

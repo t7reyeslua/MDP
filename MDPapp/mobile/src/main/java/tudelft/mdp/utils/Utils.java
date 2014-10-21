@@ -116,10 +116,10 @@ public class Utils {
         return minDate;
     }
 
-    public static Double getStd(ArrayList<Integer> list){
+    public static Double getStdInt(ArrayList<Integer> list){
         Double std = 0.0;
         if(!list.isEmpty()) {
-            Double mean = getMean(list);
+            Double mean = getMeanInt(list);
             for (Integer n : list) {
                 Double delta = n - mean;
                 std += (delta * delta);
@@ -129,10 +129,34 @@ public class Utils {
         return std;
     }
 
-    public static Double getMean(ArrayList<Integer> list){
+    public static Double getMeanInt(ArrayList<Integer> list){
         Double sum = 0.0;
         if(!list.isEmpty()) {
             for (Integer n : list) {
+                sum += n;
+            }
+            return sum / list.size();
+        }
+        return sum;
+    }
+
+    public static Double getStd(ArrayList<Double> list){
+        Double std = 0.0;
+        if(!list.isEmpty()) {
+            Double mean = getMean(list);
+            for (Double n : list) {
+                Double delta = n - mean;
+                std += (delta * delta);
+            }
+            std = Math.sqrt(std/list.size());
+        }
+        return std;
+    }
+
+    public static Double getMean(ArrayList<Double> list){
+        Double sum = 0.0;
+        if(!list.isEmpty()) {
+            for (Double n : list) {
                 sum += n;
             }
             return sum / list.size();

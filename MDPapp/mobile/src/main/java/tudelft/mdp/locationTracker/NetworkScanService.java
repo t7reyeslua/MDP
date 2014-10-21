@@ -98,7 +98,7 @@ public class NetworkScanService extends Service {
                 NetworkInfoObject networkInfo = new NetworkInfoObject(
                         result.SSID,
                         result.BSSID,
-                        result.level);
+                        (double) result.level);
                 scanResult.add(networkInfo);
             }
             getNewScanResults();

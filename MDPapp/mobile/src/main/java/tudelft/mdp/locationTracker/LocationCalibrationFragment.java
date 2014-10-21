@@ -359,7 +359,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
     private void calculateScansMeanAndStd(ArrayList<NetworkInfoObject> scans){
         for (NetworkInfoObject accumulatedScan : scans){
 
-            ArrayList<Integer> trimmedList = alphaTrimmerFilter(accumulatedScan.getRSSIarray());
+            ArrayList<Double> trimmedList = alphaTrimmerFilter(accumulatedScan.getRSSIarray());
             Double mean = Utils.getMean(trimmedList);
             Double std = Utils.getStd(trimmedList);
 
@@ -369,7 +369,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         }
     }
 
-    private ArrayList<Integer> alphaTrimmerFilter(ArrayList<Integer> unfilteredList){
+    private ArrayList<Double> alphaTrimmerFilter(ArrayList<Double> unfilteredList){
         //Apply Alpha Trimmer
         Collections.sort(unfilteredList);
         int size = unfilteredList.size();
@@ -378,7 +378,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         double alphaCoeff = Double.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                 .getString(UserPreferences.ALPHA_TRIMMER_COEFFICIENT, "0.2"));
         int  elementsToTrimm = (int) Math.floor(size * alphaCoeff);
-        ArrayList<Integer> filteredList = new ArrayList<Integer>(unfilteredList.subList(elementsToTrimm, size - elementsToTrimm ));
+        ArrayList<Double> filteredList = new ArrayList<Double>(unfilteredList.subList(elementsToTrimm, size - elementsToTrimm ));
 
         return filteredList;
     }
@@ -398,6 +398,8 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
 
     private void applyCalibrationParams(){
         //Apply calibration params if you are MASTER (already calibrated)
+        // It is applied to the mean since it is only done until the very end when the mean
+        // has already been calculated. It is not being applied to each single scan.
         if (isMaster){
             for (NetworkInfoObject network : aggregatedScanResults){
                 Double calibratedValue = calibrationM * network.getMean() + calibrationB;

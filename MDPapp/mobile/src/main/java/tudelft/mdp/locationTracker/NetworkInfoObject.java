@@ -12,19 +12,19 @@ public class NetworkInfoObject implements Serializable {
     public String SSID;
     public String BSSID;
 
-    public Integer RSSI;
+    public Double RSSI;
     public Integer count;
 
     public Double mean;
     public Double std;
 
-    public ArrayList<Integer> RSSIarray = new ArrayList<Integer>();
+    public ArrayList<Double> RSSIarray = new ArrayList<Double>();
 
     public NetworkInfoObject(){
     }
 
     public NetworkInfoObject(String SSID, String BSSID,
-            Integer RSSI) {
+            Double RSSI) {
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.RSSI = RSSI;
@@ -41,24 +41,24 @@ public class NetworkInfoObject implements Serializable {
         this.count = count;
     }
 
-    public void addRSSI(Integer level){
+    public void addRSSI(Double level){
         RSSIarray.add(level);
     }
 
-    public ArrayList<Integer> getRSSIarray() {
+    public ArrayList<Double> getRSSIarray() {
         return RSSIarray;
     }
 
 
-    public void setRSSIarray(ArrayList<Integer> RSSIarray) {
+    public void setRSSIarray(ArrayList<Double> RSSIarray) {
         this.RSSIarray = RSSIarray;
     }
 
-    public Integer getRSSI() {
+    public Double getRSSI() {
         return RSSI;
     }
 
-    public void setRSSI(Integer RSSI) {
+    public void setRSSI(Double RSSI) {
         this.RSSI = RSSI;
     }
 

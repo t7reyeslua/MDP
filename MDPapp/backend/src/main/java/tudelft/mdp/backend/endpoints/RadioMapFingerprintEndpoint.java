@@ -147,7 +147,7 @@ public class RadioMapFingerprintEndpoint {
             @Named("bssid") String bssid,
             @Named("place") String place,
             @Named("zone") String zone,
-            @Named("rssi") Integer rssi) {
+            @Named("rssi") Double rssi) {
 
         LOG.info("Calling getApHistogramInZone method");
 

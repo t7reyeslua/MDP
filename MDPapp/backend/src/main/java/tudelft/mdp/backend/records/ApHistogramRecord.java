@@ -27,7 +27,7 @@ public class ApHistogramRecord {
 
 
     @Index
-    private Integer rssi;
+    private Double rssi;
 
     private Integer count;
 
@@ -76,11 +76,11 @@ public class ApHistogramRecord {
         this.zone = zone;
     }
 
-    public Integer getRssi() {
+    public Double getRssi() {
         return rssi;
     }
 
-    public void setRssi(Integer rssi) {
+    public void setRssi(Double rssi) {
         this.rssi = rssi;
     }
 

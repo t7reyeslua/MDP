@@ -327,7 +327,7 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
     private void applyCalibrationParams(ArrayList<NetworkInfoObject> recentScanResult){
 
         for (NetworkInfoObject networkInfo : recentScanResult) {
-            Double calibratedValue = calibrationM * networkInfo.getMean() + calibrationB;
+            Double calibratedValue = calibrationM * networkInfo.getRSSI() + calibrationB;
             networkInfo.setMean(calibratedValue);
         }
 
@@ -343,6 +343,8 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         for(NetworkInfoObject networkInfo : recentScanResult){
             // Check if the particular read RSSI level has been seen before for this particular network
             boolean alreadyExists = false;
+            // TODO: check if RSSI value needs to be rounded after calibration.
+
             for (ApHistogramRecord existentInfo : localHistogram){
                 if ((networkInfo.getRSSI().equals(existentInfo.getRssi())) &&
                     (networkInfo.getBSSID().equals(existentInfo.getBssid()))){

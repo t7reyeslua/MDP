@@ -23,7 +23,7 @@ public class LocationFingerprintRecord {
     private String zone;
 
     @Index
-    private Integer rssi;
+    private Double rssi;
 
     @Index
     private String timeOfDay;
@@ -32,7 +32,7 @@ public class LocationFingerprintRecord {
     }
 
     public void buildLocationFingerprintRecord(String ssid, String bssid, String place, String zone,
-            Integer rssi, String timeOfDay) {
+            Double rssi, String timeOfDay) {
         this.ssid = ssid;
         this.bssid = bssid;
         this.place = place;
@@ -73,11 +73,11 @@ public class LocationFingerprintRecord {
         this.zone = zone;
     }
 
-    public Integer getRssi() {
+    public Double getRssi() {
         return rssi;
     }
 
-    public void setRssi(Integer rssi) {
+    public void setRssi(Double rssi) {
         this.rssi = rssi;
     }
 
