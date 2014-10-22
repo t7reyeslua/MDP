@@ -49,7 +49,7 @@ fileID = fopen(FileToRead,'r');
 fSpecX3=' %f %f %f';
 fSpecX5=' %f %f %f %f %f';
 %num(1),timestamp(1),Acc(3),gyro(3),gravity(3),magnet(3),linAcc(3),tilt(3),Rotation(5)
-formatSpec = strcat('%d %f',fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX5,);
+formatSpec = strcat('%d %f',fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX5);
 sizeM = [25 Inf];
 
 
