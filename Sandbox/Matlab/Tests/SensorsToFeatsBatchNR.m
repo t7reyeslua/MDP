@@ -1,25 +1,22 @@
 % Author: Luis A. Gonzalez
-% Date	: 23-09-2014
-% Brief	: Matlab script. Accel data to Features of a folder
-% Reads/store all dataset, calculates all features of the Sample only
-% Start and Windowframe need to be set, change after first vizualization.
-% Returns 'Results.txt'
-
+% Date	: 16-10-2014
+% Brief	: Reads all the .txt files of a folder and gives back the .arff
+% Only takes Sensors of smartwatch
 clearvars 
 
 %% Settings
-    % Defined path of Sets and output file, Folder of Sets must not contain
-    % anything else than Sets, the data should be  '%d %d %f %f %f' or else
-    % to be changed in proper line
+    %% File Handling 
+    % Folder of Sets must not containother than Sets,
+    %the data should be  '%d %d %f %f %f ...'
 
     datasetspath  = 'C:\Users\LG\Dropbox\SENSORS\BrushT1';
     resultsname='WekaTBrushResults2.arff';
     resultspath='C:\Users\LG\Dropbox\SENSORS\';
     
-    %Precision of the results Int and decimal point and FFT
+    %% Precision of Other settings
     pNum='4';
     pDec='4';
-    fftN=200; % FFT resolution biggger the more resolution
+    fftN=500; % FFT resolution biggger the more resolution
 
     % Sample window
     LowerLimit=1; %Min 1
@@ -28,23 +25,30 @@ clearvars
     %Filter properties
     cutfreq=2.6; %Cutt off frequency (low pass Butterworth filter)
     
-    %Choose Features 1 is Enable
+    %% Features to enable (1 is Enable)
     ftTDomain=1;        %mean 3x, std dev 3x, variance 3,x & Magnitudes of this values
     ftTCovariance=0;    %2x2 matrices of covariance relations xy,yz,zx.
     ftfft=1;            %fast furier transform
     ftfilter=1;         %filter
     
-    ActSen=2; %number of active sensors, 6 is without rotation
+    %% Sensors to enable
+    % number of active sensors (see ref )
+    % Example: just Tilt and Gyro: ActSen=[5,2];
+    % Accelerometer=1
+    % Gyroscope    =2
+    % Magnetometer =3
+    % Linear Acc   =4
+    % Tilt         =5
+    % Rotation     =6
+    ActSen=[1,2,3,4,5,6]; 
     
-    %Care to update Atributes list (line 44)
-
-%% arff Notes; write any coments here
+    %% arff Notes; write any coments here
 FileComments='This is a 1 line comment';
 
+%% PROGRAM STARTS
 
+    %% Writting header in Results
 
-%% Writting header in Results
-UserUpperlimit=LowerLimit+WindowSize-1;
 
 Filelist    = dir(fullfile(datasetspath, '*.txt'));
 nFiles   = length(Filelist);
@@ -63,27 +67,32 @@ fprintf(fileID,'%s\n\n','@relation Monitoring');
                 'Til'; %5
                 'Rot']; %6
     GSets=cellstr(GTitles);
+    
+%     ActSen=ActSen+2;%to skip timestamp and number
+    SizeActSen=size(ActSen);
+    SizeActSen(2);
 
+    %% Print @attributes
 
-%% Print @attributes
-for nsensors=(1:ActSen)
+for nsensors=(1:SizeActSen(2))
+    sensortoread=ActSen(nsensors);
     if(ftTDomain==1)
-        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' meanX_',GSets{nsensors},' numeric'),strcat('@attribute',' meanY_',GSets{nsensors},' numeric'),strcat('@attribute',' meanZ_',GSets{nsensors},' numeric'));
-        if(nsensors==7)
-            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' meanA_',GSets{nsensors},' numeric'),strcat('@attribute',' meanB_',GSets{nsensors},' numeric'));
+        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' meanX_',GSets{sensortoread},' numeric'),strcat('@attribute',' meanY_',GSets{sensortoread},' numeric'),strcat('@attribute',' meanZ_',GSets{sensortoread},' numeric'));
+        if(sensortoread==7)
+            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' meanA_',GSets{sensortoread},' numeric'),strcat('@attribute',' meanB_',GSets{sensortoread},' numeric'));
         end
         
-        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' stdX_',GSets{nsensors},' numeric'),strcat('@attribute',' stdY_',GSets{nsensors},' numeric'),strcat('@attribute',' stdZ_',GSets{nsensors},' numeric'));
-        if(nsensors==7)
-            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' stdA_',GSets{nsensors},' numeric'),strcat('@attribute',' stdB_',GSets{nsensors},' numeric'));
+        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' stdX_',GSets{sensortoread},' numeric'),strcat('@attribute',' stdY_',GSets{sensortoread},' numeric'),strcat('@attribute',' stdZ_',GSets{sensortoread},' numeric'));
+        if(sensortoread==7)
+            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' stdA_',GSets{sensortoread},' numeric'),strcat('@attribute',' stdB_',GSets{sensortoread},' numeric'));
         end
         
-        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' varX_',GSets{nsensors},' numeric'),strcat('@attribute',' varY_',GSets{nsensors},' numeric'),strcat('@attribute',' varZ_',GSets{nsensors},' numeric'));
-        if(nsensors==7)
-            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' varA_',GSets{nsensors},' numeric'),strcat('@attribute',' varB_',GSets{nsensors},' numeric'));
+        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' varX_',GSets{sensortoread},' numeric'),strcat('@attribute',' varY_',GSets{sensortoread},' numeric'),strcat('@attribute',' varZ_',GSets{sensortoread},' numeric'));
+        if(sensortoread==7)
+            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' varA_',GSets{sensortoread},' numeric'),strcat('@attribute',' varB_',GSets{sensortoread},' numeric'));
         end
         
-        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' MeanMag_',GSets{nsensors},' numeric'),strcat('@attribute',' StdMag_',GSets{nsensors},' numeric'),strcat('@attribute',' VarMag_',GSets{nsensors},' numeric'));
+        fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' MeanMag_',GSets{sensortoread},' numeric'),strcat('@attribute',' StdMag_',GSets{sensortoread},' numeric'),strcat('@attribute',' VarMag_',GSets{sensortoread},' numeric'));
     else
     end
 
@@ -94,30 +103,28 @@ for nsensors=(1:ActSen)
 %     end
 
     if(ftfft==1)
-       fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' FundFreqX_',GSets{nsensors},' numeric'),strcat('@attribute',' FundFreqY_',GSets{nsensors},' numeric'),strcat('@attribute',' FundFreqZ_',GSets{nsensors},' numeric'));
-        if(nsensors==7)
-            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' FundFreqA_',GSets{nsensors},' numeric'),strcat('@attribute',' FundFreqB_',GSets{nsensors},' numeric'));
+       fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' FundFreqX_',GSets{sensortoread},' numeric'),strcat('@attribute',' FundFreqY_',GSets{sensortoread},' numeric'),strcat('@attribute',' FundFreqZ_',GSets{sensortoread},' numeric'));
+        if(sensortoread==7)
+            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' FundFreqA_',GSets{sensortoread},' numeric'),strcat('@attribute',' FundFreqB_',GSets{sensortoread},' numeric'));
         end
  
     end
 
     if(ftfilter==1)
-       fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' ZeroCrossX_',GSets{nsensors},' numeric'),strcat('@attribute',' ZeroCrossY_',GSets{nsensors},' numeric'),strcat('@attribute',' ZeroCrossZ_',GSets{nsensors},' numeric'));
-        if(nsensors==7)
-            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' ZeroCrossA_',GSets{nsensors},' numeric'),strcat('@attribute',' ZeroCrossB_',GSets{nsensors},' numeric'));
+       fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' ZeroCrossX_',GSets{sensortoread},' numeric'),strcat('@attribute',' ZeroCrossY_',GSets{sensortoread},' numeric'),strcat('@attribute',' ZeroCrossZ_',GSets{sensortoread},' numeric'));
+        if(sensortoread==7)
+            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' ZeroCrossA_',GSets{sensortoread},' numeric'),strcat('@attribute',' ZeroCrossB_',GSets{sensortoread},' numeric'));
         end
  
-       fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' FZeroCrossX_',GSets{nsensors},' numeric'),strcat('@attribute',' FZeroCrossY_',GSets{nsensors},' numeric'),strcat('@attribute',' FZeroCrossZ_',GSets{nsensors},' numeric'));
-        if(nsensors==7)
-            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' FZeroCrossA_',GSets{nsensors},' numeric'),strcat('@attribute',' FZeroCrossB_',GSets{nsensors},' numeric'));
+       fprintf(fileID,'%s\n%s\n%s\n',strcat('@attribute',' FZeroCrossX_',GSets{sensortoread},' numeric'),strcat('@attribute',' FZeroCrossY_',GSets{sensortoread},' numeric'),strcat('@attribute',' FZeroCrossZ_',GSets{sensortoread},' numeric'));
+        if(sensortoread==7)
+            fprintf(fileID,'%s\n%s\n',strcat('@attribute',' FZeroCrossA_',GSets{sensortoread},' numeric'),strcat('@attribute',' FZeroCrossB_',GSets{sensortoread},' numeric'));
         end
  
     end
 end
 
-
-
-%% Print Class Attributes
+    %% Print Class Attributes
 
 for k = 1:nFiles
 
@@ -136,9 +143,12 @@ fprintf(fileID,'@data\n');
 fclose(fileID);
 
 fprintf('Processed: \n');
+
+    %% Get feats from all files
 for k = 1:nFiles
       filename = Filelist(k).name;
-    %% Proper function analyzed
+      
+    %% Creating main Array (scanfile)
     FileToRead=fullfile(datasetspath,filename);
 
     fileID = fopen(FileToRead,'r');
@@ -155,7 +165,11 @@ for k = 1:nFiles
     % Change transpose
     Matrix_R = Matrix_R';  
 
-    % All features 
+    % Correct limits
+    if(LowerLimit<=0)
+        LowerLimit=1;
+    end
+    UserUpperlimit=LowerLimit+WindowSize-1;
     UpperLimit=UserUpperlimit;
     if(size(Matrix_R)<UpperLimit)
         LimitSize=size(Matrix_R);
@@ -164,10 +178,12 @@ for k = 1:nFiles
 
     SampleSize=UpperLimit-LowerLimit;
 
-    %% Sensors Loop
-    for SLoop=(1:ActSen)
+    
+    %% Sensors Loop of Sample
+    for SensorLoop=(1:SizeActSen(2))
+        Sensorft=ActSen(nsensors);
         %Creating the Sample
-        if(SLoop<7)
+        if(Sensorft<7)
            Sample = zeros(SampleSize,4);
             for i=(1:UpperLimit-LowerLimit)%timestamploop
                 Sample(i,1) = Matrix_R(LowerLimit+i,1);
@@ -175,7 +191,7 @@ for k = 1:nFiles
 
             for i=(1:UpperLimit-LowerLimit)
                 for j=(2:4)
-                Sample(i,j) = Matrix_R(LowerLimit+i,j+1+(SLoop-1)*3);
+                Sample(i,j) = Matrix_R(LowerLimit+i,j+1+(Sensorft-1)*3);
                 end
             end;
         else            
@@ -186,7 +202,7 @@ for k = 1:nFiles
 
             for i=(1:UpperLimit-LowerLimit)
                 for j=(2:6)
-                Sample(i,j) = Matrix_R(LowerLimit+i,j+1+(SLoop-1)*3);
+                Sample(i,j) = Matrix_R(LowerLimit+i,j+1+(Sensorft-1)*3);
                 end
             end;
         end
@@ -307,7 +323,7 @@ for k = 1:nFiles
 
         %% Printing Feature values
         if(ftTDomain==1)
-            if(SLoop<7)
+            if(Sensorft<7)
                 fprintf(fileID,precisionprint,meanX,meanY,meanZ);
                 fprintf(fileID,precisionprint,stdX,stdY,stdZ);
                 fprintf(fileID,precisionprint,varianceX,varianceY,varianceZ);
@@ -334,7 +350,7 @@ for k = 1:nFiles
 %         end
 
         if(ftfft==1)
-            if(SLoop<7)
+            if(Sensorft<7)
            fprintf(fileID,precisionprint,FundfreqX,FundfreqY,FundfreqZ);    
             else            
  
@@ -345,7 +361,7 @@ for k = 1:nFiles
 
         if(ftfilter==1)
             
-            if(SLoop<7)
+            if(Sensorft<7)
                fprintf(fileID,precisionprint,ZeroCrossX,ZeroCrossY,ZeroCrossZ); 
                fprintf(fileID,precisionprint,FZeroCrossX,FZeroCrossY,FZeroCrossZ);  
             else            
