@@ -148,7 +148,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         if (!mTraining) {
             // Broadcast the ON/OFF event to all users to identify what they are doing at the moment.
             Log.w(TAG, "Broadcast to ALL users");
-            new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION,
+            new GcmMessagingAsyncTask().execute(String.valueOf(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION),
                     nfcTag,
                     context);
         } else {

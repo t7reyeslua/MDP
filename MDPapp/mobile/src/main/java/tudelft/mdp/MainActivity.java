@@ -52,6 +52,7 @@ import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
 import tudelft.mdp.locationTracker.LocationCalibrationFragment;
 import tudelft.mdp.locationTracker.LocationFingerprintFragment;
 import tudelft.mdp.locationTracker.LocationHistoryFragment;
+import tudelft.mdp.locationTracker.LocatorFragment;
 import tudelft.mdp.ui.ExpandableListAdapter;
 import tudelft.mdp.activityMonitor.SensorViewerFragment;
 
@@ -444,6 +445,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                         .replace(R.id.content_frame, fragment, "id_locCalibration")
                         .commit();
                 break;
+            case NavigationDrawer.LOCATOR:
+                fragment =  new LocatorFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_locator")
+                        .commit();
+                break;
             case NavigationDrawer.DEVICEMANAGER:
                 fragment =  new DeviceManagerFragment();
                 fragmentManager.beginTransaction()
@@ -623,7 +630,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
     private void handleIntent(Intent intent) {
 
-        Log.d(TAG, "handleIntent");
+        Log.w(TAG, "handleIntent");
         String action = intent.getAction();
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             Log.d(TAG, action);
@@ -637,8 +644,18 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             }
         } else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
 
+            Log.d(TAG, action);
             // In case we would still use the Tech Discovered Intent
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            String tagId = ByteArrayToHexString(tag.getId());
+            Log.d(TAG, tagId);
+
+            String nfcUID = ByteArrayToHexString(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
+            Log.d(TAG, nfcUID);
+
+
+            executeDeviceDetection(nfcUID);
+
             String[] techList = tag.getTechList();
             String searchedTech = Ndef.class.getName();
 
@@ -651,19 +668,21 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         } else if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)) {
             Log.d(TAG, action);
             String nfcUID = ByteArrayToHexString(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
-            //mUsername.append("\nNFC TAG: " + nfcUID);
-            if (!mGoogleApiClient.isConnected()){
-                login_signin();
-            }
-
-
-
-            new DeviceDetectionAsyncTask().execute(this, nfcUID, mUsername, getFragmentManager());
-            Vibrator v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
-            v.vibrate(500);
-
-            Log.d(TAG, nfcUID);
+            executeDeviceDetection(nfcUID);
         }
+    }
+
+    private void executeDeviceDetection(String nfcUID){
+        //mUsername.append("\nNFC TAG: " + nfcUID);
+        if (!mGoogleApiClient.isConnected()){
+            login_signin();
+        }
+
+        new DeviceDetectionAsyncTask().execute(this, nfcUID, mUsername, getFragmentManager());
+        Vibrator v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+        v.vibrate(500);
+
+        Log.d(TAG, nfcUID);
     }
 
     private String ByteArrayToHexString(byte [] inarray) {
@@ -743,7 +762,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
         @Override
         protected void onPostExecute(String result) {
-
             /*
             if (result != null) {
                 mUsername.append("\nRead content: " + result);

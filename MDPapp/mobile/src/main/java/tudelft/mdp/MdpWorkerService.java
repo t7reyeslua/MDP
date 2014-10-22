@@ -66,14 +66,19 @@ public class MdpWorkerService extends Service implements
     public static final int MSG_SCHEDULE_NEXT = 88;
     public static final int MSG_LOCATION_ACQUIRED = 99;
     public static final int MSG_TEST = 20;
+    public static final int MSG_LOCATION_STEP_BY_STEP = 21;
+    public static final int MSG_LOCATION_GAUSSIANS = 22;
 
     public static final String ARG_TEST = "TEST";
     public static final String ARG_SCHEDULE_NEXT = "SCHEDULE NEXT";
     public static final String ARG_LOCATION_ACQUIRED = "LOCATION ACQUIRED";
+    public static final String ARG_LOCATION_STEP_BY_STEP = "LOCATION STEP BY STEP";
+    public static final String ARG_LOCATION_GAUSSIANS = "LOCATION GAUSSIANS";
 
     private String locationCalculated;
     private boolean mLocationRequestedByTimeTick = false;
     private boolean mLocationRequestedByBroadcast = false;
+    private boolean mLocationRequestedByLocatorStepByStep = false;
 
 
     GoogleApiClient mGoogleApiClient;
@@ -81,6 +86,8 @@ public class MdpWorkerService extends Service implements
     private SharedPreferences sharedPrefs;
 
 
+    private int numScansStepByStep;
+    private int numScansCountStepByStep;
     private int numScans;
     private int numScansCount;
     private int numScansForMotionLocation = 4;
@@ -93,6 +100,7 @@ public class MdpWorkerService extends Service implements
     private Timer mTimerMotion = new Timer();
 
     private ArrayList<String> mSensorReadings = new ArrayList<String>();
+    private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansStepByStep = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansTimerTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansBroadcastTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
@@ -429,6 +437,7 @@ public class MdpWorkerService extends Service implements
             if (numScansCount < numScans) {
                 mNetworkScansTimerTick.add(newRecentScanResult);
                 numScansCount++;
+                Log.i(LOGTAG, "location by TICK Scan no." + numScansCount);
             } else {
 
                 Log.i(LOGTAG, "Finished required scans for determining location by TICK.");
@@ -436,6 +445,19 @@ public class MdpWorkerService extends Service implements
                 mLocationRequestedByTimeTick = false;
             }
         }
+
+        if (mLocationRequestedByLocatorStepByStep) {
+            if (numScansCountStepByStep < numScansStepByStep) {
+                mNetworkScansStepByStep.add(newRecentScanResult);
+                numScansCountStepByStep++;
+                Log.i(LOGTAG, "location Step by Step Scan no." + numScansCountStepByStep);
+            } else {
+                Log.i(LOGTAG, "Finished required scans for determining location step by step.");
+                mLocationRequestedByLocatorStepByStep = false;
+                sendMessageToUI(MSG_LOCATION_STEP_BY_STEP);
+            }
+        }
+
 
         if (mLocationRequestedByBroadcast){
             if (numScansCountForMotionLocation < numScansForMotionLocation){
@@ -457,10 +479,10 @@ public class MdpWorkerService extends Service implements
     private void detectLocation(){
 
         Log.i(LOGTAG, "Start required scans for determining location by TICK.");
-        mLocationRequestedByTimeTick = true;
         numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
         numScansCount = 0;
         mNetworkScansTimerTick.clear();
+        mLocationRequestedByTimeTick = true;
     }
 
 
@@ -482,6 +504,18 @@ public class MdpWorkerService extends Service implements
     }
 
 
+    //Location Step By Step ************************************************************************
+
+    /**
+     * Initializes all required variables to start location step by step.
+     */
+    private void initLocationStepByStep(){
+        Log.i(LOGTAG, "Start required scans for determining location step by step.");
+        numScansStepByStep = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
+        numScansCountStepByStep = 0;
+        mNetworkScansStepByStep.clear();
+        mLocationRequestedByLocatorStepByStep = true;
+    }
 
     //Timer Tasks***********************************************************************************
 
@@ -617,6 +651,18 @@ public class MdpWorkerService extends Service implements
                         msg.setData(bundle);
                         messenger.send(msg);
                         break;
+                    case MSG_LOCATION_STEP_BY_STEP:
+                        bundle.putSerializable(ARG_LOCATION_STEP_BY_STEP, mNetworkScansStepByStep);
+                        msg = Message.obtain(null, MSG_LOCATION_STEP_BY_STEP);
+                        msg.setData(bundle);
+                        messenger.send(msg);
+                        break;
+                    case MSG_LOCATION_GAUSSIANS:
+                        bundle.putSerializable(ARG_LOCATION_GAUSSIANS, mGaussianRecords);
+                        msg = Message.obtain(null, MSG_LOCATION_GAUSSIANS);
+                        msg.setData(bundle);
+                        messenger.send(msg);
+                        break;
                     default:
                         break;
                 }
@@ -641,6 +687,12 @@ public class MdpWorkerService extends Service implements
                     break;
                 case MSG_UNREGISTER_CLIENT:
                     mClients.remove(msg.replyTo);
+                    break;
+                case MSG_LOCATION_STEP_BY_STEP:
+                    initLocationStepByStep();
+                    break;
+                case MSG_LOCATION_GAUSSIANS:
+                    sendMessageToUI(MSG_LOCATION_GAUSSIANS);
                     break;
                 case NetworkScanService.MSG_SCANRESULT_READY:
                     @SuppressWarnings("unchecked")

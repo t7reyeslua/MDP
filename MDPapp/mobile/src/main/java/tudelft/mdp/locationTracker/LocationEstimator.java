@@ -1,6 +1,8 @@
 package tudelft.mdp.locationTracker;
 
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +22,8 @@ import tudelft.mdp.utils.Utils;
  */
 public class LocationEstimator {
 
+
+    private static final String LOGTAG = "MDP-LocationEstimator";
 
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansRaw = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
@@ -47,11 +51,11 @@ public class LocationEstimator {
 
     // Getters & Setters ***************************************************************************
 
-    public ArrayList<ArrayList<NetworkInfoObject>> getNetworkScans() {
+    public ArrayList<ArrayList<NetworkInfoObject>> getNetworkScansRaw() {
         return mNetworkScansRaw;
     }
 
-    public void setNetworkScans(ArrayList<ArrayList<NetworkInfoObject>> networkScans) {
+    public void setNetworkScansRaw(ArrayList<ArrayList<NetworkInfoObject>> networkScans) {
         mNetworkScansRaw = networkScans;
     }
 
@@ -63,6 +67,13 @@ public class LocationEstimator {
         mGaussianRecords = gaussianRecords;
     }
 
+    public ArrayList<NetworkInfoObject> getNetworkScans() {
+        return mNetworkScans;
+    }
+
+    public void setNetworkScans(ArrayList<NetworkInfoObject> networkScans) {
+        mNetworkScans = networkScans;
+    }
 
     // Bayessian ***********************************************************************************
 
@@ -72,6 +83,8 @@ public class LocationEstimator {
      * Ordered in descending order.
      */
     public HashMap<String,Double> calculateLocationBayessian(){
+
+        Log.i(LOGTAG, "calculateLocationBayessian");
         consolidateNetworkScans();
         sortNetworksByRSSI();
         String currentPlace = determineCurrentPlace();
@@ -81,7 +94,7 @@ public class LocationEstimator {
             calculatePMFofZones();
             return getPmfWithHighestProbability();
         } else {
-            return null;
+            return new HashMap<String, Double>();
         }
     }
 
@@ -91,6 +104,8 @@ public class LocationEstimator {
      * with each sensed network.
      */
     public ArrayList<HashMap<String,Double>> calculateLocationBayessian_IntermediatePMFs(){
+
+        Log.i(LOGTAG, "calculateLocationBayessian_IntermediatePMFs");
         consolidateNetworkScans();
         sortNetworksByRSSI();
         String currentPlace = determineCurrentPlace();
@@ -111,6 +126,7 @@ public class LocationEstimator {
      */
     public void consolidateNetworkScans(){
 
+        Log.i(LOGTAG, "consolidateNetworkScans");
         for (ArrayList<NetworkInfoObject> networkScanArray : mNetworkScansRaw){
 
             for(NetworkInfoObject networkInfoObject : networkScanArray){
@@ -124,6 +140,7 @@ public class LocationEstimator {
                     newNetworkInfoObject.setSSID(networkInfoObject.getSSID());
                     networkInfoObject.setCount(1);
                     networkInfoObject.addRSSI(networkInfoObject.getRSSI());
+                    mNetworkScans.add(networkInfoObject);
                 } else {
                     mNetworkScans.get(index).setCount(mNetworkScans.get(index).getCount() +  1);
                     mNetworkScans.get(index).addRSSI(networkInfoObject.getRSSI());
@@ -159,6 +176,8 @@ public class LocationEstimator {
      * Sorts the networks according to the perceived RSSI levels.
      */
     public void sortNetworksByRSSI(){
+
+        Log.i(LOGTAG, "sortNetworksByRSSI");
         Collections.sort(mNetworkScans, new Comparator<NetworkInfoObject>() {
             @Override
             public int compare(NetworkInfoObject item1, NetworkInfoObject item2) {
@@ -175,16 +194,21 @@ public class LocationEstimator {
      * @return Current Place
      */
     public String determineCurrentPlace(){
+
         for (NetworkInfoObject scannedNetwork : mNetworkScans){
             for (ApGaussianRecord apGaussianRecord : mGaussianRecords){
                 if (scannedNetwork.getBSSID().equals(apGaussianRecord.getBssid())){
                     //This apGaussianRecord hold information from this network
+
+                    Log.i(LOGTAG, "determineCurrentPlace: " + currentPlace);
                     currentPlace = apGaussianRecord.getPlace();
                     return apGaussianRecord.getPlace();
                 }
             }
         }
 
+
+        Log.i(LOGTAG, "determineCurrentPlace: " + "UNKNOWN");
         //You are in an unknown place
         return null;
     }
@@ -199,7 +223,10 @@ public class LocationEstimator {
         pmf.clear();
         pmfIntermediateResults.clear();
 
+
         String currentPlace = determineCurrentPlace();
+
+        Log.i(LOGTAG, "determineExistingZones: " + currentPlace);
         if (currentPlace != null) {
             for (ApGaussianRecord apGaussianRecord : mGaussianRecords) {
                 if (apGaussianRecord.getPlace().equals(currentPlace)) {
@@ -213,6 +240,8 @@ public class LocationEstimator {
      * Initializes all zones with equal probability (Uniform distribution).
      */
     public void setInitialBelief(){
+
+        Log.i(LOGTAG, "setInitialBelief");
         Double numberOfZones = (double) pmf.size();
         if (pmf.size() > 0) {
             Double initialProbability = 1.0 / numberOfZones;
@@ -231,6 +260,8 @@ public class LocationEstimator {
      */
     public void calculatePMFofZones(){
 
+
+        Log.i(LOGTAG, "calculatePMFofZones");
         //Use each scanned network to calculate the probabilities of the zones (rooms)
         for (NetworkInfoObject scannedNetwork : mNetworkScans){
             String networkBSSID = scannedNetwork.getBSSID();
@@ -276,6 +307,8 @@ public class LocationEstimator {
      * Normalizes the PMF calculated
      */
     public void normalizePMF(double probabilityOfAllZones){
+
+        Log.i(LOGTAG, "normalizePMF");
         for (String zone : pmf.keySet()){
             double normalizedProbability = pmf.get(zone) / probabilityOfAllZones;
             pmf.put(zone, normalizedProbability);
@@ -313,6 +346,8 @@ public class LocationEstimator {
         double max = 0.0;
         int index = -1;
 
+
+        Log.i(LOGTAG, "getPmfWithHighestProbability");
         for (int i = 0; i < pmfIntermediateResults.size(); i++){
             HashMap<String,Double> intermediatePMFresult = pmfIntermediateResults.get(i);
             for (Double probability : intermediatePMFresult.values()){
@@ -336,6 +371,8 @@ public class LocationEstimator {
      * @return map with values sorted in descending order.
      */
     public static HashMap<String, Double> sortByProbability(HashMap<String, Double> unsortedMap) {
+
+        Log.i(LOGTAG, "sortByProbability");
         // Convert Map to List
         List<Map.Entry<String, Double>> list =
                 new LinkedList<Map.Entry<String, Double>>(unsortedMap.entrySet());

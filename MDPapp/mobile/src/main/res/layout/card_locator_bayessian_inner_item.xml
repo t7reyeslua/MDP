@@ -5,8 +5,6 @@
               android:orientation="horizontal"
               android:paddingLeft="15dp"
               android:paddingRight="15dp"
-              android:paddingBottom="8dp"
-              android:paddingTop="5dp"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content">
 
@@ -15,28 +13,18 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="15">
+            android:layout_weight="30">
         <com.devspark.robototextview.widget.RobotoTextView
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="80"
-                android:text="29"
+                android:text="Eduroam"
                 android:textColor="@android:color/darker_gray"
                 app:fontFamily="roboto"
                 app:textWeight="bold"
-                android:textSize="18sp"
-                android:id="@+id/twDay" android:layout_gravity="center"
-                android:textAlignment="center" android:gravity="center"/>
-        <com.devspark.robototextview.widget.RobotoTextView
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="40"
-                android:text="OCT 2014"
-                android:textColor="@android:color/darker_gray"
-                app:fontFamily="roboto"
-                android:textSize="10sp"
-                android:id="@+id/twMonthYear" android:layout_gravity="center"
-                android:textAlignment="center" android:gravity="center"/>
+                android:textSize="12sp"
+                android:id="@+id/twName1" android:layout_gravity="center_vertical|right"
+                android:textAlignment="center" android:gravity="center|top"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="vertical"
@@ -53,7 +41,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="match_parent" android:layout_weight="25">
+            android:layout_height="match_parent" android:layout_weight="30">
         <com.devspark.robototextview.widget.RobotoTextView
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
@@ -61,9 +49,9 @@
                 android:textColor="@android:color/darker_gray"
                 app:fontFamily="roboto"
                 app:textWeight="light"
-                android:textSize="14sp"
-                android:text="08:15:02"
-                android:id="@+id/twTimestamp" android:gravity="center_vertical|center_horizontal"/>
+                android:textSize="12sp"
+                android:text="CE:08:A5:02"
+                android:id="@+id/twName2" android:gravity="center_horizontal|left|top"/>
     </LinearLayout>
 
     <LinearLayout
@@ -77,24 +65,21 @@
                 android:textColor="@android:color/darker_gray"
                 app:fontFamily="roboto"
                 app:textWeight="light"
-                android:textSize="14sp"
-                android:text="Home"
-                android:id="@+id/twPlace" android:gravity="center_vertical|right"
+                android:textSize="12sp"
+                android:text="75.23 db"
+                android:id="@+id/twNumber1" android:gravity="right|top"
                 android:paddingRight="2dp"/>
-    </LinearLayout>
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_height="match_parent" android:layout_weight="30">
+
         <com.devspark.robototextview.widget.RobotoTextView
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
                 android:layout_weight="80"
                 android:textColor="@android:color/darker_gray"
                 app:fontFamily="roboto"
-                android:textSize="14sp"
-                android:text="Bedroom"
-                android:id="@+id/twZone" android:gravity="center_vertical|left"
-                app:textWeight="bold"/>
+                app:textWeight="light"
+                android:textSize="8sp"
+                android:text="2.25"
+                android:id="@+id/twNumber2" android:gravity="right|top"
+                android:paddingRight="2dp"/>
     </LinearLayout>
 </LinearLayout>

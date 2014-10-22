@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <RelativeLayout
+                android:orientation="horizontal"
+                android:paddingBottom="5dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <Button
+                    android:layout_height="35dp"
+                    android:layout_width="120dp"
+                    android:text="SCAN"
+                    android:textStyle="bold"
+                    android:id="@+id/btnNewScan"
+                    android:background="#fc6767"
+                    android:textColor="@color/White"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginTop="0dp"
+                    android:layout_centerInParent="true"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="8dp"
+            android:id="@+id/progressBar"/>
+
+
+</LinearLayout>

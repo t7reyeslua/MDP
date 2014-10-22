@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="center_vertical|center_horizontal">
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" android:gravity="center_horizontal"
+            android:paddingTop="10dp" android:paddingBottom="10dp">
+
+        <Button
+                android:layout_height="35dp"
+                android:layout_width="120dp"
+                android:text="NEXT AP"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:textSize="14sp"
+                android:background="#fc6767"
+                android:textColor="@color/White"
+                android:fontFamily="sans-serif-light"
+                android:id="@+id/btnNextAP"/>
+
+        <TextView android:layout_width="8dp"
+                  android:layout_height="wrap_content"/>
+
+        <Button
+                android:layout_height="35dp"
+                android:layout_width="120dp"
+                android:text="FINAL RESULT"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:textSize="14sp"
+                android:background="#fc6767"
+                android:textColor="@color/White"
+                android:fontFamily="sans-serif-light"
+                android:id="@+id/btnFinalResultBayessian"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/resultBayessian"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal">
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" android:gravity="center_horizontal"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="3dp">
+
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="35">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        app:textWeight="light"
+                        android:textSize="12sp"
+                        android:text="Calculated location:"
+                        android:gravity="center_vertical|right"
+                        android:paddingRight="2dp"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="20">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        app:textWeight="light"
+                        android:textSize="12sp"
+                        android:text="Home"
+                        android:id="@+id/twPlace" android:gravity="center_vertical|right"
+                        android:paddingRight="2dp"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="30">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        android:textSize="12sp"
+                        android:text="Bedroom"
+                        android:id="@+id/twZone" android:gravity="center_vertical|left"
+                        app:textWeight="bold"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="15">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        android:textSize="12sp"
+                        android:text="95.45%"
+                        android:id="@+id/twProb" android:gravity="center_vertical|left"
+                        app:textWeight="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" android:gravity="center_horizontal"
+                android:paddingRight="2dp"
+                android:paddingLeft="2dp"
+                android:paddingTop="0dp" android:paddingBottom="10dp">
+
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="35">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        app:textWeight="light"
+                        android:textSize="12sp"
+                        android:text="Using network:"
+                        android:gravity="center_vertical|right"
+                        android:paddingRight="2dp"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="20">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        app:textWeight="light"
+                        android:textSize="12sp"
+                        android:text="[1/15]"
+                        android:id="@+id/twNetworkNumber" android:gravity="center_vertical|right"
+                        android:paddingRight="2dp"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" android:layout_weight="45">
+                <com.devspark.robototextview.widget.RobotoTextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="80"
+                        android:textColor="@android:color/darker_gray"
+                        app:fontFamily="roboto"
+                        android:textSize="12sp"
+                        android:text="Mierdifi"
+                        android:id="@+id/twNetworkName" android:gravity="center_vertical|left"
+                        app:textWeight="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp" >
+
+            <ScrollView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/scrollView">
+
+                <it.gmariotti.cardslib.library.prototypes.LinearListView
+                        android:id="@+id/card_inner_base_main_cardwithlist"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        />
+            </ScrollView>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
