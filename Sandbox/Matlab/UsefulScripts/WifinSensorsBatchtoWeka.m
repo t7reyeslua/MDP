@@ -12,10 +12,11 @@ clearvars
     %1 file of Sensors with name log_sensors_CUSTOMNAME_TIMESTAMP.txt
     %1 be 1 file of Networks with name log_networks_CUSTOMNAME_TIMESTAMP.txt
 
-    sensordatasetspath  = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan2\Motion';
-    networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\TestScan2\Location';
-    resultsname='WekaResults.arff';
-    resultspath='C:\Users\LG\Dropbox\MDP_LAG\TestScan2\';
+    sensordatasetspath  = 'C:\Users\LG\Dropbox\MDP_LAG\WatchTest1\Motion';
+    networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\WatchTest1\Location';
+    resultsname='WekaResults';
+    resultspath='C:\Users\LG\Dropbox\MDP_LAG\WatchTest1\';
+    
     
     %% Precision of Other settings
     
@@ -25,7 +26,7 @@ clearvars
 
     % Sample window
     LowerLimit=1; %Min 1
-    WindowSize=inf; %"inf" for using the whole set
+    WindowSize=400; %"inf" for using the whole set
     
     %Filter properties
     cutfreq=2.6; %Cutt off frequency (low pass Butterworth filter)
@@ -46,7 +47,7 @@ clearvars
     % Tilt         =5
     % Rotation     =6
 %     ActSen=[1,2,3,4,5,6]; 
-     ActSen=[1,2,3,4,5]; 
+     ActSen=[1,2,3,4,5,6]; 
     
     %% arff Notes; write any coments here
 FileComments='This is a 1 line comment';
@@ -157,31 +158,45 @@ for k = 1:nFiles
             varMagnitude=sqrt(power(varianceX,2)+power(varianceY,2)+power(varianceZ,2));
 
             %% FFT
+            Sampletime = datenumtosecs(Matrix_R(UpperLimit,2))-datenumtosecs(Matrix_R(LowerLimit,2));
+            NFFT = 2^nextpow2(SampleSize);
+            SampleFreq=floor(SampleSize/(Sampletime));
+            nyquist = SampleFreq/2;
             if(ftfft==1)
-                Sampletime = datenumtosecs(Matrix_R(UpperLimit,2))-datenumtosecs(Matrix_R(LowerLimit,2));
-%                 Sampletime=SampleS(SampleSize-1,1)-SampleS(1,1);%in miliseconds
-
-                NFFT = 2^nextpow2(SampleSize);
-
-                fftX=fft(SampleS(:,2));
-                fftX(1)=[];
-                fftY=fft(SampleS(:,3));
-                fftY(1)=[];
-                fftZ=fft(SampleS(:,4));
-                fftZ(1)=[];
-
-                nfft=length(fftX);
-                powerFFTX = abs(fftX(1:floor(nfft/2))).^2;
-                powerFFTY = abs(fftY(1:floor(nfft/2))).^2;
-                powerFFTZ = abs(fftZ(1:floor(nfft/2))).^2;
-                SampleFreq=floor(SampleSize/(Sampletime));
-                nyquist = SampleFreq/2;
-                plotfreq=(1:nfft/2)/(nfft/2)*nyquist;
-
-                FundfreqX = plotfreq(find(powerFFTX==max(powerFFTX)));
-                FundfreqY = plotfreq(find(powerFFTY==max(powerFFTY)));
-                FundfreqZ = plotfreq(find(powerFFTZ==max(powerFFTZ)));
-
+                
+                if (stdX<0.001)% signals with no variation dont have FundFreq
+                    FundfreqX=0;
+                else              
+                    fftX=fft(SampleS(:,2));
+                    fftX(1)=[];
+                    nfft=length(fftX);
+                    powerFFTX = abs(fftX(1:floor(nfft/2))).^2;
+                    plotfreq=(1:nfft/2)/(nfft/2)*nyquist;
+                    FundfreqX = plotfreq(find(powerFFTX==max(powerFFTX)));
+                end
+                
+                if (stdY<0.001)% signals with no variation dont have FundFreq
+                    FundfreqY=0;
+                else                       
+                    fftY=fft(SampleS(:,3));
+                    fftY(1)=[];
+                    nfft=length(fftY);
+                    powerFFTY = abs(fftY(1:floor(nfft/2))).^2;
+                    plotfreq=(1:nfft/2)/(nfft/2)*nyquist;
+                    FundfreqY = plotfreq(find(powerFFTY==max(powerFFTY)));
+                end
+                
+                if (stdZ<0.001)% signals with no variation dont have FundFreq
+                    FundfreqZ=0;
+                else   
+                    fftZ=fft(SampleS(:,4));
+                    fftZ(1)=[];
+                    nfft=length(fftZ);
+                    powerFFTZ = abs(fftZ(1:floor(nfft/2))).^2;
+                    plotfreq=(1:nfft/2)/(nfft/2)*nyquist;       
+                    FundfreqZ = plotfreq(find(powerFFTZ==max(powerFFTZ)));
+                end
+                
             end   
 
             %% Filter & ZeroCrosseFreq/2);
@@ -240,7 +255,10 @@ for k = 1:nFiles
             SensorftCell{10+sstep}=mMagnitude;
             SensorftCell{11+sstep}=stdMagnitude;
             SensorftCell{12+sstep}=varMagnitude;
-            SensorftCell{13+sstep}=FundfreqX;
+%             SensorftCell{13+sstep}=0;
+%             SensorftCell{14+sstep}=0;
+%             SensorftCell{15+sstep}=0;
+                        SensorftCell{13+sstep}=FundfreqX;
             SensorftCell{14+sstep}=FundfreqY;
             SensorftCell{15+sstep}=FundfreqZ;
             SensorftCell{16+sstep}=double(ZeroCrossX);
@@ -280,10 +298,11 @@ run(fullfile(pwd,'BatchNetworkMerger.m'));
 
 
 %% Print
+formatOut =30; %ISO 8601 timestamp
 
     %% Writting header in Results
 
-resultgo = fullfile(resultspath,resultsname);
+resultgo = fullfile(resultspath,strcat(resultsname,'_',datestr(now,formatOut),'.arff'));
 fileID = fopen(resultgo,'w');
 fprintf(fileID,'%s\t%s\n\n','%',FileComments);
 fprintf(fileID,'%s\n\n','@relation deviceclass');
@@ -361,7 +380,8 @@ end
     for nnet=(1:sh(2))
     NameNetwork=networktable.Properties.VariableNames(nnet);
 
-        fprintf(fileID,'%s\n',strcat('@attribute ',char(NameNetwork),' numeric'));
+%         fprintf(fileID,'%s\n',strcat('@attribute ',' ',char(NameNetwork),' numeric'));
+        fprintf(fileID,'%s %s %s\n','@attribute ',char(NameNetwork),' numeric');
     end
         %% Print Class Attributes
 
@@ -373,12 +393,14 @@ for k = 1:nFiles
 
 end
 
+ClassFiles=unique(ClassFiles);
+
 
 fprintf(fileID,'%s','@attribute activity {');
-for k = 1:nFiles-1
+for k = 1:length(ClassFiles)-1
     fprintf(fileID,'%s',strcat(ClassFiles{k},','));    
 end
-    fprintf(fileID,'%s\n\n',strcat(ClassFiles{nFiles},'}'));    
+    fprintf(fileID,'%s\n\n',strcat(ClassFiles{length(ClassFiles)},'}'));    
 
 fprintf(fileID,'@data\n');
 fclose(fileID);
