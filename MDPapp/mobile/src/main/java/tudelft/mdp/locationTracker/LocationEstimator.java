@@ -87,6 +87,7 @@ public class LocationEstimator {
         Log.i(LOGTAG, "calculateLocationBayessian");
         consolidateNetworkScans();
         sortNetworksByRSSI();
+        //ignoreUnknownNetworks();
         String currentPlace = determineCurrentPlace();
         if (currentPlace != null) {
             determineExistingZones();
@@ -100,7 +101,7 @@ public class LocationEstimator {
 
     /**
      * calculateLocationBayessian_IntermediatePMFs
-     * @return ArrayList with all th intermediate pmf results after calculating the probabilities
+     * @return ArrayList with all the intermediate pmf results after calculating the probabilities
      * with each sensed network.
      */
     public ArrayList<HashMap<String,Double>> calculateLocationBayessian_IntermediatePMFs(){
@@ -108,6 +109,7 @@ public class LocationEstimator {
         Log.i(LOGTAG, "calculateLocationBayessian_IntermediatePMFs");
         consolidateNetworkScans();
         sortNetworksByRSSI();
+        //ignoreUnknownNetworks();
         String currentPlace = determineCurrentPlace();
         if (currentPlace != null) {
             determineExistingZones();
@@ -115,10 +117,22 @@ public class LocationEstimator {
             calculatePMFofZones();
             return pmfIntermediateResults;
         } else {
-            return null;
+            return new ArrayList<HashMap<String,Double>>();
         }
     }
 
+
+    public ArrayList<ApGaussianRecord> getGaussianRecordsOfNetwork(NetworkInfoObject network){
+        ArrayList<ApGaussianRecord> gaussianRecordsOfNetwork = new ArrayList<ApGaussianRecord>();
+
+        for (ApGaussianRecord gaussianRecord : mGaussianRecords){
+            if (gaussianRecord.getBssid().equals(network.getBSSID())){
+                gaussianRecordsOfNetwork.add(gaussianRecord);
+            }
+        }
+
+        return gaussianRecordsOfNetwork;
+    }
 
     /**
      * Consolidates all network scans into a single one.
@@ -185,6 +199,28 @@ public class LocationEstimator {
                 return item2.getRSSI().compareTo(item1.getRSSI());
             }
         });
+    }
+
+    /**
+     * Eliminates from the network list all those network which have no training information.
+     */
+    public void ignoreUnknownNetworks(){
+        Iterator<NetworkInfoObject> networkIterator = mNetworkScans.iterator();
+        while(networkIterator.hasNext()){
+            NetworkInfoObject networkInfoObject = networkIterator.next();
+            boolean exists = false;
+
+            for (ApGaussianRecord apGaussianRecord : mGaussianRecords){
+                if (apGaussianRecord.getBssid().equals(networkInfoObject.getBSSID())){
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists){
+                networkIterator.remove();
+            }
+        }
     }
 
     /**
@@ -264,12 +300,15 @@ public class LocationEstimator {
         Log.i(LOGTAG, "calculatePMFofZones");
         //Use each scanned network to calculate the probabilities of the zones (rooms)
         for (NetworkInfoObject scannedNetwork : mNetworkScans){
+
             String networkBSSID = scannedNetwork.getBSSID();
             Double networkObservedRSSI = scannedNetwork.getRSSI();
             double probabilityOfAllZones = 0.0;
+            HashMap<String,Double> pmfIteration = new HashMap<String, Double>(pmf);
 
             //For each zone (room) calculate its probability
             for (String zone : pmf.keySet()){
+
                 ApGaussianRecord apGaussianRecord = getApGaussianRecordOfNetworkInZone(networkBSSID, currentPlace, zone);
                 if (apGaussianRecord != null){
                     double NetworkMeanInZone = apGaussianRecord.getMean();
@@ -279,25 +318,27 @@ public class LocationEstimator {
                     double cdf2 = Gaussian.Phi(networkObservedRSSI - 0.5, NetworkMeanInZone, NetworkStdInZone);
                     double zoneAPpmf = cdf1 - cdf2;
 
-                    double prior = pmf.get(zone);
+                    double prior = pmfIteration.get(zone);
                     double posterior = prior * zoneAPpmf;
-                    pmf.put(zone, posterior);
+                    pmfIteration.put(zone, posterior);
 
                     probabilityOfAllZones += posterior;
 
                 } else {
                     //This network has never been seen in this zone (room).
-                    //Still, we asign it a very low probability so it does not go to completely 0.
-                    pmf.put(zone, 0.01);
-                    probabilityOfAllZones += 0.01;
+                    //Still, we assign it a very low probability so it does not go to completely 0.
+                    double prior = pmf.get(zone);
+                    double posterior = prior * 0.01;
+                    pmfIteration.put(zone, posterior);
+                    probabilityOfAllZones += posterior;
                 }
             }
 
             //Normalize
-            normalizePMF(probabilityOfAllZones);
+            normalizePMF(probabilityOfAllZones, pmfIteration);
 
             //Save the intermediate result
-            pmfIntermediateResults.add(pmf);
+            pmfIntermediateResults.add(pmfIteration);
 
         }
 
@@ -306,12 +347,34 @@ public class LocationEstimator {
     /**
      * Normalizes the PMF calculated
      */
-    public void normalizePMF(double probabilityOfAllZones){
+    public void normalizePMF(double probabilityOfAllZones, HashMap<String,Double> pmf ){
 
         Log.i(LOGTAG, "normalizePMF");
+        double sumProb = 0.0;
         for (String zone : pmf.keySet()){
-            double normalizedProbability = pmf.get(zone) / probabilityOfAllZones;
+            sumProb += pmf.get(zone);
+        }
+
+        for (String zone : pmf.keySet()){
+            double normalizedProbability = pmf.get(zone) / sumProb;
             pmf.put(zone, normalizedProbability);
+        }
+
+
+        double sum = 0.0;
+        for (String zone : pmf.keySet()){
+            double prob = pmf.get(zone);
+            if (prob == 0.0){
+                prob = 0.01;
+                pmf.put(zone, prob);
+            }
+            sum += prob;
+        }
+
+        if (sum > 1.0){
+            normalizePMF(sum, pmf);
+        } else {
+            this.pmf = new HashMap<String, Double>(pmf);
         }
     }
 

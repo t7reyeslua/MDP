@@ -14,6 +14,10 @@
             android:layout_marginRight="12dp"
             android:layout_marginTop="5dp"/>
 
+
+
+
+
     <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -22,6 +26,16 @@
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
+
+            <it.gmariotti.cardslib.library.view.CardView
+                    android:id="@+id/cardScanResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp"
+                    android:layout_marginTop="5dp"/>
+
+
             <it.gmariotti.cardslib.library.view.CardView
                     android:id="@+id/cardBayessian"
                     android:layout_width="match_parent"

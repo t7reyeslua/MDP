@@ -92,7 +92,7 @@ public class NetworkScanService extends Service {
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            Log.i(LOGTAG, "Received new scan results.");
+            //Log.i(LOGTAG, "Received new scan results.");
             scanResult.clear();
             for (ScanResult result : myWifiManager.getScanResults()){
                 NetworkInfoObject networkInfo = new NetworkInfoObject(
@@ -112,7 +112,8 @@ public class NetworkScanService extends Service {
     }
 
     private void getNewScanResults(){
-        Log.i(LOGTAG, "Request for new Scan Results. Starting scan...");
+        //Log.i(LOGTAG, "Request for new Scan Results. Starting scan...");
+        // TODO pause eventually
         myWifiManager.startScan();
     }
 
@@ -120,7 +121,7 @@ public class NetworkScanService extends Service {
 
     private void sendMessageToUI(int id) {
 
-        Log.d(LOGTAG, "sendMessageToUI: " + id);
+        //Log.d(LOGTAG, "sendMessageToUI: " + id);
         for (Messenger messenger : mClients){
             Bundle bundle = new Bundle();
             Message msg;

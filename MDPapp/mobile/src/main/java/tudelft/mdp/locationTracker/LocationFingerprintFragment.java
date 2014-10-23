@@ -264,11 +264,19 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         mProgressBar.setIndeterminate(false);
         mProgressBar.setProgress(0);
 
-        new UploadLocationRawDataAsyncTask().execute(rootView.getContext(), rawScans);
-        new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
+
+        uploadScanDataToCloud(place, zone);
 
     }
 
+    private void uploadScanDataToCloud(String place, String zone){
+
+        Toast.makeText(rootView.getContext(), "Updating data...", Toast.LENGTH_SHORT).show();
+        Log.w(LOGTAG, "uploadScanDataToCloud: Histograms");
+        new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
+        Log.w(LOGTAG, "uploadScanDataToCloud: Raw Data");
+        new UploadLocationRawDataAsyncTask().execute(rootView.getContext(), rawScans);
+    }
 
 
     /**

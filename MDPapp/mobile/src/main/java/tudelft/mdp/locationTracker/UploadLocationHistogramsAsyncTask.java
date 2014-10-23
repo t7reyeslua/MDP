@@ -32,8 +32,8 @@ public class UploadLocationHistogramsAsyncTask extends AsyncTask<Object, Void, B
         recordWrapper.setLocalHistogram(rawScans);
 
 
-        place = (String)  params[1];
-        zone  = (String)  params[2];
+        place = (String)  params[2];
+        zone  = (String)  params[3];
 
 
 
@@ -58,9 +58,11 @@ public class UploadLocationHistogramsAsyncTask extends AsyncTask<Object, Void, B
     @Override
     protected void onPostExecute(Boolean result) {
         if (result) {
+            Log.w(TAG, "Histograms uploaded successfully, Requesting Gaussians");
             Toast.makeText(context, "Histograms uploaded successfully", Toast.LENGTH_SHORT).show();
             new RequestCalculateGaussiansAsyncTask().execute(context, place, zone);
         } else {
+            Log.e(TAG, "Ooops! Some problem occurred while uploading the histograms.");
             Toast.makeText(context, "Ooops! Some problem occurred while uploading the histograms.", Toast.LENGTH_SHORT).show();
         }
     }

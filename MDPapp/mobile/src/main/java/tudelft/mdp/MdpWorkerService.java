@@ -418,7 +418,17 @@ public class MdpWorkerService extends Service implements
         LocationEstimator locationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
         HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
 
-        // TODO : Save 3 highest values in DB
+        int i  = 0;
+        for (String zone : pmf.keySet()){
+            if (i < pmf.size() && i < 3){
+                Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
+                // TODO : Save 3 highest values in DB
+                i++;
+            } else {
+                break;
+            }
+        }
+
 
 
     }
@@ -500,6 +510,7 @@ public class MdpWorkerService extends Service implements
      * @param outputList Updated Gaussians
      */
     public void processFinishRequestGaussians(List<ApGaussianRecord> outputList){
+        Log.w(LOGTAG, "Set of Gaussians received");
         mGaussianRecords = new ArrayList<ApGaussianRecord>(outputList);
     }
 
@@ -680,7 +691,7 @@ public class MdpWorkerService extends Service implements
     private class IncomingMessageHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            Log.d(LOGTAG, "handleMessage: " + msg.what);
+            //Log.d(LOGTAG, "handleMessage: " + msg.what);
             switch (msg.what) {
                 case MSG_REGISTER_CLIENT:
                     mClients.add(msg.replyTo);

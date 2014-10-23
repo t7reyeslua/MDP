@@ -27,10 +27,6 @@ public class UploadLocationRawDataAsyncTask extends AsyncTask<Object, Void, Bool
 
         @SuppressWarnings("unchecked")
         ArrayList<LocationFingerprintRecord> rawScans  = (ArrayList<LocationFingerprintRecord>) params[1];
-        LocationFingerprintRecordWrapper recordWrapper = new LocationFingerprintRecordWrapper();
-        recordWrapper.setLocationFingerprintRecordWrapperArrayList(rawScans);
-
-
 
         if (mRadioMapFingerprintEndpointService == null) {
             /* For testing against a deployed backend */
@@ -39,14 +35,40 @@ public class UploadLocationRawDataAsyncTask extends AsyncTask<Object, Void, Bool
             mRadioMapFingerprintEndpointService = builder.build();
         }
 
+        return sendByChunks(rawScans);
+
+    }
+
+    private boolean sendByChunks(ArrayList<LocationFingerprintRecord> rawScans){
+        int chunkSize = 100;
+        Log.e(TAG, "Uploading raw scans " + rawScans.size());
+
+        ArrayList<ArrayList<LocationFingerprintRecord>> wrapperChunks = new ArrayList<ArrayList<LocationFingerprintRecord>>();
+
+        for (int i = 0; i < rawScans.size(); i += chunkSize){
+            wrapperChunks.add(new ArrayList<LocationFingerprintRecord>(
+                    rawScans.subList(i,  i + (Math.min(chunkSize, rawScans.size() - i)) ))
+            );
+        }
+
+        Log.i(TAG, "Dividing into chunks:" + wrapperChunks.size());
+
+
+        int chunkNum = 0;
         try {
-            Log.e(TAG, "Uploading raw scans " + rawScans.size());
-            mRadioMapFingerprintEndpointService.insertRawLocationFingerprintForZoneBulk(recordWrapper).execute();
+            for (ArrayList<LocationFingerprintRecord> chunk : wrapperChunks) {
+                LocationFingerprintRecordWrapper recordWrapper = new LocationFingerprintRecordWrapper();
+                recordWrapper.setLocationFingerprintRecordWrapperArrayList(chunk);
+
+                mRadioMapFingerprintEndpointService.insertRawLocationFingerprintForZoneBulk(recordWrapper).execute();
+                chunkNum++;
+            }
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Some error while uploading");
+            Log.e(TAG, "Some error while uploading chunk " + chunkNum);
             return false;
         }
+
 
     }
 

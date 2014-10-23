@@ -34,7 +34,7 @@ public class RequestCalculateGaussiansAsyncTask extends AsyncTask<Object, Void, 
         }
 
         try {
-            mRadioMapFingerprintEndpointService.calculateZoneGaussians(place, zone).execute();
+            mRadioMapFingerprintEndpointService.calculateZoneGaussians(place.toLowerCase(), zone.toLowerCase()).execute();
             return true;
         } catch (IOException e) {
             Log.e(TAG, "Some error while uploading");
@@ -46,11 +46,15 @@ public class RequestCalculateGaussiansAsyncTask extends AsyncTask<Object, Void, 
     @Override
     protected void onPostExecute(Boolean result) {
         if (result) {
+
+            Log.w(TAG, "Gaussians calculated successfully");
             Toast.makeText(context, "Gaussians calculated successfully", Toast.LENGTH_SHORT).show();
-            new GcmMessagingAsyncTask().execute(MessagesProtocol.SENDGCM_CMD_UPDATEGAUSSIANS,
+            new GcmMessagingAsyncTask().execute(String.valueOf(MessagesProtocol.SENDGCM_CMD_UPDATEGAUSSIANS),
                                                 MessagesProtocol.UPDATE_GAUSSIANS,
                                                 context);
         } else {
+
+            Log.e(TAG, "Some error while asking for Gaussians");
             Toast.makeText(context, "Ooops! Some problem occurred while doing this.", Toast.LENGTH_SHORT).show();
         }
     }

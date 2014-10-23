@@ -15,12 +15,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -29,8 +32,10 @@ import tudelft.mdp.MdpWorkerService;
 import tudelft.mdp.R;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.ui.CalibrationControlCard;
+import tudelft.mdp.ui.ExpandableListAdapterRSSI;
 import tudelft.mdp.ui.LocatorBayessianCard;
 import tudelft.mdp.ui.LocatorNewScanCard;
+import tudelft.mdp.ui.LocatorScanResultCard;
 
 public class LocatorFragment extends Fragment implements ServiceConnection {
 
@@ -43,6 +48,8 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
     private CardView mCardViewNewScan;
     private CardView mCardViewBayessian;
+    private CardView mCardViewScanResult;
+    private LocatorScanResultCard mCardScanResult;
     private LocatorNewScanCard mCardNewScan;
     private LocatorBayessianCard mCardBayessian;
 
@@ -70,6 +77,11 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     private ArrayList<HashMap<String,Double>> pmfIntermediateResultsBayessian = new ArrayList<HashMap<String, Double>>();
     private int networkIdCount;
     private String currentPlace = "TBD";
+
+
+    private ExpandableListView mExpandableListAP;
+    private ArrayList<NetworkInfoObject> groupItem = new ArrayList<NetworkInfoObject>();
+    private ArrayList<Object> childItem = new ArrayList<Object>();
 
     private static final String TAG = "MDP-LocatorFragment";
 
@@ -115,6 +127,7 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     private void configureCardsInit(){
         configureNewScanCard();
         configureBayessianCard();
+        configureScanResultsCard();
     }
 
     private void configureNewScanCard(){
@@ -136,6 +149,21 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
             }
         });
     }
+
+    private void configureScanResultsCard(){
+
+        mCardViewScanResult = (CardView) rootView.findViewById(R.id.cardScanResults);
+        mCardScanResult = new LocatorScanResultCard(rootView.getContext());
+        mCardScanResult.setShadow(true);
+        mCardViewScanResult.setCard(mCardScanResult);
+
+        mExpandableListAP = (ExpandableListView) mCardViewScanResult.findViewById(R.id.ap_exp);
+        //mExpandableListAP = (ExpandableListView) rootView.findViewById(R.id.ap_exp1);
+
+        updateScanResultsList(mockLocationEstimator());
+        mCardViewScanResult.setVisibility(View.INVISIBLE);
+    }
+
 
     private void configureBayessianCard(){
         mCardBayessian = new LocatorBayessianCard(rootView.getContext());
@@ -195,13 +223,15 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         String zone = "Unknown";
         Double max = 0.0;
         HashMap<String, Double> sortedPMF = new HashMap<String, Double>();
-        if (updatedResults.size() > 0) {
-            //mLinearLayoutBayessian.setVisibility(View.VISIBLE);
-            sortedPMF = LocationEstimator.sortByProbability(updatedResults);
-            zone = (String) sortedPMF.keySet().toArray()[0];
-            max = sortedPMF.get(zone);
-        } else {
-            //mLinearLayoutBayessian.setVisibility(View.INVISIBLE);
+        if (updatedResults != null){
+            if (updatedResults.size() > 0) {
+                //mLinearLayoutBayessian.setVisibility(View.VISIBLE);
+                sortedPMF = LocationEstimator.sortByProbability(updatedResults);
+                zone = (String) sortedPMF.keySet().toArray()[0];
+                max = sortedPMF.get(zone);
+            } else {
+                //mLinearLayoutBayessian.setVisibility(View.INVISIBLE);
+            }
         }
 
         mTextViewCurrentPlace.setText(currentPlace);
@@ -225,6 +255,91 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         return mockPMF;
     }
 
+    private LocationEstimator mockLocationEstimator(){
+        LocationEstimator locationEstimator = new LocationEstimator();
+
+        ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansRawMock = new ArrayList<ArrayList<NetworkInfoObject>>();
+        ArrayList<ApGaussianRecord> mGaussianRecordsMock = new ArrayList<ApGaussianRecord>();
+
+        NetworkInfoObject network1 = new NetworkInfoObject("OO:AA::BB:CC:DD", "Network 1", -75.00);
+        NetworkInfoObject network2 = new NetworkInfoObject("O1:AA::BB:CC:DD", "Network 2", -85.00);
+        NetworkInfoObject network3 = new NetworkInfoObject("O2:AA::BB:CC:DD", "Network 3", -95.00);
+        NetworkInfoObject network4 = new NetworkInfoObject("O3:AA::BB:CC:DD", "Network 4", -65.00);
+        NetworkInfoObject network5 = new NetworkInfoObject("O4:AA::BB:CC:DD", "Network 5", -55.00);
+        ArrayList<NetworkInfoObject> networkInfoObjects = new ArrayList<NetworkInfoObject>();
+
+        NetworkInfoObject network1b = new NetworkInfoObject("OO:AA::BB:CC:DD", "Network 1", -77.00);
+        NetworkInfoObject network2b = new NetworkInfoObject("O1:AA::BB:CC:DD", "Network 2", -87.00);
+        NetworkInfoObject network3b = new NetworkInfoObject("O2:AA::BB:CC:DD", "Network 3", -97.00);
+        NetworkInfoObject network4b = new NetworkInfoObject("O3:AA::BB:CC:DD", "Network 4", -67.00);
+        ArrayList<NetworkInfoObject> networkInfoObjectsB = new ArrayList<NetworkInfoObject>();
+
+        networkInfoObjects.add(network1);
+        networkInfoObjects.add(network2);
+        networkInfoObjects.add(network3);
+        networkInfoObjects.add(network4);
+        networkInfoObjects.add(network5);
+        mNetworkScansRawMock.add(networkInfoObjects);
+
+        networkInfoObjectsB.add(network1b);
+        networkInfoObjectsB.add(network2b);
+        networkInfoObjectsB.add(network3b);
+        networkInfoObjectsB.add(network4b);
+        mNetworkScansRawMock.add(networkInfoObjectsB);
+
+        ApGaussianRecord apGaussianRecord1a = createMockApGaussianRecord("OO:AA::BB:CC:DD", "Network 1", -75.00, 1.00, "Home", "Kitchen");
+        ApGaussianRecord apGaussianRecord2a = createMockApGaussianRecord("O0:AA::BB:CC:DD", "Network 1", -85.00, 1.00, "Home", "Room A");
+        ApGaussianRecord apGaussianRecord3a = createMockApGaussianRecord("O0:AA::BB:CC:DD", "Network 1", -95.00, 1.00, "Home", "Room B");
+        ApGaussianRecord apGaussianRecord1b = createMockApGaussianRecord("O1:AA::BB:CC:DD", "Network 2", -75.00, 1.00, "Home", "Kitchen");
+        ApGaussianRecord apGaussianRecord2b = createMockApGaussianRecord("O1:AA::BB:CC:DD", "Network 2", -85.00, 1.00, "Home", "Room A");
+        ApGaussianRecord apGaussianRecord3b = createMockApGaussianRecord("O1:AA::BB:CC:DD", "Network 2", -95.00, 1.00, "Home", "Room B");
+        ApGaussianRecord apGaussianRecord1c = createMockApGaussianRecord("O1:AA::BB:CC:DD", "Network 2", -75.00, 1.00, "Home", "Kitchen");
+        ApGaussianRecord apGaussianRecord2c = createMockApGaussianRecord("O2:AA::BB:CC:DD", "Network 3", -85.00, 1.00, "Home", "Room A");
+        ApGaussianRecord apGaussianRecord3c = createMockApGaussianRecord("O2:AA::BB:CC:DD", "Network 3", -95.00, 1.00, "Home", "Room B");
+        ApGaussianRecord apGaussianRecord1d = createMockApGaussianRecord("O2:AA::BB:CC:DD", "Network 3", -75.00, 1.00, "Home", "Kitchen");
+        ApGaussianRecord apGaussianRecord2d = createMockApGaussianRecord("O5:AA::BB:CC:DD", "Network 6", -85.00, 1.00, "Home", "Room A");
+        ApGaussianRecord apGaussianRecord3d = createMockApGaussianRecord("O5:AA::BB:CC:DD", "Network 6", -95.00, 1.00, "Home", "Room B");
+        ApGaussianRecord apGaussianRecord1e = createMockApGaussianRecord("O4:AA::BB:CC:DD", "Network 5", -59.00, 1.00, "Home", "Kitchen");
+        ApGaussianRecord apGaussianRecord2e = createMockApGaussianRecord("O4:AA::BB:CC:DD", "Network 5", -85.00, 1.00, "Home", "Room A");
+        ApGaussianRecord apGaussianRecord3e = createMockApGaussianRecord("O4:AA::BB:CC:DD", "Network 5", -95.00, 1.00, "Home", "Room B");
+        mGaussianRecordsMock.add(apGaussianRecord1a);
+        mGaussianRecordsMock.add(apGaussianRecord2a);
+        mGaussianRecordsMock.add(apGaussianRecord3a);
+        mGaussianRecordsMock.add(apGaussianRecord1b);
+        mGaussianRecordsMock.add(apGaussianRecord2b);
+        mGaussianRecordsMock.add(apGaussianRecord3b);
+        mGaussianRecordsMock.add(apGaussianRecord1c);
+        mGaussianRecordsMock.add(apGaussianRecord2c);
+        mGaussianRecordsMock.add(apGaussianRecord3c);
+        mGaussianRecordsMock.add(apGaussianRecord1d);
+        mGaussianRecordsMock.add(apGaussianRecord2d);
+        mGaussianRecordsMock.add(apGaussianRecord3d);
+        mGaussianRecordsMock.add(apGaussianRecord1e);
+        mGaussianRecordsMock.add(apGaussianRecord2e);
+        mGaussianRecordsMock.add(apGaussianRecord3e);
+
+        locationEstimator.setNetworkScansRaw(mNetworkScansRawMock);
+        locationEstimator.setGaussianRecords(mGaussianRecordsMock);
+
+        locationEstimator.consolidateNetworkScans();
+        locationEstimator.sortNetworksByRSSI();
+        locationEstimator.ignoreUnknownNetworks();
+
+        return locationEstimator;
+    }
+
+    private ApGaussianRecord createMockApGaussianRecord(String SSID, String BSSID, Double mean, Double std, String place, String zone){
+        ApGaussianRecord apGaussianRecord = new ApGaussianRecord();
+        apGaussianRecord.setZone(zone);
+        apGaussianRecord.setPlace(place);
+        apGaussianRecord.setStd(std);
+        apGaussianRecord.setMean(mean);
+        apGaussianRecord.setBssid(BSSID);
+        apGaussianRecord.setSsid(SSID);
+        return apGaussianRecord;
+    }
+
+
     // Receive data from Background Service ********************************************************
 
     private void handleGaussianResult(ArrayList<ApGaussianRecord> gaussianRecords){
@@ -233,28 +348,76 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     }
 
     private void handleScanResult(ArrayList<ArrayList<NetworkInfoObject>> networkScans) {
-        mNetworkScans = new ArrayList<ArrayList<NetworkInfoObject>>(networkScans);
-        mLocationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
-        pmfFinalBayessian = mLocationEstimator.calculateLocationBayessian();
-        pmfIntermediateResultsBayessian = mLocationEstimator.calculateLocationBayessian_IntermediatePMFs();
-        currentPlace = mLocationEstimator.determineCurrentPlace();
-        networkIdCount = 0;
-
-
-        mProgressBar.setIndeterminate(false);
-
         Toast.makeText(rootView.getContext(),"Scan Results ready",Toast.LENGTH_SHORT).show();
+        initBayessianLocation(networkScans);
+
+        updateScanResultsList(mLocationEstimator);
+        mCardViewScanResult.setVisibility(View.VISIBLE);
+    }
 
 
-        mCardViewBayessian.setVisibility(View.VISIBLE);
-        mButtonCalculateLocationUsingNextNetwork_Bayessian.setEnabled(true);
-        mButtonCalculateLocation_Bayessian.setEnabled(true);
+    private void updateScanResultsList(LocationEstimator locationEstimator){
+        setExpListScanResultData(locationEstimator);
+
+        mExpandableListAP.setAdapter(new ExpandableListAdapterRSSI(rootView.getContext(), groupItem, childItem));
+        mExpandableListAP.setOnGroupClickListener(new ExpDrawerGroupClickListener());
+    }
+
+    private class ExpDrawerGroupClickListener implements ExpandableListView.OnGroupClickListener {
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                int groupPosition, long id) {
+
+            if (parent.isGroupExpanded(groupPosition)){
+                parent.collapseGroup(groupPosition);
+            }else {
+                parent.expandGroup(groupPosition, true);
+            }
+            return true;
+        }
+    }
+
+    private void setExpListScanResultData(LocationEstimator locationEstimator){
+        groupItem.clear();
+        childItem.clear();
+
+        for (NetworkInfoObject networkInfoObject : locationEstimator.getNetworkScans()){
+            groupItem.add(networkInfoObject);
+            ArrayList<ApGaussianRecord> child = locationEstimator.getGaussianRecordsOfNetwork(networkInfoObject);
+            //Sorting according to Zone name
+            Collections.sort(child, new Comparator<ApGaussianRecord>() {
+                @Override
+                public int compare(ApGaussianRecord item1, ApGaussianRecord item2) {
+
+                    return item1.getZone().compareTo(item2.getZone());
+                }
+            });
+
+            childItem.add(child);
+        }
     }
 
 
 
 
+
     // Bayessian calculations **********************************************************************
+
+    private void initBayessianLocation(ArrayList<ArrayList<NetworkInfoObject>> networkScans){
+        mNetworkScans = new ArrayList<ArrayList<NetworkInfoObject>>(networkScans);
+        mLocationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
+        //mLocationEstimator = mockLocationEstimator();
+        pmfFinalBayessian = mLocationEstimator.calculateLocationBayessian();
+        pmfIntermediateResultsBayessian = mLocationEstimator.calculateLocationBayessian_IntermediatePMFs();
+        currentPlace = mLocationEstimator.determineCurrentPlace();
+        networkIdCount = 0;
+
+        mProgressBar.setIndeterminate(false);
+
+        mCardViewBayessian.setVisibility(View.VISIBLE);
+        mButtonCalculateLocationUsingNextNetwork_Bayessian.setEnabled(true);
+        mButtonCalculateLocation_Bayessian.setEnabled(true);
+    }
 
     private void calculateNextAPBayessian(){
         if (currentPlace == null){
@@ -274,7 +437,10 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         if (currentPlace == null){
             refreshBayessianCard(pmfFinalBayessian, "Unknown" , -1);
         } else {
-            int index = findNetworkWithBestResult();
+            int index  = -1;
+            if (pmfFinalBayessian != null) {
+                index = findNetworkWithBestResult();
+            }
             refreshBayessianCard(pmfFinalBayessian, currentPlace, index);
         }
     }
@@ -295,11 +461,14 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
             }
         }
         return index;
-
-
-
-
     }
+
+
+
+
+
+
+
 
 
     // Service connection methods ******************************************************************

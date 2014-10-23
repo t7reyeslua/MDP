@@ -104,8 +104,10 @@
 
 
 
-
-
+    <datastore-index kind="ApGaussianRecord" ancestor="false" source="manual">
+        <property name="zone" direction="asc"/>
+        <property name="mean" direction="asc"/>
+    </datastore-index>
 
     <datastore-index kind="ApGaussianRecord" ancestor="false" source="manual">
         <property name="bssid" direction="asc"/>
