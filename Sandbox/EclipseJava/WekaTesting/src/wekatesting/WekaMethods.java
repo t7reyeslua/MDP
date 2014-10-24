@@ -1,14 +1,68 @@
 package wekatesting;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Serializable;
+
 import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.meta.AttributeSelectedClassifier;
+import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class WekaMethods {
 	
+
 	
 	/**
-	  * @brief 	This methods takes an .arff file and returns the Prediction of the instancenum value.
+	  * @brief 	Serialization Method for J48
+	  * 
+	  **/  
+	public static void CreateModelJ48(String modelpath,String testArff,int instanceNum)throws Exception{
+		// create J48
+		 Classifier cls = new J48();
+		 
+		 // train
+		 Instances inst = new Instances(new BufferedReader(new FileReader(testArff)));
+		 inst.setClassIndex(inst.numAttributes() - 1);
+		 cls.buildClassifier(inst);
+		 weka.core.SerializationHelper.write(modelpath, cls);		
+	}
+		
+	/**
+	  * @brief 	Serialization Method for NaiveBayes,default config
+	  * 
+	  **/  
+	public static void CreateModelNaiveBayes(String modelpath,String testArff,int instanceNum)throws Exception{
+		// create J48
+		 Classifier cls = new NaiveBayes();
+		 
+		 // train
+		 Instances inst = new Instances(new BufferedReader(new FileReader(testArff)));
+		 inst.setClassIndex(inst.numAttributes() - 1);
+		 cls.buildClassifier(inst);
+		 weka.core.SerializationHelper.write(modelpath, cls);		
+	}
+		
+//	/**
+//	  * @brief 	Serialization Method for AttributeSelectedClassifier
+//	  * NOT TESTED
+//	  **/  
+//	public static void CreateModelAttributeSelectionCfs(String modelpath,String testArff,int instanceNum)throws Exception{
+//		// create J48
+//		 Classifier cls = new AttributeSelectedClassifier();
+//		 
+//		 // train
+//		 Instances inst = new Instances(new BufferedReader(new FileReader(testArff)));
+//		 inst.setClassIndex(inst.numAttributes() - 1);
+//		 cls.buildClassifier(inst);
+//		 weka.core.SerializationHelper.write(modelpath, cls);		
+//	}
+//		
+	
+	/**
+	  * @brief 	This methods takes an .arff file and returns the Prediction of the instance num value.
 	  * 		If not present it uses the 1st one.
 	  * 		The test file shall have the same attributes than the one used to create the model 
 	  * 
