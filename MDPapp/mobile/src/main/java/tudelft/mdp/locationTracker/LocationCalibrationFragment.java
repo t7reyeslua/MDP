@@ -322,6 +322,8 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         calibrationScansCount = 0;
         getPreviousCalibrationValues();
 
+
+
         aggregatedScanResults.clear();
         mProgressBar.setIndeterminate(true);
         mSwitch.setEnabled(false);
@@ -337,11 +339,15 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
     }
 
     private void stopCalibration(){
+
+        sendMessageToService(NetworkScanService.MSG_PAUSE_SCANS_CALIBRATION);
         automaticUnbinding();
 
         sortArrayList(aggregatedScanResults);
         calculateScansMeanAndStd(aggregatedScanResults);
         applyCalibrationParams();
+
+
 
         mProgressBar.setIndeterminate(false);
         mSwitch.setEnabled(true);
@@ -572,6 +578,8 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         catch (RemoteException e) {
             // In this case the service has crashed before we could even do anything with it
         }
+
+        sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_CALIBRATION);
     }
 
     private void automaticBinding() {
@@ -627,6 +635,20 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
     }
 
 
+    private void sendMessageToService(int command) {
+        if (mIsBound) {
+            if (mServiceMessenger != null) {
+                try {
+                    Message msg = Message
+                            .obtain(null, command);
+                    msg.replyTo = mMessenger;
+                    mServiceMessenger.send(msg);
+                } catch (RemoteException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        }
+    }
 
     private class IncomingMessageHandler extends Handler {
         @Override

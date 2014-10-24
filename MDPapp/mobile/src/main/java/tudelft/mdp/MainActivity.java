@@ -302,7 +302,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         groupItem.add("Activity Monitor");
         groupItem.add("Location Tracker");
         groupItem.add("Device Manager");
-        //groupItem.add("Utilities");
+        groupItem.add("Utilities");
     }
 
 
@@ -347,13 +347,11 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         /**
          * Add Data For Utilities
          */
-        //child = new ArrayList<String>();
+        child = new ArrayList<String>();
         //child.add("Sensors recorder");
-        /*child.add("Network RSSI");
-        child.add("Step Counter");
-        child.add("Orientation");
-        child.add("DB manager");*/
-        //childItem.add(child);
+        child.add("DB manager");
+        child.add("Messenger");
+        childItem.add(child);
     }
 
 
@@ -398,6 +396,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 }
             } else if (groupPosition == NavigationDrawer.UTILITIES){
                 switch (childPosition){
+                    case 0:
+                        position = NavigationDrawer.DBMANAGER;
+                        break;
+                    case 1:
+                        position = NavigationDrawer.MESSENGER;
+                        break;
                     default:
                         break;
                 }
@@ -462,6 +466,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragment, "id_sensorsviewer")
                         .commit();
+                break;
+            case NavigationDrawer.DBMANAGER:
+                break;
+            case NavigationDrawer.MESSENGER:
                 break;
             default:
                 break;

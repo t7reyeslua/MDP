@@ -44,16 +44,46 @@ public class UploadLocationHistogramsAsyncTask extends AsyncTask<Object, Void, B
             mRadioMapFingerprintEndpointService = builder.build();
         }
 
+
+        return sendByChunks(rawScans);
+
+    }
+
+    private boolean sendByChunks(ArrayList<ApHistogramRecord> rawScans){
+        int chunkSize = 50;
+        Log.e(TAG, "Uploading histogram scans " + rawScans.size());
+
+        ArrayList<ArrayList<ApHistogramRecord>> wrapperChunks = new ArrayList<ArrayList<ApHistogramRecord>>();
+
+        for (int i = 0; i < rawScans.size(); i += chunkSize){
+            wrapperChunks.add(new ArrayList<ApHistogramRecord>(
+                            rawScans.subList(i,  i + (Math.min(chunkSize, rawScans.size() - i)) ))
+            );
+        }
+
+        Log.i(TAG, "Dividing into chunks:" + wrapperChunks.size());
+
+
+        int chunkNum = 0;
         try {
-            Log.e(TAG, "Uploading histograms scans " + rawScans.size());
-            mRadioMapFingerprintEndpointService.increaseApHistogramRssiCountInZoneBulk(recordWrapper).execute();
+            for (ArrayList<ApHistogramRecord> chunk : wrapperChunks) {
+                ApHistogramRecordWrapper recordWrapper = new ApHistogramRecordWrapper();
+                recordWrapper.setLocalHistogram(chunk);
+
+
+                mRadioMapFingerprintEndpointService.increaseApHistogramRssiCountInZoneBulk(recordWrapper).execute();
+                chunkNum++;
+            }
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Some error while uploading");
+            Log.e(TAG, "Some error while uploading chunk " + chunkNum + " : " + e.getMessage());
             return false;
         }
 
+
     }
+
+
 
     @Override
     protected void onPostExecute(Boolean result) {

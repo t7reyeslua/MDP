@@ -65,7 +65,7 @@ public class UploadLocationRawDataAsyncTask extends AsyncTask<Object, Void, Bool
             }
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "Some error while uploading chunk " + chunkNum);
+            Log.e(TAG, "Some error while uploading chunk " + chunkNum + " : " + e.getMessage());
             return false;
         }
 

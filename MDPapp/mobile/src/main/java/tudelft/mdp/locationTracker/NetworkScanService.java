@@ -26,6 +26,14 @@ public class NetworkScanService extends Service {
     public static final int MSG_REGISTER_CLIENT = 6;
     public static final int MSG_UNREGISTER_CLIENT = 7;
     public static final int MSG_SCANRESULT_READY = 8;
+    public static final int MSG_PAUSE_SCANS_TICK = 88;
+    public static final int MSG_UNPAUSE_SCANS_TICK = 99;
+    public static final int MSG_PAUSE_SCANS_CALIBRATION = 888;
+    public static final int MSG_UNPAUSE_SCANS_CALIBRATION = 999;
+    public static final int MSG_PAUSE_SCANS_BROADCAST = 8888;
+    public static final int MSG_UNPAUSE_SCANS_BROADCAST = 9999;
+    public static final int MSG_PAUSE_SCANS_STEPBYSTEP = 88888;
+    public static final int MSG_UNPAUSE_SCANS_STEPBYSTEP = 99999;
 
     public static final String ARG_SCANRESULT = "SCAN RESULT";
 
@@ -35,6 +43,11 @@ public class NetworkScanService extends Service {
     private WifiManager myWifiManager;
 
     private static boolean isRunning = false;
+
+    private boolean pauseScansTick = true;
+    private boolean pauseScansBroadcast = true;
+    private boolean pauseScansCalibration = true;
+    private boolean pauseScansStepByStep = true;
 
     private static final String LOGTAG = "MDP-NetworkScanService";
 
@@ -71,7 +84,7 @@ public class NetworkScanService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
-        getNewScanResults();
+        //getNewScanResults();
         return START_STICKY; // Run until explicitly stopped.
     }
 
@@ -112,9 +125,15 @@ public class NetworkScanService extends Service {
     }
 
     private void getNewScanResults(){
-        //Log.i(LOGTAG, "Request for new Scan Results. Starting scan...");
-        // TODO pause eventually
-        myWifiManager.startScan();
+        if (!pauseScansBroadcast || !pauseScansCalibration || !pauseScansTick || !pauseScansStepByStep) {
+            String requester = "";
+            if (!pauseScansTick) requester += "TICK|";
+            if (!pauseScansBroadcast) requester += "BROADCAST|";
+            if (!pauseScansCalibration) requester += "CALIBRATION|";
+            if (!pauseScansStepByStep) requester += "STEPBYSTEP|";
+            Log.i(LOGTAG, "Request for new Scan Results. Starting scan... : " + requester);
+            myWifiManager.startScan();
+        }
     }
 
     //UI interaction Routines***********************************************************************
@@ -148,13 +167,50 @@ public class NetworkScanService extends Service {
     private class IncomingMessageHandler extends Handler { // Handler of incoming messages from clients.
         @Override
         public void handleMessage(Message msg) {
-            Log.d(LOGTAG, "handleMessage: " + msg.what);
             switch (msg.what) {
                 case MSG_REGISTER_CLIENT:
+                    Log.d(LOGTAG, "handleMessage: " + "RegisterClient");
                     mClients.add(msg.replyTo);
                     break;
                 case MSG_UNREGISTER_CLIENT:
+                    Log.d(LOGTAG, "handleMessage: " + "UnRegisterClient");
                     mClients.remove(msg.replyTo);
+                    break;
+                case MSG_PAUSE_SCANS_CALIBRATION:
+                    Log.d(LOGTAG, "handleMessage: " + "PAUSE_CALIBRATION");
+                    pauseScansCalibration = true;
+                    break;
+                case MSG_UNPAUSE_SCANS_CALIBRATION:
+                    Log.d(LOGTAG, "handleMessage: " + "UNPAUSE_CALIBRATION");
+                    pauseScansCalibration = false;
+                    getNewScanResults();
+                    break;
+                case MSG_PAUSE_SCANS_TICK:
+                    Log.d(LOGTAG, "handleMessage: " + "PAUSE_TICK");
+                    pauseScansTick = true;
+                    break;
+                case MSG_UNPAUSE_SCANS_TICK:
+                    Log.d(LOGTAG, "handleMessage: " + "UNPAUSE_TICK");
+                    pauseScansTick = false;
+                    getNewScanResults();
+                    break;
+                case MSG_PAUSE_SCANS_BROADCAST:
+                    Log.d(LOGTAG, "handleMessage: " + "PAUSE_BROADCAST");
+                    pauseScansBroadcast = true;
+                    break;
+                case MSG_UNPAUSE_SCANS_BROADCAST:
+                    Log.d(LOGTAG, "handleMessage: " + "UNPAUSE_BROADCAST");
+                    pauseScansBroadcast = false;
+                    getNewScanResults();
+                    break;
+                case MSG_PAUSE_SCANS_STEPBYSTEP:
+                    Log.d(LOGTAG, "handleMessage: " + "PAUSE_STEPBYSTEP");
+                    pauseScansStepByStep = true;
+                    break;
+                case MSG_UNPAUSE_SCANS_STEPBYSTEP:
+                    Log.d(LOGTAG, "handleMessage: " + "UNPAUSE_STEPBYSTEP");
+                    pauseScansStepByStep = false;
+                    getNewScanResults();
                     break;
                 default:
                     super.handleMessage(msg);

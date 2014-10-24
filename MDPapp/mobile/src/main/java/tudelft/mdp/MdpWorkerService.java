@@ -35,7 +35,6 @@ import java.util.TimerTask;
 
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
-import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.locationTracker.LocationEstimator;
@@ -419,13 +418,19 @@ public class MdpWorkerService extends Service implements
         HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
 
         int i  = 0;
-        for (String zone : pmf.keySet()){
-            if (i < pmf.size() && i < 3){
-                Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
-                // TODO : Save 3 highest values in DB
-                i++;
-            } else {
-                break;
+        locationCalculated = "";
+        if (pmf != null) {
+            for (String zone : pmf.keySet()) {
+                if (i < pmf.size() && i < 3) {
+                    if (locationCalculated.length() == 0) {
+                        locationCalculated = zone;
+                    }
+                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
+                    // TODO : Save 3 highest values in DB
+                    i++;
+                } else {
+                    break;
+                }
             }
         }
 
@@ -450,6 +455,7 @@ public class MdpWorkerService extends Service implements
                 Log.i(LOGTAG, "location by TICK Scan no." + numScansCount);
             } else {
 
+                sendMessageToService(NetworkScanService.MSG_PAUSE_SCANS_TICK);
                 Log.i(LOGTAG, "Finished required scans for determining location by TICK.");
                 estimateLocation(mNetworkScansTimerTick);
                 mLocationRequestedByTimeTick = false;
@@ -462,6 +468,7 @@ public class MdpWorkerService extends Service implements
                 numScansCountStepByStep++;
                 Log.i(LOGTAG, "location Step by Step Scan no." + numScansCountStepByStep);
             } else {
+                sendMessageToService(NetworkScanService.MSG_PAUSE_SCANS_STEPBYSTEP);
                 Log.i(LOGTAG, "Finished required scans for determining location step by step.");
                 mLocationRequestedByLocatorStepByStep = false;
                 sendMessageToUI(MSG_LOCATION_STEP_BY_STEP);
@@ -475,6 +482,7 @@ public class MdpWorkerService extends Service implements
                 numScansCountForMotionLocation++;
             } else{
 
+                sendMessageToService(NetworkScanService.MSG_PAUSE_SCANS_BROADCAST);
                 Log.i(LOGTAG, "Finished required scans for determining location by BROADCAST.");
                 mLocationRequestedByBroadcast = false;
                 dataCompleteLocation = true;
@@ -487,7 +495,7 @@ public class MdpWorkerService extends Service implements
      * Initializes all required things for detection routine
      */
     private void detectLocation(){
-
+        sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_TICK);
         Log.i(LOGTAG, "Start required scans for determining location by TICK.");
         numScans = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
         numScansCount = 0;
@@ -510,8 +518,9 @@ public class MdpWorkerService extends Service implements
      * @param outputList Updated Gaussians
      */
     public void processFinishRequestGaussians(List<ApGaussianRecord> outputList){
-        Log.w(LOGTAG, "Set of Gaussians received");
         mGaussianRecords = new ArrayList<ApGaussianRecord>(outputList);
+        Log.w(LOGTAG, "Set of Gaussians received. Records: " + mGaussianRecords.size());
+
     }
 
 
@@ -521,6 +530,8 @@ public class MdpWorkerService extends Service implements
      * Initializes all required variables to start location step by step.
      */
     private void initLocationStepByStep(){
+
+        sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_STEPBYSTEP);
         Log.i(LOGTAG, "Start required scans for determining location step by step.");
         numScansStepByStep = sharedPrefs.getInt(UserPreferences.SCANSAMPLES, 1);
         numScansCountStepByStep = 0;
@@ -611,12 +622,15 @@ public class MdpWorkerService extends Service implements
 
         sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
         sendDataMapToWear(MessagesProtocol.STARTSENSING, "START: MOTION DATA REQUESTED BY MOBILE");
+
         Log.i(LOGTAG, "Start Motion Tick.");
         motionTickDone = false;
         int motionWindow = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
         mTimerMotion = new Timer();
         mTimerMotion.scheduleAtFixedRate(new MotionWearTick(), 0, motionWindow * 1000);
 
+
+        sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_BROADCAST);
         mLocationRequestedByBroadcast = true;
         numScansCountForMotionLocation = 0;
 
@@ -629,6 +643,21 @@ public class MdpWorkerService extends Service implements
 
 
     //Communication interaction routines with other services and threads****************************
+
+    private void sendMessageToService(int command) {
+        if (mIsBound) {
+            if (mServiceMessenger != null) {
+                try {
+                    Message msg = Message
+                            .obtain(null, command);
+                    msg.replyTo = mMessenger;
+                    mServiceMessenger.send(msg);
+                } catch (RemoteException e) {
+                    Log.e(LOGTAG, e.getMessage());
+                }
+            }
+        }
+    }
 
     /**
      * SendMessageToUI

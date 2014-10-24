@@ -190,14 +190,14 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
         mButtonCalculateLocationUsingNextNetwork_Bayessian.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(rootView.getContext(), "Calculating location...", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(rootView.getContext(), "Calculating location...", Toast.LENGTH_SHORT).show();
                 calculateNextAPBayessian();
             }
         });
 
         mButtonCalculateLocation_Bayessian.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(rootView.getContext(), "Calculating final location...", Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(rootView.getContext(), "Calculating final location...", Toast.LENGTH_SHORT).show();
                 calculateFinalLocationBayessian();
             }
         });

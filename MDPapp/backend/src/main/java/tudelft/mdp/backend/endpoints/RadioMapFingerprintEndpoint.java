@@ -5,8 +5,11 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.apphosting.datastore.EntityV4;
 
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.cmd.QueryKeys;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -397,6 +400,32 @@ public class RadioMapFingerprintEndpoint {
             //when we use put
             ofy().save().entity(locationFingerprintRecord).now();
         }
+    }
+
+    @ApiMethod(name = "listLocationFingerprintRecordAll", path = "list_location_fingerprint_raw_all")
+    public CollectionResponse<LocationFingerprintRecord> listLocationFingerprintRecordAll() throws NotFoundException {
+
+        LOG.info("Calling listLocationFingerprintRecordAll method");
+
+        List<LocationFingerprintRecord> records = ofy().load().type(LocationFingerprintRecord.class)
+                .list();
+
+        if(records == null) {
+            throw new NotFoundException("There are no records found with these criteria");
+        }
+
+        return CollectionResponse.<LocationFingerprintRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "deleteAllLocationFingerprintRaw", path = "delete_all_location_fingerprint_raw")
+    public void deleteAllLocationFingerprintRaw(){
+        LOG.info("Calling deleteAllLocationFingerprintRaw method");
+
+        List<Key<LocationFingerprintRecord>> records = ofy().load().type(LocationFingerprintRecord.class).keys().list();
+
+        LOG.info("Record keys:" + records.size());
+        ofy().delete().keys(records).now();
+
     }
 
 

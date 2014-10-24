@@ -13,5 +13,6 @@ public class NavigationDrawer {
     public static final int LOCATOR = 34;
     public static final int DEVICEMANAGER = 4;
     public static final int UTILITIES = 5;
-    public static final int DATAVISUALIZER = 51;
+    public static final int DBMANAGER = 51;
+    public static final int MESSENGER = 52;
 }
