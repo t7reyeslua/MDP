@@ -419,6 +419,10 @@ public class LocationEstimator {
                     index = i;
                 }
             }
+            if (max > 0.9){
+                Log.e(LOGTAG, "Stopped at pmf no. " + index);
+                break;
+            }
         }
 
         if (index > -1){

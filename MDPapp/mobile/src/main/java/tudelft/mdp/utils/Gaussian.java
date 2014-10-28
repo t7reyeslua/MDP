@@ -1,4 +1,7 @@
 package tudelft.mdp.utils;
+
+import android.util.Log;
+
 /*************************************************************************
  *  File: Gaussian.java
  *  Author: Robert Sedgewick, based on Marsaglia method, with minimal changes by
@@ -65,6 +68,11 @@ public class Gaussian {
     // This gives the probability that a random variable X distributed normally with
     // mean mu and stdev sigma produces a value less than z
     public static double Phi(double z, double mu, double sigma) {
+        //Log.i("MDP-Gaussian", "Z=" + z + " MU=" + mu + " SIGMA="+ sigma);
+        if (z == mu){
+            Log.e("MDP-Gaussian", "Z equals mu");
+            z += 0.1;
+        }
         return Phi((z - mu) / sigma);
     }
 

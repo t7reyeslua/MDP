@@ -8,6 +8,7 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -174,20 +175,30 @@ public class MdpWorkerService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
+        //startNotification();
 
+        return START_STICKY; // Run until explicitly stopped.
+    }
+
+    private void startNotification(){
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, 0);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle("MDP")
-                .setSmallIcon(R.drawable.plug)
+                .setContentText("Application is running")
+                .setSmallIcon(R.drawable.plug128)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true).build();
 
-        startForeground(7777, notification);
-        return START_STICKY; // Run until explicitly stopped.
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(7777, notification);
+        //startForeground(7777, notification);
     }
+
 
     @Override
     public void onStart(Intent intent, int startid) {
