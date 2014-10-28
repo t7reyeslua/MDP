@@ -142,6 +142,12 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
 
 
     private void askForMotionLocation(NfcRecord mDeviceInfo){
+        Log.w(TAG, "Broadcast to ALL users");
+        new GcmMessagingAsyncTask().execute(String.valueOf(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION),
+                nfcTag,
+                context);
+
+        /*
         boolean mTraining = PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(UserPreferences.TRAINING_PHASE, false);
 
@@ -161,7 +167,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             messageIntent.putExtra(MessagesProtocol.MESSAGE, nfcTag + "|" + mDeviceInfo.getType());
             LocalBroadcastManager.getInstance(context).sendBroadcast(messageIntent);
 
-        }
+        }*/
 
     }
 }

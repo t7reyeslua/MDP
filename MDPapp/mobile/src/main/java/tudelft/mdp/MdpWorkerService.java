@@ -7,6 +7,8 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -23,13 +25,19 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -166,6 +174,17 @@ public class MdpWorkerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
 
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setContentTitle("MDP")
+                .setSmallIcon(R.drawable.plug)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true).build();
+
+        startForeground(7777, notification);
         return START_STICKY; // Run until explicitly stopped.
     }
 
@@ -308,13 +327,19 @@ public class MdpWorkerService extends Service implements
     @Override
     public void onConnected(Bundle connectionHint) {
         sendDataMapToWear(MessagesProtocol.SNDMESSAGE, "Hello from Mobile");
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
+                UserPreferences.WEARCONNECTED, true).commit();
     }
 
     @Override
-    public void onConnectionSuspended(int cause) { }
+    public void onConnectionSuspended(int cause) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
+                UserPreferences.WEARCONNECTED, false).commit();}
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) { }
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
+                UserPreferences.WEARCONNECTED, false).commit();}
 
 
     /**
@@ -434,8 +459,31 @@ public class MdpWorkerService extends Service implements
             }
         }
 
+        if (locationEstimator.calculateLocationBayessian_IntermediatePMFs() != null){
+            i = 0;
+            for (HashMap<String, Double> intPmf : locationEstimator.calculateLocationBayessian_IntermediatePMFs()){
+                Log.e(LOGTAG, "Network " + (i++));
+                String zone = getHighest(intPmf);
+                if (zone.length() > 0) {
+                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + intPmf.get(zone));
+                }
+            }
+        }
 
 
+
+    }
+
+    public String getHighest(HashMap<String, Double> intPmf){
+        Double max = 0.0;
+        String zoneMax = "";
+        for (String zone : intPmf.keySet()){
+            if (intPmf.get(zone) > max){
+                max = intPmf.get(zone);
+                zoneMax = zone;
+            }
+        }
+        return zoneMax;
     }
 
 
@@ -605,8 +653,12 @@ public class MdpWorkerService extends Service implements
 
             boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, false);
             if (trainingPhase){
-                wekaSensorsRawDataObject.saveToFile(deviceEvent);
-                wekaNetworkScansObject.saveToFile(deviceEvent);
+                if (wekaSensorsRawDataObject.getSensorReadings().size() > 0) {
+                    wekaSensorsRawDataObject.saveToFile(deviceEvent);
+                }
+                if (wekaNetworkScansObject.getNetworkScans().size() > 0) {
+                    wekaNetworkScansObject.saveToFile(deviceEvent);
+                }
             }
         }
 
@@ -620,15 +672,23 @@ public class MdpWorkerService extends Service implements
 
         Log.i(LOGTAG, "Start Motion Location Data Recollection by BROADCAST.");
 
-        sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
-        sendDataMapToWear(MessagesProtocol.STARTSENSING, "START: MOTION DATA REQUESTED BY MOBILE");
 
-        Log.i(LOGTAG, "Start Motion Tick.");
-        motionTickDone = false;
-        int motionWindow = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
-        mTimerMotion = new Timer();
-        mTimerMotion.scheduleAtFixedRate(new MotionWearTick(), 0, motionWindow * 1000);
+        dataCompleteLocation = false;
+        dataCompleteMotion = true;
+        motionTickDone = true;
+        if (sharedPrefs.getBoolean(UserPreferences.WEARCONNECTED, false)) {
+            dataCompleteMotion = false;
+            sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
+            sendDataMapToWear(MessagesProtocol.STARTSENSING,
+                    "START: MOTION DATA REQUESTED BY MOBILE");
 
+
+            Log.i(LOGTAG, "Start Motion Tick.");
+            motionTickDone = false;
+            int motionWindow = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
+            mTimerMotion = new Timer();
+            mTimerMotion.scheduleAtFixedRate(new MotionWearTick(), 0, motionWindow * 1000);
+        }
 
         sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_BROADCAST);
         mLocationRequestedByBroadcast = true;
@@ -636,9 +696,6 @@ public class MdpWorkerService extends Service implements
 
         mSensorReadings.clear();
         mNetworkScansBroadcastTick.clear();
-
-        dataCompleteLocation = false;
-        dataCompleteMotion = false;
     }
 
 

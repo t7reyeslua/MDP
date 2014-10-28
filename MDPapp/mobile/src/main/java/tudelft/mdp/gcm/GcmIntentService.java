@@ -41,7 +41,7 @@ public class GcmIntentService extends IntentService {
 
                 String message = extras.getString("message");
 
-                showToast(message);
+                //showToast(message);
                 handleMessage(message);
             }
         }

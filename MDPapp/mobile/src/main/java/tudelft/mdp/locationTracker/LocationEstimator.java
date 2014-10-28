@@ -428,6 +428,18 @@ public class LocationEstimator {
         }
     }
 
+    public String getHighestZoneFromPMF(HashMap<String, Double> intPmf){
+        Double max = 0.0;
+        String zoneMax = "";
+        for (String zone : intPmf.keySet()){
+            if (intPmf.get(zone) > max){
+                max = intPmf.get(zone);
+                zoneMax = zone;
+            }
+        }
+        return zoneMax;
+    }
+
     /**
      * sortByProbability
      * @param unsortedMap to be sorted

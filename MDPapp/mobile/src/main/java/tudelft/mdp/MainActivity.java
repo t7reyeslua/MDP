@@ -43,6 +43,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import tudelft.mdp.Utilities.MessengerFragment;
 import tudelft.mdp.dashboard.DashboardFragment;
 import tudelft.mdp.deviceManager.DeviceDetectionAsyncTask;
 import tudelft.mdp.deviceManager.DeviceManagerFragment;
@@ -349,8 +350,8 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
          */
         child = new ArrayList<String>();
         //child.add("Sensors recorder");
-        child.add("DB manager");
         child.add("Messenger");
+        //child.add("DB manager");
         childItem.add(child);
     }
 
@@ -397,10 +398,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             } else if (groupPosition == NavigationDrawer.UTILITIES){
                 switch (childPosition){
                     case 0:
-                        position = NavigationDrawer.DBMANAGER;
+                        position = NavigationDrawer.MESSENGER;
                         break;
                     case 1:
-                        position = NavigationDrawer.MESSENGER;
+                        position = NavigationDrawer.DBMANAGER;
                         break;
                     default:
                         break;
@@ -470,6 +471,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             case NavigationDrawer.DBMANAGER:
                 break;
             case NavigationDrawer.MESSENGER:
+                fragment =  new MessengerFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_messenger")
+                        .commit();
                 break;
             default:
                 break;
@@ -808,7 +813,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
     }
 
-    /* Location Service Routines*/
+    /* MdpWorkerService Routines*/
     private void automaticBinding() {
         startServiceLocation();
     }
@@ -818,13 +823,13 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
     }
 
     public void startServiceLocation(){
-        Log.i(TAG, "Location Service: START");
+        Log.i(TAG, "MdpWorkerService: START");
         Intent intent = new Intent(this, MdpWorkerService.class);
         this.startService(intent);
     }
 
     public void stopServiceLocation(){
-        Log.i(TAG, "Location Service: STOP");
+        Log.i(TAG, "MdpWorkerService: STOP");
         this.stopService(new Intent(this, MdpWorkerService.class));
     }
 
@@ -832,13 +837,13 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.i(TAG, "Location Service: onServiceConnected");
+        Log.i(TAG, "MdpWorkerService: onServiceConnected");
         mServiceMessengerLocation = new Messenger(service);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        Log.i(TAG, "Location Service: onServiceDisconnected");
+        Log.i(TAG, "MdpWorkerService: onServiceDisconnected");
         if (mServiceMessengerLocation != null) {
             mServiceMessengerLocation = null;
         }

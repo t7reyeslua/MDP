@@ -10,6 +10,7 @@ public class UserPreferences {
     public static final String USERID = "USERID";
     public static final String USERMAIL = "USEREMAIL";
     public static final String USERPIC = "USERPIC";
+    public static final String WEARCONNECTED = "WEARCONNECTED";
 
 
     public static final String CALIBRATED = "CALIBRATED";

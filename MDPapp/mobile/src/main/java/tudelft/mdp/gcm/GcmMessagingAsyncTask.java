@@ -49,7 +49,7 @@ public class GcmMessagingAsyncTask extends AsyncTask<Object, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean msgSent) {
         if (msgSent) {
-            Toast.makeText(context, "Message broadcast ["+ msgType +"] :" + msgLoad , Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Message broadcast ["+ msgType +"] :" + msgLoad , Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Successfully sent message.");
         } else {
             Toast.makeText(context, "Oops! Something happened. Try again later.", Toast.LENGTH_SHORT).show();

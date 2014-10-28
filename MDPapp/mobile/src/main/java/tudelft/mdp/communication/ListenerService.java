@@ -5,17 +5,34 @@ import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import tudelft.mdp.enums.MessagesProtocol;
+import tudelft.mdp.enums.UserPreferences;
 
 public class ListenerService extends WearableListenerService {
 
 
     private static final String LOGTAG = "MDP-WearableListenerService";
+
+    @Override
+    public void onPeerConnected(Node peer){
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
+                UserPreferences.WEARCONNECTED, true).commit();
+    }
+
+    @Override
+    public void onPeerDisconnected(Node peer){
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
+                UserPreferences.WEARCONNECTED, false).commit();
+    }
+
+
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
