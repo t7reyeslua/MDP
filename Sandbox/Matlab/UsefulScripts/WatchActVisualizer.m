@@ -1,24 +1,34 @@
 % Author: Luis A. Gonzalez
 % Date	: 13-10-2014
 % Brief	: Matlab script. Sensors data vizualizer.
-%% Working Path 
-cd 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab';
+%% Clear all 
 clearvars ;
 clf( figure(1))
 clf( figure(2))
 clf( figure(3))
 
-% Change the .txt to be readed
-datasetName= 'log_SCE_20141014_233115.txt';
-datasetspath  = 'C:\Users\LG\Dropbox\SENSORS\BrushT1';
+%% getting working dir
+fullworkdir = mfilename('fullpath') ;
+wd=strsplit(fullworkdir,'\');
+wdsize=size(wd);
+workdir='';
+for i=(1:(wdsize(2)-1))
+    workdir=fullfile(workdir,wd(i));
+end
+
+cd(char(workdir));
+
+%% Change the .txt to be readed
+datasetName= 'log_BT_20141023_132423.txt';
+datasetspath  = 'C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab\Datasets\BT_2210_1344';
 
 resultsname='ResultsWatchTV.txt';
 resultspath='C:\Users\LG\Documents\GitHub\MDP\Sandbox\Matlab';
 %% Precision of the results Int and decimal point and FFT
 pNum='4';
 pDec='8';
-fftN=1000; %biggger the more resolution
-CutFreq=5;
+fftN=400; %biggger the more resolution
+CutFreq=2.6;
 
 %After a first run,check fig, change limits to desired sample to get std dev
 LowerLimit=1; %Min 1
@@ -27,7 +37,6 @@ WindowSample=inf; %"inf" for using the whole set
 %Declaring the Sensors
     GTitles = [ 'Acc       '; %1
                 'Gyro      '; %2
-                'Gravity   '; %3
                 'Magnet    '; %4
                 'Linear Acc'; %5
                 'Tilt      '; %6
@@ -47,10 +56,10 @@ UpperLimit=LowerLimit+WindowSample;
 FileToRead=fullfile(datasetspath,datasetName);
 fileID = fopen(FileToRead,'r');
 fSpecX3=' %f %f %f';
-fSpecX5=' %f %f %f %f %f';
+fSpecX4=' %f %f %f %f';
 %num(1),timestamp(1),Acc(3),gyro(3),gravity(3),magnet(3),linAcc(3),tilt(3),Rotation(5)
-formatSpec = strcat('%d %f',fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX5);
-sizeM = [25 Inf];
+formatSpec = strcat('%d %f',fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX3,fSpecX4);
+sizeM = [21 Inf];
 
 
 % Matrix_R, contains the Wholedataset.

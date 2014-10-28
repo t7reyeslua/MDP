@@ -56,19 +56,19 @@ public class MainTest {
         readFile.Acc2list(TimeStamp,Xlist, Ylist, Zlist);
       
 //        int SampleSize=TimeStamp.size();
-        double SampleFreq = AccFeatures.GetSampleFreq(TimeStamp);
+        double SampleFreq = SensorFeatures.GetSampleFreq(TimeStamp);
         
-		double MeanX=AccFeatures.Mean(Xlist);
-        double MeanY=AccFeatures.Mean(Ylist);
-        double MeanZ=AccFeatures.Mean(Zlist);
+		double MeanX=SensorFeatures.Mean(Xlist);
+        double MeanY=SensorFeatures.Mean(Ylist);
+        double MeanZ=SensorFeatures.Mean(Zlist);
         
-        double StdDevX=AccFeatures.StandardDeviation(Xlist);
-        double StdDevY=AccFeatures.StandardDeviation(Ylist);
-        double StdDevZ=AccFeatures.StandardDeviation(Zlist);
+        double StdDevX=SensorFeatures.StandardDeviation(Xlist);
+        double StdDevY=SensorFeatures.StandardDeviation(Ylist);
+        double StdDevZ=SensorFeatures.StandardDeviation(Zlist);
         
-        double FundFreqX=AccFeatures.FirstComponentFFT(Xlist,SampleFreq);
-        double FundFreqY=AccFeatures.FirstComponentFFT(Ylist,SampleFreq);
-        double FundFreqZ=AccFeatures.FirstComponentFFT(Zlist,SampleFreq);
+        double FundFreqX=SensorFeatures.FirstComponentFFT(Xlist,SampleFreq);
+        double FundFreqY=SensorFeatures.FirstComponentFFT(Ylist,SampleFreq);
+        double FundFreqZ=SensorFeatures.FirstComponentFFT(Zlist,SampleFreq);
         
         int StepsX=0;
         int StepsY=0;
@@ -79,13 +79,13 @@ public class MainTest {
         int NZeroZ=0;
         
         if (debug) {
-	        System.out.println("Sample freq. = " + AccFeatures.GetSampleFreq(TimeStamp));
+	        System.out.println("Sample freq. = " + SensorFeatures.GetSampleFreq(TimeStamp));
 	        System.out.println("Mean" + MeanX+" "+ MeanY+" "+MeanZ);
 	        System.out.println("Std Dev" + StdDevX+" "+ StdDevY+" "+ StdDevZ);
 	        System.out.println("Variance" + StdDevX*StdDevX+" "+ StdDevY*StdDevY+" "+ StdDevZ*StdDevZ+" ");
-	        System.out.println("Mags (mean)" + AccFeatures.Magnitud(MeanX,MeanY,MeanZ));
-	        System.out.println("Mags (std)" + AccFeatures.Magnitud(StdDevX,StdDevY,StdDevZ));
-	        System.out.println("Mags (var)" + AccFeatures.Magnitud(StdDevX*StdDevX,StdDevY*StdDevY,StdDevZ*StdDevZ));
+	        System.out.println("Mags (mean)" + SensorFeatures.Magnitud(MeanX,MeanY,MeanZ));
+	        System.out.println("Mags (std)" + SensorFeatures.Magnitud(StdDevX,StdDevY,StdDevZ));
+	        System.out.println("Mags (var)" + SensorFeatures.Magnitud(StdDevX*StdDevX,StdDevY*StdDevY,StdDevZ*StdDevZ));
         }
         //Freq Domain
         
@@ -100,17 +100,17 @@ public class MainTest {
     
               
 
-        FilterX=XCounter.ButtFilterArray(AccFeatures.ZeroNormal(Xlist));
-        FilterY=XCounter.ButtFilterArray(AccFeatures.ZeroNormal(Ylist));
-        FilterZ=XCounter.ButtFilterArray(AccFeatures.ZeroNormal(Zlist));
+        FilterX=XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(Xlist));
+        FilterY=XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(Ylist));
+        FilterZ=XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(Zlist));
 
         StepsX=XCounter.stepCounter(FilterX, 3, 1.5);
         StepsY=XCounter.stepCounter(FilterY, 3, 1.5);
         StepsZ=XCounter.stepCounter(FilterZ, 3, 1.5);
         
-        NZeroX=XCounter.ZeroXing(AccFeatures.ZeroNormal(AccFeatures.ZeroNormal(Xlist)));
-        NZeroY=XCounter.ZeroXing(AccFeatures.ZeroNormal(AccFeatures.ZeroNormal(Ylist)));
-        NZeroZ=XCounter.ZeroXing(AccFeatures.ZeroNormal(AccFeatures.ZeroNormal(Zlist)));
+        NZeroX=XCounter.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Xlist)));
+        NZeroY=XCounter.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Ylist)));
+        NZeroZ=XCounter.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Zlist)));
        
         
         if (debug) {

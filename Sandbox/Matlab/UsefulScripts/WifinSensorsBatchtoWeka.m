@@ -4,6 +4,17 @@
 % Sensors to be consider can be chosen
 clearvars 
 
+%% getting working dir
+fullworkdir = mfilename('fullpath') ;
+wd=strsplit(fullworkdir,'\');
+wdsize=size(wd);
+workdir='';
+for i=(1:(wdsize(2)-1))
+    workdir=fullfile(workdir,wd(i));
+end
+
+cd(char(workdir));
+
 %% Settings
     %% File Handling 
     % Folder of Sets must not containother than Sets,
@@ -14,7 +25,7 @@ clearvars
 
     sensordatasetspath  = 'C:\Users\LG\Dropbox\MDP_LAG\WatchTest1\Motion';
     networkdatasetspath = 'C:\Users\LG\Dropbox\MDP_LAG\WatchTest1\Location';
-    resultsname='WekaResults';
+    resultsname='WR_Win100';
     resultspath='C:\Users\LG\Dropbox\MDP_LAG\WatchTest1\';
     
     
@@ -26,7 +37,7 @@ clearvars
 
     % Sample window
     LowerLimit=1; %Min 1
-    WindowSize=400; %"inf" for using the whole set
+    WindowSize=100; %"inf" for using the whole set
     
     %Filter properties
     cutfreq=2.6; %Cutt off frequency (low pass Butterworth filter)
@@ -292,7 +303,7 @@ SensorftTable([1],:)=[];
     
     %% Get Location feats from all files
 
-run(fullfile(pwd,'BatchNetworkMerger.m'));
+run('BatchNetworkMerger.m');
 
 
 
