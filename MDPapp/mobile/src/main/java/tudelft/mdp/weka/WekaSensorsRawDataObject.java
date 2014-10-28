@@ -78,10 +78,8 @@ public class WekaSensorsRawDataObject {
     }
 
 
-
     public void separateBySensors(String record){
         String[] parts = record.split("\t");
-
         for ( int i = 0; i < parts.length; i++){
             String sensorName = getSensorName(i);
             addValueToSensorArray(sensorName, Double.valueOf(parts[i]));

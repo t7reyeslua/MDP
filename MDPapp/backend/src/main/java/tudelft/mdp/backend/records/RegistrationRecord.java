@@ -13,7 +13,37 @@ public class RegistrationRecord {
 
     @Index
     private String regId;
-    // you can add more fields...
+
+    @Index
+    private String username;
+    @Index
+    private String email;
+    @Index
+    private String device;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
+    }
 
     public RegistrationRecord() {}
 

@@ -15,11 +15,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import tudelft.mdp.backend.endpoints.registration.Registration;
+import tudelft.mdp.backend.endpoints.registration.model.RegistrationRecord;
 
 /**
  * Register devices with the Google Cloud Messaging backend
  */
-public class GcmRegistrationAsyncTask extends AsyncTask<Context, Void, String> {
+public class GcmRegistrationAsyncTask extends AsyncTask<Object, Void, String> {
     private static Registration regService = null;
     private GoogleCloudMessaging gcm;
     private Context context;
@@ -28,7 +29,7 @@ public class GcmRegistrationAsyncTask extends AsyncTask<Context, Void, String> {
     private static final String SENDER_ID = "722201926414";
 
     @Override
-    protected String doInBackground(Context... params) {
+    protected String doInBackground(Object... params) {
         if (regService == null) {
 
             /*
@@ -54,7 +55,12 @@ public class GcmRegistrationAsyncTask extends AsyncTask<Context, Void, String> {
             regService = builder.build();
         }
 
-        context = params[0];
+        context = (Context) params[0];
+        String username = (String) params[1];
+        String email = (String) params[2];
+        String device = (String) params[3];
+
+
 
         String msg = "";
         try {
@@ -68,7 +74,13 @@ public class GcmRegistrationAsyncTask extends AsyncTask<Context, Void, String> {
             // so it can use GCM/HTTP or CCS to send messages to your app.
             // The request to your server should be authenticated if your app
             // is using accounts.
-            regService.register(regId).execute();
+
+            RegistrationRecord record = new RegistrationRecord();
+            record.setRegId(regId);
+            record.setUsername(username);
+            record.setEmail(email);
+            record.setDevice(device);
+            regService.register(record).execute();
 
         } catch (IOException ex) {
             ex.printStackTrace();

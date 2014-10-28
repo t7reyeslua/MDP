@@ -20,6 +20,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -104,19 +105,16 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         }
         mGoogleApiClient = buildGoogleApiClient();
 
+        /*
         if (!mGoogleApiClient.isConnected()){
             login_signin();
         }
+        */
 
         configureActionBar();
         initDrawer();
-
         verifyNFCenabled();
-
         automaticBinding();
-
-        new GcmRegistrationAsyncTask().execute(this);
-
         selectItem(NavigationDrawer.DASHBOARD, -1);
 
 
@@ -176,9 +174,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
         // Retrieve some profile information to personalize our app for the user.
         currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-
-
-
         getProfileInformation();
 
 
@@ -530,6 +525,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
 
                 mDrawerListAdapter.notifyDataSetChanged();
+
+
+                String device = Build.DEVICE + " " + Build.MODEL;
+                new GcmRegistrationAsyncTask().execute(this, personName, email, device);
             } else {
                 Toast.makeText(getApplicationContext(),
                         "Person information is null", Toast.LENGTH_LONG).show();

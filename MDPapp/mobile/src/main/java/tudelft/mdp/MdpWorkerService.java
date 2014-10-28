@@ -43,6 +43,7 @@ import java.util.TimerTask;
 
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
+import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.locationTracker.LocationEstimator;
@@ -327,19 +328,14 @@ public class MdpWorkerService extends Service implements
     @Override
     public void onConnected(Bundle connectionHint) {
         sendDataMapToWear(MessagesProtocol.SNDMESSAGE, "Hello from Mobile");
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
-                UserPreferences.WEARCONNECTED, true).commit();
+        new VerifyAndroidWearConnectedAsyncTask().execute(this.getApplicationContext(), mGoogleApiClient);
     }
 
     @Override
-    public void onConnectionSuspended(int cause) {
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
-                UserPreferences.WEARCONNECTED, false).commit();}
+    public void onConnectionSuspended(int cause) {}
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(
-                UserPreferences.WEARCONNECTED, false).commit();}
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 
 
     /**
@@ -648,6 +644,8 @@ public class MdpWorkerService extends Service implements
         Log.w(LOGTAG, "consolidateMotionLocationData");
         if (isDataCompleteLocation && isDataCompleteMotion){
             //TODO Save/upload both data sets
+
+            Log.w(LOGTAG, "Data and Motion Completed");
             WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(mNetworkScansBroadcastTick);
             WekaSensorsRawDataObject wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
 

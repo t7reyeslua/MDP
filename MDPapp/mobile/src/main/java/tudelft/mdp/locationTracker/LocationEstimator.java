@@ -349,7 +349,7 @@ public class LocationEstimator {
      */
     public void normalizePMF(double probabilityOfAllZones, HashMap<String,Double> pmf ){
 
-        Log.i(LOGTAG, "normalizePMF");
+        //Log.i(LOGTAG, "normalizePMF");
         double sumProb = 0.0;
         for (String zone : pmf.keySet()){
             sumProb += pmf.get(zone);
