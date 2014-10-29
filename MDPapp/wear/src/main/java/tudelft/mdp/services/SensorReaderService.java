@@ -479,8 +479,8 @@ public class SensorReaderService extends Service implements
         snapshotCounter = 0;
         snapshotArray.clear();
 
-        mTimerSendSnapshot  = new Timer();
-        mTimerSendSnapshot.scheduleAtFixedRate(new SnapshotTick(), 0, Constants.TIMER_UPDATE_RATE);
+        /*mTimerSendSnapshot  = new Timer();
+        mTimerSendSnapshot.scheduleAtFixedRate(new SnapshotTick(), 0, Constants.TIMER_UPDATE_RATE);*/
 
 
         mTimerDoSnapshot  = new Timer();

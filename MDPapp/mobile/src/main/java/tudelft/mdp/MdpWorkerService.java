@@ -18,11 +18,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -114,6 +116,10 @@ public class MdpWorkerService extends Service implements
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansBroadcastTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
 
+    PowerManager pm;
+    WifiManager wm;
+    PowerManager.WakeLock wl;
+    WifiManager.WifiLock wifiLock;
 
 
     //Constructor **********************************************************************************
@@ -148,12 +154,35 @@ public class MdpWorkerService extends Service implements
 
         updateGaussians();
 
+        pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MDP-PowerManager");
+        wl.acquire();
+        Log.e(LOGTAG,"WakeLock Acquired");
+
+        wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        wifiLock = wm.createWifiLock("MDP-WifiLock");
+        wifiLock.acquire();
+        Log.e(LOGTAG,"WifiLock Acquired");
+
 
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (wl != null){
+            if (wl.isHeld()){
+                wl.release();
+                Log.e(LOGTAG,"WakeLock Released");
+            }
+        }
+        if (wifiLock != null){
+            if (wifiLock.isHeld()){
+                wifiLock.release();
+                Log.e(LOGTAG,"WifiLock Released");
+            }
+        }
 
         isRunning = false;
         try {

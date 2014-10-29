@@ -1,4 +1,4 @@
-package tudelft.mdp.enums;
+package tudelft.mdp.backend;
 
 /**
  * Created by t7 on 9-10-14.
@@ -70,7 +70,6 @@ public class MessagesProtocol {
     public static final String UPDATE_GAUSSIANS = "UPDATE_GAUSSIANS";
     public static final String MSG_RECEIVED = "MSG_RECEIVED";
     public static final String KEEPGCMALIVE = "KEEPGCMALIVE";
-
 
 
 
