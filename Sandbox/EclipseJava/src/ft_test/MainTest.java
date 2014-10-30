@@ -108,9 +108,9 @@ public class MainTest {
         StepsY=XCounter.stepCounter(FilterY, 3, 1.5);
         StepsZ=XCounter.stepCounter(FilterZ, 3, 1.5);
         
-        NZeroX=XCounter.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Xlist)));
-        NZeroY=XCounter.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Ylist)));
-        NZeroZ=XCounter.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Zlist)));
+        NZeroX=SensorFeatures.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Xlist)));
+        NZeroY=SensorFeatures.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Ylist)));
+        NZeroZ=SensorFeatures.ZeroXing(SensorFeatures.ZeroNormal(SensorFeatures.ZeroNormal(Zlist)));
        
         
         if (debug) {

@@ -1,7 +1,6 @@
 package ft_test;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Luis Gonzalez
@@ -121,27 +120,7 @@ public class XCounter {
 		return steps;
 	}
 
-    public static int ZeroXing(List<Double> signal) {
-    	/**
-		 * @author Luis Gonzalez
-		 * @version 2, 06/10/14
-		 * 
-		 * @brief it returns the Number of Zero crossing of a signal
-		 */
-    	
-        int numZC=0;
 
-        
-        for (int i=0; i<signal.size()-2; i++){
-                if( (signal.get(i)>=0 && signal.get(i+1)<0) ||( signal.get(i)<0 && signal.get(i+1)>=0)){
-                        numZC++;
-                }
-        }                       
-
-        return numZC;
-
-    }  
-    
     
 	/**
 	 * cutoff freq 8hz, sample freq 200hz (5 ms) [a,b]=butter(2,8/(200/2),'low')

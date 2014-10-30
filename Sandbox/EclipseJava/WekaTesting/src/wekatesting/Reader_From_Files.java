@@ -1,8 +1,6 @@
 /**
  * @author  Luis Gonzalez
- * @version 1.1, 04/10/14
- * 
- * for wekatesting
+ * @version 1, 04/10/14
  *
  *Idea from:
  *	http://jdongprogramming.com/helpful-code-snippets/how-to-read-a-txt-or-csv-in-java/
@@ -22,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Scanner;
+
  
 public class Reader_From_Files {
  
@@ -31,7 +30,7 @@ public class Reader_From_Files {
     private boolean fileExists; //reduces the chances of our program crashing
     private ArrayList<String> fileContent = new ArrayList<String>();
 	
- 
+
     public Reader_From_Files(String filepath){
  
         file = new File(filepath);
@@ -132,7 +131,26 @@ public class Reader_From_Files {
         }
     }
     
+    /**
+     * Limiter should be tab,space or coma value**/
+    public ArrayList<String> Sensors2arraylists(){
+    	
+    ArrayList<String> SensorList = new ArrayList<String>();
+
+    String tempstr;
     
+        for(int i=0; i<fileContent.size(); i++){
+            tempstr = fileContent.get(i);
+            SensorList.add(tempstr);
+            }
+
+//            System.out.println(ts+"\t"+tX + "\t" + tY + "\t" +tZ);
+
+        return SensorList;
+        }
+        
+    
+      
     public ArrayList<ArrayList<Double>> AccelString2AccelSet(){
     	
 
@@ -175,41 +193,41 @@ public class Reader_From_Files {
     	
     	return ArraySet;
     }
-
+   
     
-    public void s2ltest(){
-    	//This Test includes the MeanDeviation class
+    /*
+     * idea from:
+     * http://stackoverflow.com/questions/5694385/getting-the-filenames-of-all-files-in-a-folder
+     * */
+    public static ArrayList<String> getFileNames(String filepath) {
+    	
+    	ArrayList<String> FileNames = new ArrayList<String> ();
+    	
+    	File folder = new File(filepath);
+    	File[] listOfFiles = folder.listFiles();
 
-        ArrayList<Double> Xlist = new ArrayList<Double>();
-        ArrayList<Double> Ylist = new ArrayList<Double>();
-        ArrayList<Double> Zlist = new ArrayList<Double>();
-        ArrayList<Double> Normlist = new ArrayList<Double>();
-        
-        AccelString2list(Xlist, Ylist, Zlist, Normlist);
-        
-        for(int i=0; i<fileContent.size(); i++){
-                System.out.println(Xlist.get(i) + "\t" + Ylist.get(i) + "\t" +Zlist.get(i) + "\t" +Normlist.get(i));
-        }
-        
-        MeanStandardDeviation xmsd = MeanStandardDeviation.meanAndStandardDeviation(Xlist);
-        MeanStandardDeviation ymsd = MeanStandardDeviation.meanAndStandardDeviation(Ylist);
-        MeanStandardDeviation zmsd = MeanStandardDeviation.meanAndStandardDeviation(Zlist);
-        
-        System.out.println("THIS IS STANDARD!!!!");
-        System.out.println("Std Dev of X is " + xmsd.getStdDev());
-        System.out.println("Std Dev of y is " + ymsd.getStdDev());
-        System.out.println("Std Dev of z is " + zmsd.getStdDev());
+    	    for (int i = 0; i < listOfFiles.length; i++) {
+//    	        System.out.println("File " + listOfFiles[i].getName());
+    	    	
+    	    	FileNames.add(listOfFiles[i].getName());
+    	    }
+    	
+    	
+    	return FileNames;
     }
-    public static void write2File(ArrayList<Double> AList){
+    
+
+    public static void write2File(ArrayList<String> ftList,String ResultsFileName){
+    	
+    	ResultsFileName=ResultsFileName+"_"+String.valueOf(System.currentTimeMillis())+".dat";
     	
     	Writer writer = null;
 
     	try {
-    	    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ResultArray.dat"), "utf-8"));
-    	    double meanlocal=MeanStandardDeviation.Mean(AList);
+    	    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(ResultsFileName), "utf-8"));
     	    
-            for(int i=0; i<AList.size(); i++){
-            	writer.write(String.valueOf(i+" "+(AList.get(i)-meanlocal))+"\n");
+            for(int i=0; i<ftList.size(); i++){
+            	writer.write(ftList.get(i)+"\n");
             	
             }
     	    
@@ -220,9 +238,6 @@ public class Reader_From_Files {
     	   try {writer.close();} catch (Exception ex) {}
     	}
     	
-    	
-
-
     }
 
  

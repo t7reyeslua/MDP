@@ -51,11 +51,5 @@ public class SLinearRegression {
 		return factors;
 	}
 
-	/** 
-	 * @brief test to compare two scans
-	 */
-	public static void TestSLR(){
-		
-		
-	}
+
 }

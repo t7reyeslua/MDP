@@ -10,16 +10,18 @@
  * 
  */
 
-package ft_test;
-
+package wekatesting;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccFeatures {
+public class SensorFeatures {
 
 /**************************** Time Domain features ****************************/
-	
+	/**
+	  * @brief 	 
+	  * @return Mean of the Array 
+	  * */
     public static double Mean(List<Double> samples) {
         double mean = 0.0;
 
@@ -64,7 +66,11 @@ public class AccFeatures {
         return result;
       }
     
-    
+	/**
+	  * @brief 	 
+	  * @return It returns the Array minus its Mean 
+	  * 
+	  * */
 	public static ArrayList<Double> ZeroNormal(ArrayList<Double> samples) {
         double mean = Mean(samples);
         ArrayList<Double> ZNormalList = new ArrayList<Double>();
@@ -75,7 +81,12 @@ public class AccFeatures {
 
         return ZNormalList;
     } 
-    
+	
+	/**
+	  * @brief 	 
+	  * @return It returns Standard deviation 
+	  * 
+	  * */
     public static double StandardDeviation(List<Double> samples) {
         double mean = 0.0;
         double m2 =0.0;
@@ -94,6 +105,27 @@ public class AccFeatures {
     	return Math.sqrt((a*a)+(b*b)+(c*c));  
     }
 
+    public static int ZeroXing(ArrayList<Double> signal) {
+    	/**
+		 * @author Luis Gonzalez
+		 * @version 2, 06/10/14
+		 * 
+		 * @brief it returns the Number of Zero crossing of a signal
+		 */
+    	
+        int numZC=0;
+
+        
+        for (int i=0; i<signal.size()-2; i++){
+                if( (signal.get(i)>=0 && signal.get(i+1)<0) ||( signal.get(i)<0 && signal.get(i+1)>=0)){
+                        numZC++;
+                }
+        }                       
+
+        return numZC;
+
+    }  
+    
 /**************************** Frequency Domain features ****************************/
 /**
  * @author Luis Gonzalez
@@ -105,13 +137,34 @@ public class AccFeatures {
  * Included modified codes to calculate the freq in Hz and finding fundamental freq.
  * 
  */
-    public static double GetSampleFreq(List<Integer> timestamp) {
-   	/**
-   	 * Strictly for TimeStamp List arrays in progressive order 
-   	 */
-    	if(timestamp.size() < 124 || timestamp.get(0) > timestamp.get(timestamp.size() - 1))
-    		System.out.println("Err-Wrong timestamp list");    
+	/**
+	  * @brief 	Strictly for TimeStamp List arrays in progressive order
+	  * @return Sample frequency 
+	  * */
+    public static double GetSampleFreq(ArrayList<Double> timestamp) {
+
+//    	double divizor=0.0;
+//    	int ttime=timestamp.get(0)
+//    	double nSeconds=Math.floor(ttime/divizor)*3600;
+//    	ttime=ttime%divizor;
+//    	divizor=divizor/100;
+//%minutes
+//        nSeconds=nSeconds+floor(MMSSmmm/divizor)*60;
+//        SSmmm=mod(MMSSmmm,divizor);
+//        divizor=divizor/100;
+//%seconds
+//        nSeconds=nSeconds+floor(SSmmm/divizor);
+//        mmm=mod(SSmmm,divizor);
+//%milliseconds
+//        nSeconds=nSeconds+(mmm*.001);
+
     	
+    	if(timestamp.size() < 10 ){
+    		System.out.println("Err-GetSampleFreq, Not enough values");    
+    	}else if(timestamp.get(0) > timestamp.get(timestamp.size() - 1)){
+    		System.out.println("Err-GetSampleFreq, Wrong timestamp list");     		    		
+    	}
+    		
     	return Math.round(timestamp.size()/(((timestamp.get(timestamp.size() - 1)-timestamp.get(0)))/1000)); // For TimeStamp in MILISECONDS
 
     }
