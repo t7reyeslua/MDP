@@ -2,11 +2,9 @@ package wekatesting;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.Serializable;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;

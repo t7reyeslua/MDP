@@ -1,100 +1,7 @@
-/**
- * @author  Luis Gonzalez
- * @version 1, 05/10/14
- *
- * @brief Organized class containing methods to calculate the features od accelerometers
- * At most, raw data should be ArrayList of the accelerometers (3x) and timestamp
- * 
- * FFT and 1st Fundamental frequency can return an error (wrong freq, 2nd best) if the signal is too low or the sample rate is small
- * May be useful to return gain or top frequencies
- * 
- */
-
-package ft_test;
-
+package wekatesting;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class AccFeatures {
-
-/**************************** Time Domain features ****************************/
-	
-    public static double Mean(List<Double> samples) {
-        double mean = 0.0;
-
-        for (int i=0; i < samples.size(); i++) {
-            double sample = samples.get(i);
-            double delta = sample - mean;
-            mean += delta / (i+1);
-        }
-
-
-        return mean;
-    }  
-    
-    public static double Variance(List<Double>  data) {
-        // Get the mean of the data set
-        double mean = Mean(data);
-
-        double sumOfSquaredDeviations = 0;
-
-        // Loop through the data set
-        for (int i = 0; i < data.size(); i++) {
-          // sum the difference between the data element and the mean squared
-          sumOfSquaredDeviations += Math.pow(data.get(i) - mean, 2);
-        }
-
-        // Divide the sum by the length of the data set - 1 to get our result
-        return sumOfSquaredDeviations / (data.size() - 1);
-      }
-    
-    public static double Covariance(List<Double>  a, List<Double>  b) {
-        double amean = Mean(a);
-        double bmean = Mean(b);
-
-        double result = 0;
-
-        for (int i = 0; i < a.size(); i++) {
-          result += (a.get(i) - amean) * (b.get(i) - bmean);
-        }
-
-        result /= a.size() - 1;
-
-        return result;
-      }
-    
-    
-	public static ArrayList<Double> ZeroNormal(ArrayList<Double> samples) {
-        double mean = Mean(samples);
-        ArrayList<Double> ZNormalList = new ArrayList<Double>();
-
-        for (int i=0; i < samples.size(); i++) {
-        	ZNormalList.add(samples.get(i)-mean);
-        }
-
-        return ZNormalList;
-    } 
-    
-    public static double StandardDeviation(List<Double> samples) {
-        double mean = 0.0;
-        double m2 =0.0;
-        for (int i=0; i < samples.size(); i++) {
-            double sample = samples.get(i);
-            double delta = sample - mean;
-            mean += delta / (i+1);
-            m2 += delta * (sample - mean);
-        }
-        double variance = m2 / (samples.size() - 1);
-        double stdDev = Math.sqrt(variance);
-        return stdDev;
-    }
-
-    public static double Magnitud(Double a,Double b,Double c) {
-    	return Math.sqrt((a*a)+(b*b)+(c*c));  
-    }
-
-/**************************** Frequency Domain features ****************************/
 /**
  * @author Luis Gonzalez
  * @brief Based on the code of:
@@ -102,21 +9,13 @@ public class AccFeatures {
  * Copyright (c) 2014 Nayuki Minase
  * http://nayuki.eigenstate.org/page/free-small-fft-in-multiple-languages
  * 
- * Included modified codes to calculate the freq in Hz and finding fundamental freq.
+ * Included modified codes to calculate the freq in Hz
  * 
  */
-    public static double GetSampleFreq(List<Integer> timestamp) {
-   	/**
-   	 * Strictly for TimeStamp List arrays in progressive order 
-   	 */
-    	if(timestamp.size() < 124 || timestamp.get(0) > timestamp.get(timestamp.size() - 1))
-    		System.out.println("Err-Wrong timestamp list");    
-    	
-    	return Math.round(timestamp.size()/(((timestamp.get(timestamp.size() - 1)-timestamp.get(0)))/1000)); // For TimeStamp in MILISECONDS
 
-    }
-    
-    public static double FirstComponentFFT(ArrayList<Double> signal,double sampleFrequency) {
+
+public class Fft {
+	public static double FirstComponentFFT(ArrayList<Double> signal,double sampleFrequency) {
 		/**
 		 * @author Luis Gonzalez
 		 * @brief Using computeDft returns the First frequency components of the  signal
@@ -126,7 +25,7 @@ public class AccFeatures {
         double[] real=new double [signal.size()];
         double[] imag=new double [signal.size()];
         //double[] absFT=new double [signal.size()/2];
-        double signalMean= Mean(signal);
+        double signalMean= SensorFeatures.Mean(signal);
         
 
         
@@ -140,17 +39,14 @@ public class AccFeatures {
         double highestFreq=0.0;
         int p=0;
         for(int i=0;i<signal.size()/2;i++){
-//        	absFT[i]=Math.abs(imag[i]);
-        	 
-//        	System.out.println(i+"\t"+Math.abs(imag[i]));
-        	 
+        	//absFT[i]=Math.abs(imag[i]);
+        	    	
       	   if(Math.abs(imag[i])>highestFreq){
       		 highestFreq=Math.abs(imag[i]);
       		 p=i;
-      		 
       	   }
          }
-//        System.out.println(p);
+        
 		return (sampleFrequency/signal.size())*p;
 	}
 	
@@ -338,7 +234,5 @@ public class AccFeatures {
 			outimag[i] = ximag[i] / n;
 		}
 	}
-    
-	
 	
 }

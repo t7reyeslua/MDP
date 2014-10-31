@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Scanner;
+
  
 public class Reader_From_Files {
  
@@ -29,7 +30,7 @@ public class Reader_From_Files {
     private boolean fileExists; //reduces the chances of our program crashing
     private ArrayList<String> fileContent = new ArrayList<String>();
 	
- 
+
     public Reader_From_Files(String filepath){
  
         file = new File(filepath);
@@ -130,7 +131,26 @@ public class Reader_From_Files {
         }
     }
     
+    /**
+     * Limiter should be tab,space or coma value**/
+    public ArrayList<String> Sensors2arraylists(){
+    	
+    ArrayList<String> SensorList = new ArrayList<String>();
+
+    String tempstr;
     
+        for(int i=0; i<fileContent.size(); i++){
+            tempstr = fileContent.get(i);
+            SensorList.add(tempstr);
+            }
+
+//            System.out.println(ts+"\t"+tX + "\t" + tY + "\t" +tZ);
+
+        return SensorList;
+        }
+        
+    
+      
     public ArrayList<ArrayList<Double>> AccelString2AccelSet(){
     	
 
