@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +48,7 @@ import java.util.TimerTask;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
+import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.locationTracker.LocationEstimator;
@@ -412,6 +414,24 @@ public class MdpWorkerService extends Service implements
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, msgType);
         dataMap.putString(MessagesProtocol.MESSAGE, message);
+        dataMap.putDouble(MessagesProtocol.TIMESTAMP, System.currentTimeMillis());
+
+        if (msgType.equals(MessagesProtocol.STARTSENSING)){
+            ArrayList<Integer> mSensorListToRecord = new ArrayList<Integer>();
+            mSensorListToRecord.add(Sensor.TYPE_ACCELEROMETER);
+            mSensorListToRecord.add(Sensor.TYPE_GYROSCOPE);
+            mSensorListToRecord.add(Sensor.TYPE_MAGNETIC_FIELD);
+            mSensorListToRecord.add(Sensor.TYPE_LINEAR_ACCELERATION);
+            mSensorListToRecord.add(Constants.SAMSUNG_TILT);
+            mSensorListToRecord.add(Sensor.TYPE_ROTATION_VECTOR);
+
+            Double hz = 50.0;
+            Integer duration = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
+
+            dataMap.putDouble(MessagesProtocol.SENSORHZ, hz);
+            dataMap.putInt(MessagesProtocol.SENSOR_RECORDING_SECONDS, duration);
+            dataMap.putIntegerArrayList(MessagesProtocol.SENSORSTORECORD, mSensorListToRecord);
+        }
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
     }
@@ -429,6 +449,9 @@ public class MdpWorkerService extends Service implements
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
                 Log.w(LOGTAG,"Start sensor streaming from wear");
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
+                Log.w(LOGTAG, msgLoad);
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
                 Log.i(LOGTAG, msgLoad);
@@ -486,7 +509,7 @@ public class MdpWorkerService extends Service implements
                     if (locationCalculated.length() == 0) {
                         locationCalculated = zone;
                     }
-                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
+                  //  Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
                     // TODO : Save 3 highest values in DB
                     i++;
                 } else {
@@ -498,10 +521,10 @@ public class MdpWorkerService extends Service implements
         if (locationEstimator.calculateLocationBayessian_IntermediatePMFs() != null){
             i = 0;
             for (HashMap<String, Double> intPmf : locationEstimator.calculateLocationBayessian_IntermediatePMFs()){
-                Log.e(LOGTAG, "Network " + (i++));
+                //Log.e(LOGTAG, "Network " + (i++));
                 String zone = getHighest(intPmf);
                 if (zone.length() > 0) {
-                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + intPmf.get(zone));
+                    //Log.w(LOGTAG, "Zone:" + zone + " Prob:" + intPmf.get(zone));
                 }
             }
         }

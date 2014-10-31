@@ -40,7 +40,7 @@ public class SensorRecControlCard extends Card {
     public void setupInnerViewElements(ViewGroup parent, View view) {
 
         //Retrieve elements
-        acFile        = (AutoCompleteTextView) parent.findViewById(R.id.acFile);
+        //acFile        = (AutoCompleteTextView) parent.findViewById(R.id.acFile);
         mToggleButton  = (ToggleButton) parent.findViewById(R.id.toggleButton);
         mProgressBar      = (ProgressBar) parent.findViewById(R.id.progressBar);
         mChronometer = (Chronometer) parent.findViewById(R.id.chronometer);

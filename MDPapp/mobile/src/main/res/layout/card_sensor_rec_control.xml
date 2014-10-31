@@ -11,6 +11,7 @@
             android:paddingRight="10dp"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
+        <!--
         <LinearLayout
                 android:id="@+id/filenameGroup"
                 android:orientation="horizontal"
@@ -43,7 +44,7 @@
                     android:layout_marginRight="4dp"
                     android:layout_marginBottom="4dp"
                     android:hint="e.g. OpenHandle" />
-        </LinearLayout>
+        </LinearLayout>-->
 
 
 

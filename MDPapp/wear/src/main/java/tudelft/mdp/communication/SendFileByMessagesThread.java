@@ -10,21 +10,24 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import tudelft.mdp.Utils;
 import tudelft.mdp.enums.MessagesProtocol;
 
 public class SendFileByMessagesThread extends Thread {
     String path;
     ArrayList<String> messageList;
+    ArrayList<Integer> sensorsToRecord;
 
 
     GoogleApiClient mGoogleApiClient;
     private static final String LOGTAG = "MDP-SendMessageThread";
 
     // Constructor for sending data objects to the data layer
-    public SendFileByMessagesThread(GoogleApiClient client, String p, ArrayList<String> data) {
+    public SendFileByMessagesThread(GoogleApiClient client, String p, ArrayList<String> data, ArrayList<Integer> sensors) {
         path = p;
         messageList = data;
         mGoogleApiClient = client;
+        sensorsToRecord = sensors;
     }
 
     private void  sendMsg(String message, Node node){
@@ -49,6 +52,9 @@ public class SendFileByMessagesThread extends Thread {
                 String startMsg = MessagesProtocol.SENDSENSEORSNAPSHOTREC_START + "| Start saving file";
                 sendMsg(startMsg, node);
 
+                Log.w(LOGTAG,"Number of sensors to send: " + sensorsToRecord.size());
+                String header = MessagesProtocol.SENDSENSEORSNAPSHOTHEADER + "|" + buildHeader();
+                sendMsg(header, node);
 
                 Log.w(LOGTAG,"Number of records to send: " + messageList.size());
                 for (String message : messageList) {
@@ -62,5 +68,13 @@ public class SendFileByMessagesThread extends Thread {
                 sendMsg(finishMsg, node);
             }
         }
+    }
+
+    private String buildHeader(){
+        String header = "No.\tTimestamp\t";
+        for(Integer sensorType : sensorsToRecord){
+            header += " [" + Utils.getSensorLength(sensorType) + "]" + Utils.getSensorName(sensorType) + "\t";
+        }
+        return header;
     }
 }

@@ -13,19 +13,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.hardware.Sensor;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
 import android.widget.Chronometer;
 import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -37,6 +44,8 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.R;
+import tudelft.mdp.enums.UserPreferences;
+import tudelft.mdp.ui.SensorRecAvailableListCard;
 import tudelft.mdp.utils.Utils;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.enums.Constants;
@@ -52,11 +61,14 @@ public class SensorViewerFragment extends Fragment implements
 
     private static final String[] ACTIONS = new String[] {
             "Turn knob right",
-            "Turn knob left"
+            "Turn knob left",
+            "Brushing Teeth"
     };
 
     private CardView mCardView;
     private Card mCardSensorRec;
+    private CardView mCardViewSensorsAvailable;
+    private Card mCardSensorsAvailable;
     private ArrayList<Card> mCardsArrayList;
     private CardArrayAdapter mCardArrayAdapter;
     private CardListView mCardListView;
@@ -66,12 +78,23 @@ public class SensorViewerFragment extends Fragment implements
     private AutoCompleteTextView mActionAutoComplete;
     private Chronometer mChronometer;
 
+    private EditText mEditTextHz;
+    private EditText mEditTextDuration;
+    private LinearLayout mLinearLayoutAvailableSensors;
+    private LinearLayout mLinearLayoutAvailableSensors2;
+
     private Vibrator v;
     private FileCreator mFileCreator;
 
+    private DataMap dataMap = new DataMap();
+    private boolean fileCreated = false;
 
     private View rootView;
     GoogleApiClient mGoogleApiClient;
+
+    private ArrayList<Integer> mSensorList = new ArrayList<Integer>();
+    private ArrayList<Integer> mSensorListToRecord = new ArrayList<Integer>();
+    private ArrayList<CheckBox> mSensorListCheckBoxes = new ArrayList<CheckBox>();
 
     private static final String LOGTAG = "MDP-SensorViewerFragment";
 
@@ -97,7 +120,8 @@ public class SensorViewerFragment extends Fragment implements
 
         buildGoogleClient();
         configureBroadcastReceivers();
-        configureCards();
+        configureControlCard();
+        configureAvailableSensorsCard();
         configureCardList();
         configureAutoComplete();
         configureToggleButton();
@@ -120,6 +144,7 @@ public class SensorViewerFragment extends Fragment implements
     private void startRecording(){
         // Create a DataMap object and send it to the smartwatch
         String filename = mActionAutoComplete.getText().toString();
+        fileCreated = false;
         sendNotification(MessagesProtocol.STARTSENSINGSERVICE);
 
         sendDataMap(MessagesProtocol.STARTSENSING, filename);
@@ -136,8 +161,12 @@ public class SensorViewerFragment extends Fragment implements
         String filename = mActionAutoComplete.getText().toString();
         sendDataMap(MessagesProtocol.STOPSENSING, filename);
 
-        v.vibrate(500);
+        stopRecording_UI();
+        sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
+    }
 
+    private void stopRecording_UI(){
+        v.vibrate(500);
 
         mActionAutoComplete.setEnabled(true);
         mChronometer.stop();
@@ -146,6 +175,8 @@ public class SensorViewerFragment extends Fragment implements
         mToggleButton.setChecked(false);
         mProgressBar.setIndeterminate(false);
         mProgressBar.setProgress(0);
+
+
     }
 
     private void startChronometer() {
@@ -157,7 +188,7 @@ public class SensorViewerFragment extends Fragment implements
 
 
 
-    private void configureCards(){
+    private void configureControlCard(){
         mCardView = (CardView) rootView.findViewById(R.id.cardControl);
 
         mCardSensorRec = new SensorRecControlCard(rootView.getContext());
@@ -166,9 +197,55 @@ public class SensorViewerFragment extends Fragment implements
 
         mProgressBar = (ProgressBar) mCardView.findViewById(R.id.progressBar);
         mToggleButton = (ToggleButton) mCardView.findViewById(R.id.toggleButton);
-        mActionAutoComplete = (AutoCompleteTextView) mCardView.findViewById(R.id.acFile);
         mChronometer = (Chronometer) mCardView.findViewById(R.id.chronometer);
 
+    }
+
+    private void configureAvailableSensorsCard(){
+        mCardViewSensorsAvailable = (CardView) rootView.findViewById(R.id.cardSensorsAvailable);
+        mCardSensorsAvailable = new SensorRecAvailableListCard(rootView.getContext());
+        mCardSensorsAvailable.setShadow(true);
+        mCardViewSensorsAvailable.setCard(mCardSensorsAvailable);
+
+
+        mActionAutoComplete = (AutoCompleteTextView) mCardViewSensorsAvailable.findViewById(R.id.acFile);
+        mEditTextHz = (EditText) mCardViewSensorsAvailable.findViewById(R.id.editHz);
+        mEditTextDuration = (EditText) mCardViewSensorsAvailable.findViewById(R.id.editDuration);
+        mLinearLayoutAvailableSensors = (LinearLayout) mCardViewSensorsAvailable.findViewById(R.id.llSensorsAvailable);
+        mLinearLayoutAvailableSensors2 = (LinearLayout) mCardViewSensorsAvailable.findViewById(R.id.llSensorsAvailable2);
+
+        mCardViewSensorsAvailable.setVisibility(View.GONE);
+    }
+
+    private void refreshAvailableSensorsCard(ArrayList<Integer> availableSensors){
+        ArrayList<Integer> sensorBlackList = new ArrayList<Integer>();
+        sensorBlackList.add(Sensor.TYPE_SIGNIFICANT_MOTION);
+        sensorBlackList.add(Sensor.TYPE_HEART_RATE);
+        sensorBlackList.add(Sensor.TYPE_ORIENTATION);
+
+
+        if (mLinearLayoutAvailableSensors != null && mLinearLayoutAvailableSensors2 != null) {
+            int i = 0;
+            int halfList = availableSensors.size()/2;
+            for (Integer sensorType : availableSensors) {
+                if (!sensorBlackList.contains(sensorType)) {
+                    i++;
+                    CheckBox ch = new CheckBox(mCardViewSensorsAvailable.getContext());
+                    ch.setText(Utils.getSensorName(sensorType));
+                    ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                    ch.setTextColor(Color.GRAY);
+                    ch.setId(sensorType);
+                    mSensorListCheckBoxes.add(ch);
+
+                    if (i <= halfList) {
+                        mLinearLayoutAvailableSensors.addView(ch);
+                    } else {
+                        mLinearLayoutAvailableSensors2.addView(ch);
+                    }
+                }
+            }
+        }
+        mCardViewSensorsAvailable.setVisibility(View.VISIBLE);
     }
 
     private void configureCardList(){
@@ -191,6 +268,19 @@ public class SensorViewerFragment extends Fragment implements
 
         String sensorName = Utils.getSensorName(sensorType);
         Card card = createSensorRecInfoCard(sensorName, values);
+
+        int index = findCardIndex(sensorName);
+        if (index >= 0) {
+            mCardsArrayList.set(index, card);
+        } else {
+            mCardsArrayList.add(card);
+        }
+        mCardArrayAdapter.notifyDataSetChanged();
+    }
+
+    private void reportProgress(String progress){
+        String sensorName = "Progress";
+        Card card = createSensorRecInfoCard(sensorName, progress);
 
         int index = findCardIndex(sensorName);
         if (index >= 0) {
@@ -239,6 +329,11 @@ public class SensorViewerFragment extends Fragment implements
         IntentFilter messageFilter = new IntentFilter(MessagesProtocol.WEARSENSORSMSG);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(rootView.getContext()).registerReceiver(messageReceiver, messageFilter);
+
+
+        IntentFilter bundleFilter = new IntentFilter(MessagesProtocol.WEARSENSORSBUNDLE);
+        DataBundleReceiver dataBundleReceiver = new DataBundleReceiver();
+        LocalBroadcastManager.getInstance(rootView.getContext()).registerReceiver(dataBundleReceiver, bundleFilter);
     }
 
 
@@ -257,7 +352,17 @@ public class SensorViewerFragment extends Fragment implements
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        sendDataMap(MessagesProtocol.SNDMESSAGE, "Hello from Mobile");
+        //sendDataMap(MessagesProtocol.SNDMESSAGE, "Hello from Mobile");
+
+        if (PreferenceManager.getDefaultSharedPreferences(rootView.getContext()).getBoolean(
+                UserPreferences.WEARCONNECTED, false)) {
+            Log.i(LOGTAG, "Android Wear connected. Asking for sensor list");
+            sendNotification(MessagesProtocol.STARTSENSINGSERVICE);
+            sendDataMap(MessagesProtocol.QUERYSENSORLIST, "Query Sensor List");
+        } else {
+            Log.i(LOGTAG, "Oops! No Android Wear device connected.");
+            Toast.makeText(rootView.getContext(), "Oops! No Android Wear device connected.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -287,12 +392,58 @@ public class SensorViewerFragment extends Fragment implements
     }
 
     private void sendDataMap(Integer msgType, String message){
-        DataMap dataMap = new DataMap();
+
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, msgType);
         dataMap.putString(MessagesProtocol.MESSAGE, message);
+        dataMap.putDouble(MessagesProtocol.TIMESTAMP, System.currentTimeMillis());
+
+        if (msgType.equals(MessagesProtocol.STARTSENSING)){
+            mSensorListToRecord.clear();
+            for (CheckBox ch : mSensorListCheckBoxes){
+                if (ch.isChecked()){
+                    mSensorListToRecord.add(ch.getId());
+                }
+            }
+
+            Double hz = 50.0;
+            if (mEditTextHz.getText().toString().length() > 0){
+                hz = Double.valueOf(mEditTextHz.getText().toString());
+            }
+
+            Integer duration = 10;
+            if (mEditTextHz.getText().toString().length() > 0){
+                duration = Integer.valueOf(mEditTextDuration.getText().toString());
+            }
+
+
+            dataMap.putDouble(MessagesProtocol.SENSORHZ, hz);
+            dataMap.putInt(MessagesProtocol.SENSOR_RECORDING_SECONDS, duration);
+            dataMap.putIntegerArrayList(MessagesProtocol.SENSORSTORECORD, mSensorListToRecord);
+        }
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
+    }
+
+
+    private void handleBundle(Bundle bundle){
+        Integer msgType = bundle.getInt(MessagesProtocol.MSGTYPE);
+        Integer msgSender = bundle.getInt(MessagesProtocol.SENDER);
+
+
+        Log.i(LOGTAG, "MSGTYPE:" + msgType + " MSGSENDER:" + msgSender);
+        if (msgSender.equals(MessagesProtocol.ID_WEAR)) {
+            switch (msgType) {
+                case MessagesProtocol.QUERYSENSORLISTRESPONSE:
+                    mSensorList = bundle.getIntegerArrayList(MessagesProtocol.SENSORLISTRESULT);
+                    Log.i(LOGTAG,  "No. of sensors:" + mSensorList.size());
+                    refreshAvailableSensorsCard(mSensorList);
+                    //Toast.makeText(rootView.getContext(), "No. of sensors:" + mSensorList.size(), Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
 
@@ -303,18 +454,33 @@ public class SensorViewerFragment extends Fragment implements
 
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
-                Log.w(LOGTAG,"Start saving file");
                 if (mActionAutoComplete.getText().length() > 0){
-                    mFileCreator = new FileCreator(mActionAutoComplete.getText().toString(), Constants.DIRECTORY_SENSORS);
-                    mFileCreator.openFileWriter();
+                    if (!fileCreated) {
+                        Log.w(LOGTAG,"Start saving file");
+                        fileCreated = true;
+                        mFileCreator = new FileCreator(mActionAutoComplete.getText().toString(),
+                                Constants.DIRECTORY_SENSORS);
+                        mFileCreator.openFileWriter();
 
-                    Toast.makeText(rootView.getContext(),"Start saving file", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(rootView.getContext(), "Start saving file",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
+                Log.i(LOGTAG, msgLoad);
+                if (mActionAutoComplete.getText().length() > 0){
+                    if (mFileCreator.isOpen()) {
+                        mFileCreator.saveData(msgLoad + "\n");
+                    }
                 }
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
                 Log.i(LOGTAG, msgLoad);
                 if (mActionAutoComplete.getText().length() > 0){
-                    mFileCreator.saveData(msgLoad + "\n");
+                    if (mFileCreator.isOpen()) {
+                        mFileCreator.saveData(msgLoad + "\n");
+                    }
                 }
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
@@ -323,19 +489,32 @@ public class SensorViewerFragment extends Fragment implements
                     mFileCreator.closeFileWriter();
                     Toast.makeText(rootView.getContext(),"File created: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
 
+
+                    stopRecording_UI();
                     //sendDataMap(MessagesProtocol.KILLSERVICE, "Kill service");
-                    sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
                 }
                 break;
 
             case MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE:
                 Log.w(LOGTAG,"Current sensors readings");
+                reportProgress(msgLoad + " samples taken");
                 break;
+
+
             default:
                 insertSensorRecInfoCard(msgType, msgLoad);
                 break;
         }
 
+    }
+
+    private class DataBundleReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.w(LOGTAG, "DataBundle received from Wear");
+            Bundle message = intent.getExtras();
+            handleBundle(message);
+        }
     }
 
     private class MessageReceiver extends BroadcastReceiver {

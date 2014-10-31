@@ -20,6 +20,7 @@ public class MessagesProtocol {
     public static final String STARTSENSINGSERVICE = "START SENSING SERVICE";
     public static final String STOPSENSINGSERVICE = "STOP SENSING SERVICE";
     public static final String TIMESTAMP = "TIMESTAMP";
+    public static final String SENSOR_RECORDING_SECONDS = "SENSOR_RECORDING_SECONDS";
 
     /* SENDER/RECEIVER */
     public static final String SENDER = "SENDER";
@@ -36,11 +37,15 @@ public class MessagesProtocol {
     public static final int STARTSENSING = 0;
     public static final int STOPSENSING = 1;
     public static final int KILLSERVICE = 2;
+    public static final int QUERYSENSORLIST = 3;
+    public static final int QUERYSENSORLISTRESPONSE = 4;
     //Messages
     public static final int SENDSENSEORSNAPSHOTREC = 1000;
     public static final int SENDSENSEORSNAPSHOTREC_START  = 1001;
     public static final int SENDSENSEORSNAPSHOTREC_FINISH = 1002;
     public static final int SENDSENSEORSNAPSHOTUPDATE = 1003;
+    public static final int SENDSENSEORSNAPSHOTHEADER = 1004;
+    public static final int SENDSENSEORSNAPSHOT_END = 1005;
 
     public static final int SENDGCM_MSG = 2000;
     public static final int SENDGCM_CMD = 3000;
@@ -48,6 +53,7 @@ public class MessagesProtocol {
     public static final int SENDGCM_CMD_LOCATION = 3002;
     public static final int SENDGCM_CMD_MOTIONLOCATION = 3003;
     public static final int SENDGCM_CMD_UPDATEGAUSSIANS = 4000;
+    public static final int SENDGCM_CMD_KEEPGCMALIVE = 5000;
 
     /* MSG Payloads */
     //Data Bundle
@@ -55,6 +61,9 @@ public class MessagesProtocol {
     public static final String SENSORVALUE = "SENSORVALUE";
     public static final String MESSAGE = "MESSAGE";
     public static final String RECORDEDSENSORS = "RECORDEDSENSORS";
+    public static final String SENSORLISTRESULT = "SENSORLISTRESULT";
+    public static final String SENSORHZ = "SENSORHZ";
+    public static final String SENSORSTORECORD = "SENSORSTORECORD";
 
     //Messages
     public static final String CMD_DUMMY = "CMD";

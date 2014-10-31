@@ -1,14 +1,12 @@
-package tudelft.mdp.utils;
+package tudelft.mdp;
 
 
 import android.hardware.Sensor;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import tudelft.mdp.enums.Constants;
-import tudelft.mdp.enums.UserPreferences;
 
 public class Utils {
 
@@ -42,6 +40,63 @@ public class Utils {
         }
 
         return timeOfDay;
+    }
+    public static int getSensorLength(int sensorType){
+        int length = 0;
+
+        switch (sensorType){
+            case Sensor.TYPE_ACCELEROMETER:
+                length = 3;
+                break;
+            case Sensor.TYPE_GYROSCOPE:
+                length = 3;
+                break;
+            case Sensor.TYPE_ORIENTATION:
+                length = 3;
+                break;
+            case Sensor.TYPE_GAME_ROTATION_VECTOR:
+                //TODO: change to 5
+                length = 3;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                length = 3;
+                break;
+            case Sensor.TYPE_GRAVITY:
+                length = 3;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                length = 3;
+                break;
+            case Sensor.TYPE_STEP_COUNTER:
+                length = 1;
+                break;
+            case Sensor.TYPE_HEART_RATE:
+                length = 3;
+                break;
+            case Constants.SAMSUNG_HEART_RATE:
+                length = 3;
+                break;
+            case Constants.SAMSUNG_TILT:
+                length = 3;
+                break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                length = 3;
+                break;
+            case Sensor.TYPE_STEP_DETECTOR:
+                length = 1;
+                break;
+            case Sensor.TYPE_SIGNIFICANT_MOTION:
+                length = 1;
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
+                //TODO: change to 5
+                length = 3;
+                break;
+            default:
+                break;
+        }
+
+        return length;
     }
 
     public static String getSensorName(int sensorType){
@@ -100,79 +155,6 @@ public class Utils {
         return name;
     }
 
-    public static Double getMinTimestamp(int mode) {
-        Double minDate = 0.0;
 
-        // TODO
-        if (mode == UserPreferences.ALLTIME){
-            minDate = 0.0;
-        }
-
-        if (mode == UserPreferences.YEAR){
-            minDate = 0.0;
-        }
-
-        if (mode == UserPreferences.MONTH){
-            minDate = 0.0;
-        }
-
-        if (mode == UserPreferences.WEEK){
-            minDate = 0.0;
-        }
-
-        if (mode == UserPreferences.TODAY){
-            minDate = 0.0;
-        }
-
-        return minDate;
-    }
-
-    public static Double getStdInt(ArrayList<Integer> list){
-        Double std = 0.0;
-        if(!list.isEmpty()) {
-            Double mean = getMeanInt(list);
-            for (Integer n : list) {
-                Double delta = n - mean;
-                std += (delta * delta);
-            }
-            std = Math.sqrt(std/list.size());
-        }
-        return std;
-    }
-
-    public static Double getMeanInt(ArrayList<Integer> list){
-        Double sum = 0.0;
-        if(!list.isEmpty()) {
-            for (Integer n : list) {
-                sum += n;
-            }
-            return sum / list.size();
-        }
-        return sum;
-    }
-
-    public static Double getStd(ArrayList<Double> list){
-        Double std = 0.0;
-        if(!list.isEmpty()) {
-            Double mean = getMean(list);
-            for (Double n : list) {
-                Double delta = n - mean;
-                std += (delta * delta);
-            }
-            std = Math.sqrt(std/list.size());
-        }
-        return std;
-    }
-
-    public static Double getMean(ArrayList<Double> list){
-        Double sum = 0.0;
-        if(!list.isEmpty()) {
-            for (Double n : list) {
-                sum += n;
-            }
-            return sum / list.size();
-        }
-        return sum;
-    }
 
 }

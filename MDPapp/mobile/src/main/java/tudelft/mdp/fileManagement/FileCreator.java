@@ -32,6 +32,8 @@ public class FileCreator {
     BufferedReader brInputFile = null;
     BufferedWriter bwOutputFile = null;
 
+    public boolean isOpen = false;
+
     private final static String LOGTAG = "FileCreator";
 
     /**
@@ -50,6 +52,11 @@ public class FileCreator {
         this.filename = "backup_" + filename + "_" +date + ".txt" ;
         this.foldername = foldername;
     }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
+
 
     /**
      * Closes the writer stream
@@ -73,6 +80,7 @@ public class FileCreator {
         }
 
         bwOutputFile = null;
+        isOpen = false;
     }
 
     /**
@@ -93,6 +101,7 @@ public class FileCreator {
             Log.e(LOGTAG, "Unable to create Buffered writer");
         }
 
+        isOpen = true;
     }
 
     /**
@@ -108,6 +117,8 @@ public class FileCreator {
                 Log.e(LOGTAG, "Unable to close the file");
             }
         }
+
+        isOpen = false;
 
     }
 
@@ -140,6 +151,8 @@ public class FileCreator {
         brInputFile = new BufferedReader(new InputStreamReader(inputStream));
         Log.i(LOGTAG, "BufferedReader");
 
+
+        isOpen = true;
     }
 
     /**

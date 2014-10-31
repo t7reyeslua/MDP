@@ -21,7 +21,7 @@ public class KeepAliveGcmCronServlet extends HttpServlet {
             _logger.info("KeepAliveGCM Cron Job has been executed");
 
             MessagingEndpoint messagingEndpoint = new MessagingEndpoint();
-            messagingEndpoint.sendMessage(MessagesProtocol.SNDMESSAGE + "|" + MessagesProtocol.KEEPGCMALIVE);
+            messagingEndpoint.sendMessage(MessagesProtocol.SENDGCM_CMD_KEEPGCMALIVE + "|" + MessagesProtocol.KEEPGCMALIVE);
             //Put your logic here
             //BEGIN
             //END

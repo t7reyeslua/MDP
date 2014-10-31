@@ -22,6 +22,7 @@ import android.util.Log;
 
 import tudelft.mdp.MainScreen;
 import tudelft.mdp.R;
+import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.services.SensorReaderService;
 
@@ -47,9 +48,9 @@ public class ListenerService extends WearableListenerService {
                     if (command.equals(MessagesProtocol.STARTSENSINGSERVICE)) {
 
                         Log.i(LOGTAG, "Sensing Service: START");
-                        sendNotification(title, content);
 
                         if (!SensorReaderService.isRunning()) {
+                            sendNotification(title, content);
                             mSensorReaderService = new Intent(this, SensorReaderService.class);
                             this.startService(mSensorReaderService);
                         }

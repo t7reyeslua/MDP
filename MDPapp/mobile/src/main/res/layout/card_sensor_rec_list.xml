@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="15dp"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_header"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:text="Recording Session"
+                android:textColor="#878787"
+                />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+            android:id="@+id/filenameGroup"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingRight="12dp"
+            android:paddingLeft="12dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="Filename:"
+                android:textColor="@android:color/darker_gray"
+                android:fontFamily="sans-serif-light"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="12sp"
+                android:id="@+id/textFile"/>
+        <AutoCompleteTextView
+                android:id="@+id/acFile"
+                android:fontFamily="sans-serif-light"
+                android:textSize="12sp"
+                android:inputType="textAutoComplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:hint="e.g. Test" />
+    </LinearLayout>
+
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:paddingRight="12dp"
+            android:paddingLeft="12dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="Recording duartion (sec) :"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="12sp"
+                android:id="@+id/textDuration"/>
+        <EditText
+                android:id="@+id/editDuration"
+                android:fontFamily="sans-serif-light"
+                android:textSize="12sp"
+                android:inputType="numberDecimal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:hint="0 (Unlimited)" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:paddingRight="12dp"
+            android:paddingLeft="12dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="Sampling rate (Hz) :"
+                android:textColor="@android:color/darker_gray"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="12sp"
+                android:id="@+id/textHz"/>
+        <EditText
+                android:id="@+id/editHz"
+                android:fontFamily="sans-serif-light"
+                android:textSize="12sp"
+                android:inputType="numberDecimal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:hint="50" />
+    </LinearLayout>
+
+
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="15dp"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_header2"
+                app:fontFamily="roboto"
+                app:textWeight="light"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:text="Available Sensors"
+                android:textColor="#878787"
+                />
+
+    </LinearLayout>
+
+    <LinearLayout
+                  android:orientation="horizontal"
+                  android:paddingLeft="12dp"
+                  android:paddingRight="12dp"
+                  android:paddingBottom="8dp"
+                  android:paddingTop="5dp"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content">
+
+        <LinearLayout
+                android:id="@+id/llSensorsAvailable"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="50">
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/llSensorsAvailable2"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="50">
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
