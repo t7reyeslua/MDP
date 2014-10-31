@@ -55,6 +55,7 @@ public class MessagesProtocol {
     public static final String RECORDEDSENSORS = "RECORDEDSENSORS";
     public static final String SENSORLISTRESULT = "SENSORLISTRESULT";
     public static final String SENSORHZ = "SENSORHZ";
+    public static final String SENSORSCONSOLIDATED = "SENSORSCONSOLIDATED";
     public static final String SENSORSTORECORD = "SENSORSTORECORD";
 
     /* Intent Action Filters */

@@ -46,6 +46,7 @@
     <string name="time_between_location_detection">TIME_BETWEEN_LOCATION_DETECTIONS</string>
     <string name="alpha_trimmer_coeff">ALPHA_TRIMMER_COEFFICIENT</string>
     <string name="motion_sample_seconds">MOTION_SAMPLE_SECONDS</string>
+    <string name="sensors_consolidated">SENSORSCONSOLIDATED</string>
 
 
 

@@ -38,6 +38,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
@@ -96,6 +97,9 @@ public class SensorViewerFragment extends Fragment implements
     private ArrayList<Integer> mSensorListToRecord = new ArrayList<Integer>();
     private ArrayList<CheckBox> mSensorListCheckBoxes = new ArrayList<CheckBox>();
 
+    private HashMap<Integer, ArrayList<String>> mRecordedSensors = new HashMap<Integer, ArrayList<String>>();
+    private Integer currentlyReceivingSensor;
+    private ArrayList<String> currentlyReceivingSensorValues = new ArrayList<String>();
     private static final String LOGTAG = "MDP-SensorViewerFragment";
 
 
@@ -417,6 +421,11 @@ public class SensorViewerFragment extends Fragment implements
             }
 
 
+            Boolean consolidated = PreferenceManager
+                    .getDefaultSharedPreferences(rootView.getContext())
+                    .getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+
+            dataMap.putBoolean(MessagesProtocol.SENSORSCONSOLIDATED, consolidated);
             dataMap.putDouble(MessagesProtocol.SENSORHZ, hz);
             dataMap.putInt(MessagesProtocol.SENSOR_RECORDING_SECONDS, duration);
             dataMap.putIntegerArrayList(MessagesProtocol.SENSORSTORECORD, mSensorListToRecord);
@@ -454,15 +463,25 @@ public class SensorViewerFragment extends Fragment implements
 
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
+                stopRecording_UI();
                 if (mActionAutoComplete.getText().length() > 0){
                     if (!fileCreated) {
                         Log.w(LOGTAG,"Start saving file");
                         fileCreated = true;
-                        mFileCreator = new FileCreator(mActionAutoComplete.getText().toString(),
+                        mFileCreator = new FileCreator(
+                                mActionAutoComplete.getText().toString() + "_" +
+                                Utils.getSensorName(Integer.valueOf(msgLoad)),
                                 Constants.DIRECTORY_SENSORS);
                         mFileCreator.openFileWriter();
-
-                        Toast.makeText(rootView.getContext(), "Start saving file",
+                        Integer sensorType = Integer.valueOf(msgLoad);
+                        if (sensorType == 0) {
+                            mFileCreator.saveData(buildHeader());
+                        } else {
+                            String header = "No.\tTimestamp\t";
+                            header += " [" + Utils.getSensorLength(sensorType) + "]" + Utils.getSensorName(sensorType) + "\n";
+                            mFileCreator.saveData(header);
+                        }
+                        Toast.makeText(rootView.getContext(), "Start saving file: " + Utils.getSensorName(Integer.valueOf(msgLoad)),
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -489,8 +508,7 @@ public class SensorViewerFragment extends Fragment implements
                     mFileCreator.closeFileWriter();
                     Toast.makeText(rootView.getContext(),"File created: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
 
-
-                    stopRecording_UI();
+                    fileCreated = false;
                     //sendDataMap(MessagesProtocol.KILLSERVICE, "Kill service");
                 }
                 break;
@@ -501,11 +519,25 @@ public class SensorViewerFragment extends Fragment implements
                 break;
 
 
+            case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
+                Log.w(LOGTAG,"Stop sensor service from wear: SENDSENSEORSNAPSHOT_END");
+                sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
+                break;
+
             default:
                 insertSensorRecInfoCard(msgType, msgLoad);
                 break;
         }
 
+    }
+
+    private String buildHeader(){
+        String header = "No.\tTimestamp\t";
+        for(Integer sensorType : mSensorListToRecord){
+            header += " [" + Utils.getSensorLength(sensorType) + "]" + Utils.getSensorName(sensorType) + "\t";
+        }
+        header += "\n";
+        return header;
     }
 
     private class DataBundleReceiver extends BroadcastReceiver {

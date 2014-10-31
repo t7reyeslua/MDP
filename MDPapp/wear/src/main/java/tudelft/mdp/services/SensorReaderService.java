@@ -26,13 +26,17 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import tudelft.mdp.MySensorEventObject;
 import tudelft.mdp.Utils;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.SendFileByMessagesThread;
+import tudelft.mdp.communication.SendHashmapByMessagesThread;
 import tudelft.mdp.communication.SendMessageThread;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
@@ -57,6 +61,7 @@ public class SensorReaderService extends Service implements
     private int snapshotCounter = 0;
     private int counter = 0;
     private boolean saveFileRequired = false;
+    private boolean consolidateSensors = false;
 
     private static final String LOGTAG = "MDP-Wear SensorReaderService";
 
@@ -80,10 +85,27 @@ public class SensorReaderService extends Service implements
     private float [] mStepCounter = {0f};
     private float [] mStepDetector = {0f};
 
+    private ArrayList<MySensorEventObject> mAccelerometerAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mGyroscopeAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mGravityAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mMagneticFieldAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mMagneticFieldUncalibratedAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mHeartRateAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mTiltAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mRotationVectorAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mGameRotationVectorAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mLinearAccelerometerAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mStepCounterAL = new ArrayList<MySensorEventObject>();
+    private ArrayList<MySensorEventObject> mStepDetectorAL = new ArrayList<MySensorEventObject>();
+
+    private HashMap<Integer, ArrayList<String>> mRecordedSensors = new HashMap<Integer, ArrayList<String>>();
+
+
     private ArrayList<String> snapshotArray = new ArrayList<String>();
     private ArrayList<Integer> sensorsToRecord = new ArrayList<Integer>();
 
     private String filename;
+    private boolean sendingRecords;
 
 
 
@@ -217,7 +239,60 @@ public class SensorReaderService extends Service implements
     public void onSensorChanged(SensorEvent event) {
         Log.i(LOGTAG, "New sensor event " + counter++);
         if (!pause) {
-            copySensorValues(event);
+            if (consolidateSensors){
+                copySensorValues(event);
+            } else {
+                copySensorValuesAL(event);
+            }
+        }
+    }
+
+    private void copySensorValuesAL(SensorEvent sensorEvent){
+        MySensorEventObject event = new MySensorEventObject(
+                sensorEvent.timestamp,
+                sensorEvent.sensor.getType(),
+                sensorEvent.values);
+
+        Log.i(LOGTAG, "SensorEvent: " + sensorEvent.timestamp);
+        switch (sensorEvent.sensor.getType()) {
+            case Sensor.TYPE_ACCELEROMETER:
+                mAccelerometerAL.add(event);
+                break;
+            case Sensor.TYPE_GYROSCOPE:
+                mGyroscopeAL.add(event);
+                break;
+            case Sensor.TYPE_GRAVITY:
+                mGravityAL.add(event);
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                mMagneticFieldAL.add(event);
+                break;
+            case Constants.SAMSUNG_HEART_RATE:
+                mHeartRateAL.add(event);
+                break;
+            case Constants.SAMSUNG_TILT:
+                mTiltAL.add(event);
+                break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                mLinearAccelerometerAL.add(event);
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
+                mRotationVectorAL.add(event);
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                mMagneticFieldUncalibratedAL.add(event);
+                break;
+            case Sensor.TYPE_GAME_ROTATION_VECTOR:
+                mGameRotationVectorAL.add(event);
+                break;
+            case Sensor.TYPE_STEP_COUNTER:
+                mStepCounterAL.add(event);
+                break;
+            case Sensor.TYPE_STEP_DETECTOR:
+                mStepDetectorAL.add(event);
+                break;
+            default:
+                break;
         }
     }
 
@@ -412,17 +487,119 @@ public class SensorReaderService extends Service implements
 
     private void sendUpdate(){
         Log.e(LOGTAG, "SEND UPDATE");
-        if (snapshotArray.size() > 0) {
-            new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE + "|" + snapshotArray.size()).start();
+            int samplesTaken = getMaxSamples();
+            new SendMessageThread(mGoogleApiClient, MessagesProtocol.MSGPATH, MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE + "|" + samplesTaken).start();
+
+    }
+
+    private int getMaxSamples(){
+        if (consolidateSensors){
+            return snapshotArray.size();
+        } else {
+            ArrayList<Integer> ALsizes = new ArrayList<Integer>();
+            ALsizes.add(mAccelerometerAL.size());
+            ALsizes.add(mGyroscopeAL.size());
+            ALsizes.add(mGravityAL.size());
+            ALsizes.add(mMagneticFieldAL.size());
+            ALsizes.add(mMagneticFieldUncalibratedAL.size());
+            ALsizes.add(mHeartRateAL.size());
+            ALsizes.add(mTiltAL.size());
+            ALsizes.add(mRotationVectorAL.size());
+            ALsizes.add(mGameRotationVectorAL.size());
+            ALsizes.add(mLinearAccelerometerAL.size());
+            ALsizes.add(mStepCounterAL.size());
+            ALsizes.add(mStepDetectorAL.size());
+            return Collections.max(ALsizes);
         }
     }
 
     private void sendRecordsToMobile(){
-        ArrayList<String> records = new ArrayList<String>(snapshotArray);
-        Log.e(LOGTAG,"Start sending file. Number of records: " + snapshotArray.size() + "-" + records.size());
+        if (consolidateSensors) {
+            ArrayList<String> records = new ArrayList<String>(snapshotArray);
+            if (records.size() > 0) {
+                Log.e(LOGTAG,
+                        "Start sending file. Number of records: " + snapshotArray.size() + "-"
+                                + records
+                                .size());
+                new SendFileByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH, records,
+                        sensorsToRecord).start();
+                snapshotArray.clear();
+            }
+        } else {
+            if (mRecordedSensors.size() == 0) {
+                Log.e(LOGTAG,"Preparing buildup of hm to send");
 
-        new SendFileByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH, records, sensorsToRecord).start();
-        snapshotArray.clear();
+                if (mAccelerometerAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_ACCELEROMETER, mAccelerometerAL);
+                }
+                if (mGyroscopeAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_GYROSCOPE, mGyroscopeAL);
+                }
+                if (mGravityAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_GRAVITY, mGravityAL);
+                }
+                if (mMagneticFieldAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_MAGNETIC_FIELD, mMagneticFieldAL);
+                }
+                if (mMagneticFieldUncalibratedAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED, mMagneticFieldUncalibratedAL);
+                }
+                if (mHeartRateAL.size() > 0){
+                    buildALrecordsToSend(Constants.SAMSUNG_HEART_RATE, mHeartRateAL);
+                }
+                if (mTiltAL.size() > 0){
+                    buildALrecordsToSend(Constants.SAMSUNG_TILT, mTiltAL);
+                }
+                if (mRotationVectorAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_ROTATION_VECTOR, mRotationVectorAL);
+                }
+                if (mGameRotationVectorAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_GAME_ROTATION_VECTOR, mGameRotationVectorAL);
+                }
+                if (mLinearAccelerometerAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_LINEAR_ACCELERATION, mLinearAccelerometerAL);
+                }
+                if (mStepCounterAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_STEP_COUNTER, mStepCounterAL);
+                }
+                if (mStepDetectorAL.size() > 0){
+                    buildALrecordsToSend(Sensor.TYPE_STEP_DETECTOR, mStepDetectorAL);
+                }
+
+
+                new SendHashmapByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH,
+                        mRecordedSensors).start();
+            }
+
+        }
+    }
+
+    private void buildALrecordsToSend(int sensorType, ArrayList<MySensorEventObject> records){
+        ArrayList<String> recordsToSend = new ArrayList<String>();
+        ArrayList<Integer> sensor3 = new ArrayList<Integer>();
+        sensor3.add(Constants.SAMSUNG_TILT);
+        sensor3.add(Constants.SAMSUNG_HEART_RATE);
+        sensor3.add(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        sensor3.add(Sensor.TYPE_ROTATION_VECTOR);
+        int index = 0;
+        for (MySensorEventObject event : records) {
+            String record = String.valueOf(++index) + "\t";
+            record += String.valueOf(event.getTimestamp()) + "\t";
+
+            float[] values = event.getValuesArray();
+            if (sensor3.contains(sensorType)){
+                for (int i = 0; i < 3; i++) {
+                    float value = values[i];
+                    record += String.format("%.4f", value) + "\t";
+                }
+            } else {
+                for (float value : values) {
+                    record += String.format("%.4f", value) + "\t";
+                }
+            }
+            recordsToSend.add(record);
+        }
+        mRecordedSensors.put(sensorType, recordsToSend);
     }
 
 
@@ -443,16 +620,30 @@ public class SensorReaderService extends Service implements
 
 
 
+    private void clearALs(){
+
+        mAccelerometerAL.clear();
+        mGyroscopeAL.clear();
+        mGravityAL.clear();
+        mMagneticFieldAL.clear();
+        mMagneticFieldUncalibratedAL .clear();
+        mHeartRateAL.clear();
+        mTiltAL.clear();
+        mRotationVectorAL.clear();
+        mGameRotationVectorAL .clear();
+        mLinearAccelerometerAL.clear();
+        mStepCounterAL .clear();
+        mStepDetectorAL.clear();
+    }
 
 
+    private void sensingInit(ArrayList<Integer> sensorsToRecord, Double hz, Integer duration, Boolean consolidatedRequired){
 
+        Log.e(LOGTAG, "Start sensing " + sensorsToRecord.size() + " sensors. Hz=" + hz + "Time="
+                + duration);
 
-
-
-
-    private void sensingInit(ArrayList<Integer> sensorsToRecord, Double hz, Integer duration){
-
-        Log.e(LOGTAG,"Start sensing " + sensorsToRecord.size() + " sensors. Hz=" + hz + "Time=" + duration);
+        consolidateSensors = consolidatedRequired;
+        clearALs();
 
         configureSensing(sensorsToRecord, hz);
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -461,12 +652,16 @@ public class SensorReaderService extends Service implements
         counter = 0;
         snapshotCounter = 0;
         snapshotArray.clear();
+        mRecordedSensors.clear();
 
 
-        Long mTimerSamplingRate = (long) 1000/hz.intValue();
-        Log.i(LOGTAG, "Sampling Rate Tick:" + mTimerSamplingRate.toString());
-        mTimerDoSnapshot  = new Timer();
-        mTimerDoSnapshot.scheduleAtFixedRate(new SaveCurrentValuesSnapshotTick(), 0, mTimerSamplingRate);
+        if (consolidateSensors) {
+            Long mTimerSamplingRate = (long) 1000 / hz.intValue();
+            Log.i(LOGTAG, "Sampling Rate Tick:" + mTimerSamplingRate.toString());
+            mTimerDoSnapshot = new Timer();
+            mTimerDoSnapshot.scheduleAtFixedRate(new SaveCurrentValuesSnapshotTick(), 0,
+                    mTimerSamplingRate);
+        }
 
 
         if (saveFileRequired) {
@@ -544,17 +739,23 @@ public class SensorReaderService extends Service implements
                 sensorsToRecord = bundle.getIntegerArrayList(MessagesProtocol.SENSORSTORECORD);
                 Double hz = bundle.getDouble(MessagesProtocol.SENSORHZ, 50);
                 Integer duration = bundle.getInt(MessagesProtocol.SENSOR_RECORDING_SECONDS, 6);
-                sensingInit(sensorsToRecord, hz, duration);
+                Boolean consolidatedRequired = bundle.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+                sendingRecords = false;
+                sensingInit(sensorsToRecord, hz, duration, consolidatedRequired);
                 break;
             case MessagesProtocol.STOPSENSING:
-                Log.d(LOGTAG, "Execute Command: STOP SENSING");
-                sensingFinish();
+                if (!sendingRecords) {
+                    sendingRecords = true;
+                    Log.d(LOGTAG, "Execute Command: STOP SENSING");
+                    sensingFinish();
+                }
                 break;
             case MessagesProtocol.QUERYSENSORLIST:
                 Log.d(LOGTAG, "Execute Command: QUERY SENSOR LIST");
                 sendDataMapToMobile(MessagesProtocol.QUERYSENSORLISTRESPONSE, "Sensor List Response");
                 break;
             case MessagesProtocol.KILLSERVICE:
+                Log.e(LOGTAG, "Execute Command: STOPSELF");
                 stopSelf();
             default:
                 break;

@@ -118,6 +118,9 @@ public class MdpWorkerService extends Service implements
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansBroadcastTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
 
+    private HashMap<Integer, ArrayList<String>> mRecordedSensors = new HashMap<Integer, ArrayList<String>>();
+    private Integer currentlyReceivingSensor;
+
     PowerManager pm;
     WifiManager wm;
     PowerManager.WakeLock wl;
@@ -428,6 +431,12 @@ public class MdpWorkerService extends Service implements
             Double hz = 50.0;
             Integer duration = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
 
+            Boolean consolidated = PreferenceManager
+                    .getDefaultSharedPreferences(this)
+                    .getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+
+            dataMap.putBoolean(MessagesProtocol.SENSORSCONSOLIDATED, consolidated);
+
             dataMap.putDouble(MessagesProtocol.SENSORHZ, hz);
             dataMap.putInt(MessagesProtocol.SENSOR_RECORDING_SECONDS, duration);
             dataMap.putIntegerArrayList(MessagesProtocol.SENSORSTORECORD, mSensorListToRecord);
@@ -449,6 +458,7 @@ public class MdpWorkerService extends Service implements
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
                 Log.w(LOGTAG,"Start sensor streaming from wear");
+                currentlyReceivingSensor = Integer.valueOf(msgLoad);
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
                 Log.w(LOGTAG, msgLoad);
@@ -458,7 +468,13 @@ public class MdpWorkerService extends Service implements
                 mSensorReadings.add(msgLoad);
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
-                Log.w(LOGTAG,"Stop sensor streaming from wear");
+                Log.w(LOGTAG, "Stop sensor streaming from wear");
+                ArrayList<String> recordedSensor = new ArrayList<String>(mSensorReadings);
+                mRecordedSensors.put(currentlyReceivingSensor, recordedSensor);
+                break;
+
+            case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
+                Log.w(LOGTAG,"Stop sensor service from wear: SENDSENSEORSNAPSHOT_END");
                 sendNotificationToWear(MessagesProtocol.STOPSENSINGSERVICE);
                 dataCompleteMotion = true;
                 consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
@@ -677,8 +693,7 @@ public class MdpWorkerService extends Service implements
             Log.w(LOGTAG, "MotionWearTick");
             try {
                 if (motionTickDone){
-                    sendDataMapToWear(MessagesProtocol.STOPSENSING,
-                            "STOP: MOTION DATA REQUESTED BY MOBILE");
+                    //sendDataMapToWear(MessagesProtocol.STOPSENSING,   "STOP: MOTION DATA REQUESTED BY MOBILE");
 
                     Log.i(LOGTAG, "Stop Motion Tick.");
                     this.cancel();

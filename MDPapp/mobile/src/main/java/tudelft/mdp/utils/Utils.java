@@ -44,8 +44,66 @@ public class Utils {
         return timeOfDay;
     }
 
+    public static int getSensorLength(int sensorType){
+        int length = 0;
+
+        switch (sensorType){
+            case Sensor.TYPE_ACCELEROMETER:
+                length = 3;
+                break;
+            case Sensor.TYPE_GYROSCOPE:
+                length = 3;
+                break;
+            case Sensor.TYPE_ORIENTATION:
+                length = 3;
+                break;
+            case Sensor.TYPE_GAME_ROTATION_VECTOR:
+                //TODO: change to 5
+                length = 3;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                length = 3;
+                break;
+            case Sensor.TYPE_GRAVITY:
+                length = 3;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                length = 3;
+                break;
+            case Sensor.TYPE_STEP_COUNTER:
+                length = 1;
+                break;
+            case Sensor.TYPE_HEART_RATE:
+                length = 3;
+                break;
+            case Constants.SAMSUNG_HEART_RATE:
+                length = 3;
+                break;
+            case Constants.SAMSUNG_TILT:
+                length = 3;
+                break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                length = 3;
+                break;
+            case Sensor.TYPE_STEP_DETECTOR:
+                length = 1;
+                break;
+            case Sensor.TYPE_SIGNIFICANT_MOTION:
+                length = 1;
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
+                //TODO: change to 5
+                length = 3;
+                break;
+            default:
+                break;
+        }
+
+        return length;
+    }
+
     public static String getSensorName(int sensorType){
-        String name = "Other";
+        String name = "Consolidated";
 
         switch (sensorType){
             case Sensor.TYPE_ACCELEROMETER:
