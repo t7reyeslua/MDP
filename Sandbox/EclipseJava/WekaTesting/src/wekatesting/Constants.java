@@ -11,6 +11,8 @@ public class Constants {
     
     public static double STEP_UP_THRESHOLD=2;
     public static double STEP_DOWN_THRESHOLD=2;
+    public static double CUT_OFF_FREQ=5.333;
+    
 
     public static String FT_PRESICION = "%.3f";
         

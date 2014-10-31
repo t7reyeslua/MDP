@@ -218,7 +218,7 @@ public class WekaSensorsRawDataObject {
     		features = features+String.format(Precision,z)+",";
     		features = features+String.format(Precision,SensorFeatures.Magnitud(x,y,z))+",";   		
 
-    		//fre. domain fts.
+    		//freq. domain fts.
     		features = features+String.format(Precision,SensorFeatures.FirstComponentFFT(xArray, SampleFreq))+",";
     		features = features+String.format(Precision,SensorFeatures.FirstComponentFFT(yArray, SampleFreq))+",";
     		features = features+String.format(Precision,SensorFeatures.FirstComponentFFT(zArray, SampleFreq))+",";
@@ -232,9 +232,9 @@ public class WekaSensorsRawDataObject {
     		 * Maybe, maybe is computationally too much
     		 * 
     		 * **/
-    		xFilArray =XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(xArray),2,5.333,SampleFreq);
-    		yFilArray =XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(yArray),2,5.333,SampleFreq);
-    		zFilArray =XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(zArray),2,5.333,SampleFreq);
+    		xFilArray =XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(xArray),2,Constants.CUT_OFF_FREQ,SampleFreq);
+    		yFilArray =XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(yArray),2,Constants.CUT_OFF_FREQ,SampleFreq);
+    		zFilArray =XCounter.ButtFilterArray(SensorFeatures.ZeroNormal(zArray),2,Constants.CUT_OFF_FREQ,SampleFreq);
     		
     		//**This might need to be filtered!!!**/
     		features = features+String.valueOf(XCounter.stepCounter(xFilArray,UL,LL))+",";
@@ -246,7 +246,7 @@ public class WekaSensorsRawDataObject {
     	}
 
     	
-    	return features;
+    	return deletelastchar(features,',');
     } 
     
 	/**
@@ -260,43 +260,57 @@ public class WekaSensorsRawDataObject {
     	
 
         
-//    	for(int i=2;i<mSensorsArrays.size()-2;i=i+3){
-    		for(int i=2;i<18;i++){
+    	for(int i=2;i<(18)+2;i=i+3){
+//    		for(int i=2;i<18;i++){
     		
     		String[] sensornameX = getSensorName(i).split("_");
     		String[] sensornameY = getSensorName(i+1).split("_");
     		String[] sensornameZ = getSensorName(i+2).split("_");
     		
     		AttributesList.add("@attribute mean_"+sensornameX[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute mean_"+sensornameY[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute mean_"+sensornameZ[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute meanMag_"+sensornameX[2]+" numeric");
+    		AttributesList.add("@attribute mean_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("@attribute mean_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+    		AttributesList.add("@attribute meanMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
     		
     		AttributesList.add("@attribute std_"+sensornameX[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute std_"+sensornameY[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute std_"+sensornameZ[1]+sensornameX[2]+" numeric");   		
-    		AttributesList.add("@attribute stdMag_"+sensornameX[2]+" numeric");
+    		AttributesList.add("@attribute std_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("@attribute std_"+sensornameZ[1]+sensornameZ[2]+" numeric");   		
+    		AttributesList.add("@attribute stdMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
     		
     		AttributesList.add("@attribute var_"+sensornameX[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute var_"+sensornameY[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute var_"+sensornameZ[1]+sensornameX[2]+" numeric");   		
-    		AttributesList.add("@attribute varMag_"+sensornameX[2]+" numeric");
+    		AttributesList.add("@attribute var_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("@attribute var_"+sensornameZ[1]+sensornameZ[2]+" numeric");   		
+    		AttributesList.add("@attribute varMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
     		
     		AttributesList.add("@attribute FundF_"+sensornameX[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute FundF_"+sensornameY[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute FundF_"+sensornameZ[1]+sensornameX[2]+" numeric");   		
+    		AttributesList.add("@attribute FundF_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("@attribute FundF_"+sensornameZ[1]+sensornameZ[2]+" numeric");   		
 
     		AttributesList.add("@attribute ZXing_"+sensornameX[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute ZXing_"+sensornameY[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute ZXing_"+sensornameZ[1]+sensornameX[2]+" numeric");  
+    		AttributesList.add("@attribute ZXing_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("@attribute ZXing_"+sensornameZ[1]+sensornameZ[2]+" numeric");  
     		
     		AttributesList.add("@attribute SCount_"+sensornameX[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute SCount_"+sensornameY[1]+sensornameX[2]+" numeric");
-    		AttributesList.add("@attribute SCount_"+sensornameZ[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("@attribute SCount_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("@attribute SCount_"+sensornameZ[1]+sensornameZ[2]+" numeric");
     		
     	}
     	
     	
     	return AttributesList;
     }
+
+	/**
+	 * @author Luis Gonzalez
+	 * @brief Based on the code of:
+	 * http://stackoverflow.com/questions/7438612/how-to-remove-the-last-character-from-a-string
+	 * @return deletes the last char character of a string, to take away the last coma of the ft string if needed
+	 */
+	public static String deletelastchar(String str,char x) {
+	    if (str.length() > 0 && str.charAt(str.length()-1)==x) {
+	      str = str.substring(0, str.length()-1);
+	    }
+	    return str;
+	}
+
 }

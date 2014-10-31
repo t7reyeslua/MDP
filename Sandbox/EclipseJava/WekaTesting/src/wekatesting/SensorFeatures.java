@@ -391,7 +391,5 @@ public class SensorFeatures {
 			outimag[i] = ximag[i] / n;
 		}
 	}
-    
-	
-	
+		
 }
