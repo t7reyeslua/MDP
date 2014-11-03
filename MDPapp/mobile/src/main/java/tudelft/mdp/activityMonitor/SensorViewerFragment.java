@@ -89,6 +89,7 @@ public class SensorViewerFragment extends Fragment implements
 
     private DataMap dataMap = new DataMap();
     private boolean fileCreated = false;
+    private boolean sessionRequested = false;
 
     private View rootView;
     GoogleApiClient mGoogleApiClient;
@@ -149,6 +150,7 @@ public class SensorViewerFragment extends Fragment implements
         // Create a DataMap object and send it to the smartwatch
         String filename = mActionAutoComplete.getText().toString();
         fileCreated = false;
+        sessionRequested  = true;
         sendNotification(MessagesProtocol.STARTSENSINGSERVICE);
 
         sendDataMap(MessagesProtocol.STARTSENSING, filename);
@@ -507,7 +509,7 @@ public class SensorViewerFragment extends Fragment implements
                 if (mActionAutoComplete.getText().length() > 0){
                     mFileCreator.closeFileWriter();
                     Toast.makeText(rootView.getContext(),"File created: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
-
+                    sessionRequested = false;
                     fileCreated = false;
                     //sendDataMap(MessagesProtocol.KILLSERVICE, "Kill service");
                 }
@@ -553,7 +555,9 @@ public class SensorViewerFragment extends Fragment implements
         @Override
         public void onReceive(Context context, Intent intent) {
             String msg = intent.getStringExtra(MessagesProtocol.MESSAGE);
-            handleMessage(msg);
+            if (sessionRequested) {
+                handleMessage(msg);
+            }
         }
     }
 

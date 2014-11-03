@@ -158,28 +158,28 @@ public class Utils {
         return name;
     }
 
-    public static Double getMinTimestamp(int mode) {
-        Double minDate = 0.0;
+    public static String getMinTimestamp(int mode) {
+        String minDate = "0";
 
         // TODO
         if (mode == UserPreferences.ALLTIME){
-            minDate = 0.0;
+            minDate = "0";
         }
 
         if (mode == UserPreferences.YEAR){
-            minDate = 0.0;
+            minDate = Utils.getCurrentTimestamp();
         }
 
         if (mode == UserPreferences.MONTH){
-            minDate = 0.0;
+            minDate = Utils.getCurrentTimestamp();
         }
 
         if (mode == UserPreferences.WEEK){
-            minDate = 0.0;
+            minDate = Utils.getCurrentTimestamp();
         }
 
         if (mode == UserPreferences.TODAY){
-            minDate = 0.0;
+            minDate = Utils.getCurrentTimestamp();
         }
 
         return minDate;

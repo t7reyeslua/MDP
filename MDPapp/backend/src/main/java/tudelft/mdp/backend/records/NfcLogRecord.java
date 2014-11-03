@@ -21,7 +21,7 @@ public class NfcLogRecord {
     private String user;
 
     @Index
-    private Double timestamp;
+    private String timestamp;
 
     public NfcLogRecord() {
     }
@@ -58,11 +58,11 @@ public class NfcLogRecord {
         this.user = user;
     }
 
-    public Double getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Double timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 }

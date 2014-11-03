@@ -725,6 +725,7 @@ public class MdpWorkerService extends Service implements
 
             Log.w(LOGTAG, "Data and Motion Completed");
             WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(mNetworkScansBroadcastTick);
+            //TODO Separate Sensor arrays
             WekaSensorsRawDataObject wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
 
             boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, false);

@@ -27,7 +27,7 @@ public class LocationLogRecord {
     private Double probability;
 
     @Index
-    private Double timestamp;
+    private String timestamp;
 
     public LocationLogRecord() {
     }
@@ -80,11 +80,11 @@ public class LocationLogRecord {
         this.probability = probability;
     }
 
-    public Double getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Double timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 }

@@ -47,7 +47,7 @@ public class RequestUserLocationHistoryAsyncTask extends AsyncTask<Object, Void,
         }
 
         Double maxDate = Double.valueOf(Utils.getCurrentTimestamp());
-        Double minDate = Utils.getMinTimestamp(UserPreferences.ALLTIME);
+        Double minDate = 0.0;
 
 
         try {

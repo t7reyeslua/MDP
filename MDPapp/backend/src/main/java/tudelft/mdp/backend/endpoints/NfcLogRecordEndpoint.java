@@ -127,8 +127,8 @@ public class NfcLogRecordEndpoint {
     public CollectionResponse<NfcLogRecord> listUserDeviceLogByDateDevice(
             @Named("nfcId") String nfcId,
             @Named("user") String user,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listUserDeviceLogByDateDevice method");
 
@@ -147,8 +147,8 @@ public class NfcLogRecordEndpoint {
     public CollectionResponse<Double> getUserStatsOfDevice (
             @Named("nfcId") String nfcId,
             @Named("user") String user,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling getUserStatsOfDevice method");
 
@@ -162,25 +162,45 @@ public class NfcLogRecordEndpoint {
         List<NfcLogRecord> userRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
                 user, minDate, maxDate).getItems());
 
-        String nowTimeString = Utils.getCurrentTimestamp();
-        Double nowTime = Double.valueOf(nowTimeString);
+        String nowTimeStringOriginal = Utils.getCurrentTimestamp();
+        String nowTimeString = nowTimeStringOriginal;
+        LOG.info("USER NOW " + nowTimeString + " No. of Records: " + userRecords.size()
+                + " NFC:" + nfcId
+                + " minDate: " + minDate
+                + " maxDate: " + maxDate);
 
         /* ========================================================*/
         /* Calculate the time the user has made use of the device */
         for (int i = userRecords.size() - 1; i >= 0; i--) {
 
             /* An ON step is detected -> Measure how long it lasted */
+            String temp = userRecords.get(i).getTimestamp();
+            LOG.info("UserRecord: " + temp + " State:" + userRecords.get(i).getState());
             if (userRecords.get(i).getState()){
-                userTime += (nowTime - userRecords.get(i).getTimestamp());
+
+                long timeNewest = Utils.convertTimestampToSeconds(nowTimeString);
+                long timeOldest = Utils.convertTimestampToSeconds(temp);
+
+                double diff1 = (double) (timeNewest - timeOldest);
+                diff1 = diff1 / 1000;
+
+
+                Double diff = Utils.differenceBetweenDates(nowTimeString, temp);
+                userTime += diff;
+                LOG.info(nowTimeString + "-" + temp + "="+ diff + "-----------" + timeNewest + "-" + timeOldest + "="+ diff1 );
             }
-            nowTime = userRecords.get(i).getTimestamp();
+            nowTimeString = temp;
         }
 
         /* The first transition was a Falling Edge.
            It was already ON when the time window started */
         if(userRecords.size() > 0) {
             if (!userRecords.get(0).getState()) {
-                userTime += (userRecords.get(0).getTimestamp() - minDate);
+                String temp = String.valueOf(userRecords.get(0).getTimestamp());
+                String minDateString = String.valueOf(minDate);
+                Double diff = Utils.differenceBetweenDates(temp, minDateString);
+                userTime += diff;
+                LOG.info(temp + "-" + minDateString + "="+ diff);
             }
         }
 
@@ -191,23 +211,31 @@ public class NfcLogRecordEndpoint {
        List<NfcLogRecord> deviceRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
                Constants.ANYUSER, minDate, maxDate).getItems());
 
-        nowTime = Double.valueOf(nowTimeString);
+        nowTimeString = nowTimeStringOriginal;
+        LOG.info("DEVICE NOW " + nowTimeString);
 
         /* Calculate the time the user has made use of the device */
         for (int i = deviceRecords.size() - 1; i >= 0; i--) {
 
             /* An ON step is detected -> Measure how long it lasted */
+            String temp = deviceRecords.get(i).getTimestamp();
             if (deviceRecords.get(i).getState()){
-                totalTime += (nowTime - deviceRecords.get(i).getTimestamp());
+                Double diff = Utils.differenceBetweenDates(nowTimeString, temp);
+                totalTime += diff;
+                LOG.info(nowTimeString + "-" + temp + "="+ diff);
             }
-            nowTime = deviceRecords.get(i).getTimestamp();
+            nowTimeString = temp;
         }
 
         /* The first transition was a Falling Edge.
            It was already ON when the time window started */
         if (deviceRecords.size() > 0) {
             if (!deviceRecords.get(0).getState()) {
-                totalTime += (deviceRecords.get(0).getTimestamp() - minDate);
+                String temp = String.valueOf(deviceRecords.get(0).getTimestamp());
+                String minDateString = String.valueOf(minDate);
+                Double diff = Utils.differenceBetweenDates(temp, minDateString);
+                totalTime += diff;
+                LOG.info(temp + "-" + minDateString + "="+ diff);
             }
         }
 
@@ -260,7 +288,7 @@ public class NfcLogRecordEndpoint {
 
         if (!nfcLogRecord.getUser().equals(Constants.ANYUSER)) {
             String stringTS = Utils.getCurrentTimestamp();
-            nfcLogRecord.setTimestamp(Double.valueOf(stringTS));
+            nfcLogRecord.setTimestamp(stringTS);
         }
 
         //Since our @Id field is a Long, Objectify will generate a unique value for us

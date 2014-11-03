@@ -1,8 +1,15 @@
 package tudelft.mdp.backend;
 
+import com.google.appengine.repackaged.org.joda.time.DateTime;
+import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormat;
+import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormatter;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import tudelft.mdp.backend.records.ApHistogramRecord;
 
@@ -20,6 +27,30 @@ public class Utils {
 
         return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
     }
+
+    public static long convertTimestampToSeconds(String timestamp){
+        // Timestamp format: 20141102190401  -YYYY MM DD hh mm ss
+                                            //0123 45 67 89 01 23
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        long dateTime = -1;
+        try {
+            Date date = simpleDateFormat.parse(timestamp);
+            dateTime = date.getTime();
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return dateTime;
+    }
+
+    public static double differenceBetweenDates(String dateNewest, String dateOldest){
+        long timeNewest = convertTimestampToSeconds(dateNewest);
+        long timeOldest = convertTimestampToSeconds(dateOldest);
+
+        double diff = (double) (timeNewest - timeOldest);
+        return diff / 1000;
+    }
+
 
 
     public static Double getStd(ArrayList<ApHistogramRecord> list){

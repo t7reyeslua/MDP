@@ -36,7 +36,7 @@ public class LocationLogRecordEndpoint {
 
         LOG.info("Calling insertLocationLogRecord method");
 
-        locationLogRecord.setTimestamp(Double.valueOf(Utils.getCurrentTimestamp()));
+        locationLogRecord.setTimestamp(Utils.getCurrentTimestamp());
         ofy().save().entity(locationLogRecord).now();
 
         return locationLogRecord;
@@ -47,7 +47,7 @@ public class LocationLogRecordEndpoint {
 
         LOG.info("Calling insertLocationLogRecordTimestamp method");
 
-        locationLogRecord.setTimestamp(Double.valueOf(timestamp));
+        locationLogRecord.setTimestamp(timestamp);
         ofy().save().entity(locationLogRecord).now();
 
         return locationLogRecord;
@@ -59,7 +59,7 @@ public class LocationLogRecordEndpoint {
         LOG.info("Calling getServerTimestamp method");
 
         LocationLogRecord locationLogRecord = new LocationLogRecord();
-        locationLogRecord.setTimestamp(Double.valueOf(Utils.getCurrentTimestamp()));
+        locationLogRecord.setTimestamp(Utils.getCurrentTimestamp());
 
         return locationLogRecord;
     }
