@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import tudelft.mdp.backend.records.ApHistogramRecord;
@@ -21,6 +22,8 @@ public class Utils {
         Calendar calendar = Calendar.getInstance();
         // 2) get a java.util.Date from the calendar instance.
         //    this date will represent the current instant, or "now".
+        TimeZone timeZone = TimeZone.getTimeZone("CET");
+        calendar.setTimeZone(timeZone);
         java.util.Date now = calendar.getTime();
         // 3) a java current time (now) instance
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());

@@ -114,6 +114,35 @@ public class WekaNetworkScansObject {
 
     }
 
+    public String getFeatures(){
+        if (mNetworksFeatures.size() == 0){
+            buildNetworkFeatures();
+        }
+        String features = "";
+
+        String header = "";
+        for (String networkBSSID : mNetworksFeatures.keySet()){
+            header += "N_" + networkBSSID + "_mean," +
+                    "N_" + networkBSSID + "_std,"  +
+                    "N_" + networkBSSID + "_min,"  +
+                    "N_" + networkBSSID + "_max,";
+        }
+        header = header.substring(0, header.length()-1);
+        features += header + "\n";
+
+        String values = "";
+        for (String networkBSSID : mNetworksFeatures.keySet()){
+
+            ArrayList<Double> networkFeatures = mNetworksFeatures.get(networkBSSID);
+            for (Double feature : networkFeatures){
+                values += feature + ",";
+            }
+
+        }
+        values = values.substring(0, values.length()-1);
+        features += values;
+        return features;
+    }
 
 
 

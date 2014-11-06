@@ -103,6 +103,20 @@
     </datastore-index>
 
 
+    <datastore-index kind="DeviceMotionLocationRecord" ancestor="false" source="manual">
+        <property name="username" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="DeviceMotionLocationRecord" ancestor="false" source="manual">
+        <property name="deviceType" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="DeviceMotionLocationRecord" ancestor="false" source="manual">
+        <property name="deviceId" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+
+
 
     <datastore-index kind="ApGaussianRecord" ancestor="false" source="manual">
         <property name="zone" direction="asc"/>

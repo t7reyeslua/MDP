@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.DeviceMotionLocationRecord;
+import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.Text;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
@@ -55,6 +57,8 @@ import tudelft.mdp.locationTracker.LocationEstimator;
 import tudelft.mdp.locationTracker.NetworkInfoObject;
 import tudelft.mdp.locationTracker.NetworkScanService;
 import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
+import tudelft.mdp.utils.Utils;
+import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
 import tudelft.mdp.weka.WekaNetworkScansObject;
 import tudelft.mdp.weka.WekaSensorsRawDataObject;
 
@@ -109,6 +113,7 @@ public class MdpWorkerService extends Service implements
     private boolean dataCompleteMotion;
     private boolean dataCompleteLocation;
     private String deviceEvent;
+    private int msgCount = 0;
     private Timer mTimerDetection = new Timer();
     private Timer mTimerMotion = new Timer();
 
@@ -157,6 +162,7 @@ public class MdpWorkerService extends Service implements
         int scanWindow = sharedPrefs.getInt(UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS, 30);
         mTimerDetection.scheduleAtFixedRate(new DetectLocationTick(), 0, scanWindow * 1000);
 
+        v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
         updateGaussians();
 
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -169,8 +175,9 @@ public class MdpWorkerService extends Service implements
         wifiLock.acquire();
         Log.e(LOGTAG,"WifiLock Acquired");
 
-
     }
+
+
 
     @Override
     public void onDestroy() {
@@ -455,10 +462,13 @@ public class MdpWorkerService extends Service implements
         Integer msgType = Integer.valueOf(parts[0]);
         String msgLoad = parts[1];
 
+
+
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
-                Log.w(LOGTAG,"Start sensor streaming from wear");
                 currentlyReceivingSensor = Integer.valueOf(msgLoad);
+                msgCount = 0;
+                Log.w(LOGTAG,"Start sensor streaming from wear: " + Utils.getSensorName(currentlyReceivingSensor) + " Records Count:" + msgCount);
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
                 Log.w(LOGTAG, msgLoad);
@@ -466,11 +476,18 @@ public class MdpWorkerService extends Service implements
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
                 Log.i(LOGTAG, msgLoad);
                 mSensorReadings.add(msgLoad);
+                msgCount++;
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
-                Log.w(LOGTAG, "Stop sensor streaming from wear");
                 ArrayList<String> recordedSensor = new ArrayList<String>(mSensorReadings);
+                mSensorReadings.clear();
                 mRecordedSensors.put(currentlyReceivingSensor, recordedSensor);
+
+                Log.w(LOGTAG, "Stop sensor streaming from wear: " + Utils.getSensorName(currentlyReceivingSensor)
+                        + " Records Count:" + msgCount
+                        + " mSensorReadings:" + mSensorReadings.size()
+                        + " mRecordedSensors:" + mRecordedSensors.get(currentlyReceivingSensor).size());
+                msgCount = 0;
                 break;
 
             case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
@@ -721,24 +738,63 @@ public class MdpWorkerService extends Service implements
 
         Log.w(LOGTAG, "consolidateMotionLocationData");
         if (isDataCompleteLocation && isDataCompleteMotion){
-            //TODO Save/upload both data sets
+            if (v != null) {
+                v.vibrate(500);
+            }
 
             Log.w(LOGTAG, "Data and Motion Completed");
             WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(mNetworkScansBroadcastTick);
-            //TODO Separate Sensor arrays
-            WekaSensorsRawDataObject wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
+            WekaSensorsRawDataObject wekaSensorsRawDataObject;
+            Boolean consolidated = sharedPrefs.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+            if (consolidated) {
+                wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
+            } else {
+                wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mRecordedSensors);
 
-            boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, false);
+                for (Integer t : mRecordedSensors.keySet()){
+                    Log.i(LOGTAG, "Array: " + Utils.getSensorName(t) + " size: " + mRecordedSensors.get(t).size());
+                }
+            }
+
+            uploadFeaturesToDB(wekaNetworkScansObject, wekaSensorsRawDataObject);
+
+            boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, true);
             if (trainingPhase){
-                if (wekaSensorsRawDataObject.getSensorReadings().size() > 0) {
-                    wekaSensorsRawDataObject.saveToFile(deviceEvent);
-                }
-                if (wekaNetworkScansObject.getNetworkScans().size() > 0) {
-                    wekaNetworkScansObject.saveToFile(deviceEvent);
-                }
+                wekaSensorsRawDataObject.saveToFile(deviceEvent, consolidated);
+                wekaNetworkScansObject.saveToFile(deviceEvent);
             }
         }
 
+    }
+
+    /**
+     * Uploads the sensed data to DB
+     * @param wekaNetworkScansObject location features
+     * @param wekaSensorsRawDataObject motion features
+     */
+    private void uploadFeaturesToDB(WekaNetworkScansObject wekaNetworkScansObject, WekaSensorsRawDataObject wekaSensorsRawDataObject){
+        Log.i(LOGTAG, "uploadFeaturesToDB:" + deviceEvent);
+        //TODO Save/upload both data sets
+        Boolean consolidated = sharedPrefs.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+        String[] parts = deviceEvent.split("_");
+        String deviceId = parts[0];
+        String deviceType = parts[1];
+        String timestamp = parts[2];
+        Text motionFeatures = new Text();
+        Text locationFeatures = new Text();
+        motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
+        locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
+
+        DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
+        deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "unknown"));
+        deviceMotionLocationRecord.setEvent(deviceEvent);
+        deviceMotionLocationRecord.setDeviceType(deviceType);
+        deviceMotionLocationRecord.setDeviceId(deviceId);
+        deviceMotionLocationRecord.setTimestamp(timestamp);
+        deviceMotionLocationRecord.setMotionFeatures(motionFeatures);
+        deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
+
+        new UploadMotionLocationFeaturesAsyncTask().execute(this.getApplicationContext(), deviceMotionLocationRecord);
     }
 
     /**
@@ -749,6 +805,10 @@ public class MdpWorkerService extends Service implements
 
         Log.i(LOGTAG, "Start Motion Location Data Recollection by BROADCAST.");
 
+        msgCount = 0;
+        if (v != null) {
+            v.vibrate(500);
+        }
 
         dataCompleteLocation = false;
         dataCompleteMotion = true;
@@ -772,6 +832,7 @@ public class MdpWorkerService extends Service implements
         numScansCountForMotionLocation = 0;
 
         mSensorReadings.clear();
+        mRecordedSensors.clear();
         mNetworkScansBroadcastTick.clear();
     }
 

@@ -2,6 +2,7 @@ package tudelft.mdp.utils;
 
 
 import android.hardware.Sensor;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.UserPreferences;
 
 public class Utils {
+    private static final String LOGTAG = "MDP-Utils";
 
     public static String getCurrentTimestamp(){
         // 1) create a java calendar instance
@@ -159,27 +161,55 @@ public class Utils {
     }
 
     public static String getMinTimestamp(int mode) {
+
+        Calendar calendar = Calendar.getInstance();
         String minDate = "0";
 
         // TODO
         if (mode == UserPreferences.ALLTIME){
-            minDate = "0";
+            minDate = "19880106000000";
+            Log.i(LOGTAG, "Min Date ALLTIME " + minDate);
         }
 
         if (mode == UserPreferences.YEAR){
-            minDate = Utils.getCurrentTimestamp();
+            //Current year + 010101000000
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + "0101000000";
+            Log.i(LOGTAG, "Min Date YEAR " + minDate);
+
         }
 
         if (mode == UserPreferences.MONTH){
-            minDate = Utils.getCurrentTimestamp();
+            //Current year + Current month + 01000000
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + String.format("%02d",calendar.get(Calendar.MONTH) + 1)
+                    + "01000000";
+            Log.i(LOGTAG, "Min Date MONTH " + minDate);
         }
 
         if (mode == UserPreferences.WEEK){
-            minDate = Utils.getCurrentTimestamp();
+            int year = calendar.get(Calendar.YEAR);
+            int week = calendar.get(Calendar.WEEK_OF_YEAR);
+
+            calendar.clear();
+            calendar.set(Calendar.WEEK_OF_YEAR, week);
+            calendar.set(Calendar.YEAR, year);
+
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + String.format("%02d",calendar.get(Calendar.MONTH ) + 1)
+                    + String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH))
+                    + "115959";
+
+            Log.i(LOGTAG, "Min Date WEEK " + minDate);
         }
 
         if (mode == UserPreferences.TODAY){
-            minDate = Utils.getCurrentTimestamp();
+            //Current year + Current month + Current Day + 000000
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + String.format("%02d",calendar.get(Calendar.MONTH ) + 1)
+                    + String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH))
+                    + "000000";
+            Log.i(LOGTAG, "Min Date TODAY " + minDate);
         }
 
         return minDate;

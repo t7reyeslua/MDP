@@ -23,6 +23,7 @@ import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmMessagingAsyncTask;
+import tudelft.mdp.utils.Utils;
 
 /**
  * AsyncTask that is called after a NFC tag is detected
@@ -144,7 +145,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     private void askForMotionLocation(NfcRecord mDeviceInfo){
         Log.w(TAG, "Broadcast to ALL users");
         new GcmMessagingAsyncTask().execute(String.valueOf(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION),
-                nfcTag,
+                nfcTag + "_" + mDeviceInfo.getType() + "_" + Utils.getCurrentTimestamp(),
                 context);
 
         /*

@@ -8,7 +8,6 @@
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
 
          <!--
-            TODO: Before you run your application, you need a Google Cloud Messaging API key.
 
             To get one, follow this link, follow the directions and press "Create" at the end:
 

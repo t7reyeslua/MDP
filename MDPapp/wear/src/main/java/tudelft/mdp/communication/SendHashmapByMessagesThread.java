@@ -53,10 +53,10 @@ public class SendHashmapByMessagesThread extends Thread {
         if (nodes.getNodes() != null) {
             for (Node node : nodes.getNodes()) {
 
-                Log.w(LOGTAG, "Number of sensors to send: " + mRecordedSensors.size());
+                Log.w(LOGTAG, "Info - Number of sensors to send: " + mRecordedSensors.size());
                 for (Integer sensorType : mRecordedSensors.keySet()) {
                     ArrayList<String> messageList = mRecordedSensors.get(sensorType);
-                    Log.w(LOGTAG, "Start sending file from thread: " + Utils.getSensorName(sensorType));
+                    Log.w(LOGTAG, "Info - Start sending file from thread: " + Utils.getSensorName(sensorType));
                     String startMsg = MessagesProtocol.SENDSENSEORSNAPSHOTREC_START
                             + "|" + sensorType;
                     sendMsg(startMsg, node);
@@ -68,20 +68,20 @@ public class SendHashmapByMessagesThread extends Thread {
                             + buildHeader(sensorType);
                     sendMsg(header, node);*/
 
-                    Log.w(LOGTAG, "Number of records to send: " + messageList.size());
+                    Log.w(LOGTAG, "Info - Number of records to send: " + messageList.size());
                     for (String message : messageList) {
                         String record = MessagesProtocol.SENDSENSEORSNAPSHOTREC + "|" + message;
                         sendMsg(record, node);
                     }
 
-                    Log.w(LOGTAG, "Stop sending file from thread");
+                    Log.w(LOGTAG, "Info - Stop sending file from thread");
                     String finishMsg = MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH
                             + "|" + sensorType;
                     sendMsg(finishMsg, node);
                 }
 
 
-                Log.w(LOGTAG,"Stop transmission from thread");
+                Log.w(LOGTAG,"Info - Stop transmission from thread");
                 String endMsg = MessagesProtocol.SENDSENSEORSNAPSHOT_END +  "|" + " END TRANSMISSION";
                 sendMsg(endMsg, node);
             }
