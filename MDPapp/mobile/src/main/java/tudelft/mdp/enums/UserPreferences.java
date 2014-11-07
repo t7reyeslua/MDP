@@ -24,6 +24,8 @@ public class UserPreferences {
     public static final String TIME_BETWEEN_LOCATION_DETECTIONS = "TIME_BETWEEN_LOCATION_DETECTIONS";
     public static final String ALPHA_TRIMMER_COEFFICIENT = "ALPHA_TRIMMER_COEFFICIENT";
     public static final String MOTION_SAMPLE_SECONDS = "MOTION_SAMPLE_SECONDS";
+    public static final String TARGET_KWH_GROUP = "TARGET_KWH_GROUP";
+    public static final String TARGET_KWH_INDIVIDUAL = "TARGET_KWH_INDIVIDUAL";
 
     public static final String SCANSAMPLES = "SCANS_PER_SAMPLE";
 

@@ -7,6 +7,8 @@ import com.googlecode.objectify.ObjectifyService;
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
+import tudelft.mdp.backend.records.DeviceUsageRecord;
+import tudelft.mdp.backend.records.EnergyConsumptionRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecordWrapper;
 import tudelft.mdp.backend.records.LocationLogRecord;
@@ -32,6 +34,8 @@ public class OfyService {
         ObjectifyService.register(LocationLogRecord.class);
         ObjectifyService.register(LocationFingerprintRecord.class);
         ObjectifyService.register(DeviceMotionLocationRecord.class);
+        ObjectifyService.register(EnergyConsumptionRecord.class);
+        ObjectifyService.register(DeviceUsageRecord.class);
     }
 
     public static Objectify ofy() {

@@ -1,6 +1,10 @@
 package tudelft.mdp.dashboard;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -11,6 +15,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import tudelft.mdp.MainActivity;
 import tudelft.mdp.MdpWorkerService;
 import tudelft.mdp.R;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.DeviceUsageRecord;
@@ -120,7 +126,58 @@ public class DashboardFragment extends Fragment implements
         calculateUsersTotalEnergyConsumption();
         calculateDevicesTotalEnergyConsumption();
         printRankingsLog();
+        estimateDailyTarget();
     }
+
+    private void estimateDailyTarget(){
+        Double groupEnergy = 0.0;
+        Double userEnergy = 0.0;
+        Double groupDailyLimit = Double.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.TARGET_KWH_GROUP, "40.0"));
+        Double userDailyLimit = Double.valueOf(PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.TARGET_KWH_INDIVIDUAL, "10.0"));
+
+
+        for (DeviceUsageRecord deviceUsageRecord : usersTotals.get(UserPreferences.TODAY)){
+            if (deviceUsageRecord.getUsername().equals(Constants.ANYUSER)) {
+                groupEnergy = deviceUsageRecord.getUserTime();
+            }
+            if (deviceUsageRecord.getUsername().equals(user)) {
+                userEnergy = deviceUsageRecord.getUserTime();
+            }
+        }
+
+        Log.i(LOGTAG, "GROUP: " + groupEnergy + "|" + groupDailyLimit
+                    + " USER: " + userEnergy  + "|" + userDailyLimit );
+
+        if (groupEnergy > groupDailyLimit){
+            startNotification("Oops! Energy consumption in the house is over the target!");
+        }
+        if (userEnergy > userDailyLimit){
+            startNotification("Oops! Your personal energy consumption is over the target!");
+        }
+
+        // TODO save overconsumption in DB
+
+    }
+
+    private void startNotification(String message){
+        Intent notificationIntent = new Intent(rootView.getContext(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(rootView.getContext(), 0,
+                notificationIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(rootView.getContext())
+                .setContentTitle("MDP")
+                .setContentText(message)
+                .setSmallIcon(R.drawable.plug128)
+                .setContentIntent(pendingIntent).build();
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(7777, notification);
+    }
+
 
     private void printRankingsLog(){
 

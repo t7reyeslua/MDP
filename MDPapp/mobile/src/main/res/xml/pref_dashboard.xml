@@ -1,0 +1,14 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+            android:key="@string/target_kwh_individual"
+            android:dialogTitle="Daily individual kW/H limit"
+            android:inputType="numberDecimal"
+            android:defaultValue="10.0"
+            android:title="Daily individual kW/H limit"      />
+    <EditTextPreference
+            android:key="@string/target_kwh_group"
+            android:dialogTitle="Daily group k/WH limit"
+            android:inputType="numberDecimal"
+            android:defaultValue="50.0"
+            android:title="Daily group kW/H limit"      />
+</PreferenceScreen>

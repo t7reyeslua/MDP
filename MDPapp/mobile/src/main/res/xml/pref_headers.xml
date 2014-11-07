@@ -18,4 +18,8 @@
         android:fragment="tudelft.mdp.SettingsActivity$DeviceManagerPreferenceFragment"
         android:title="Device Manager" />
 
+    <header
+            android:fragment="tudelft.mdp.SettingsActivity$DashboardPreferenceFragment"
+            android:title="Dashboard" />
+
 </preference-headers>

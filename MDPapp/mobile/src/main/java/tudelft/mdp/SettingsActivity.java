@@ -103,9 +103,16 @@ public class SettingsActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_general);
 
         PreferenceCategory fakeHeader = new PreferenceCategory(this);
+        fakeHeader.setTitle("Dashboard");
+        getPreferenceScreen().addPreference(fakeHeader);
+        addPreferencesFromResource(R.xml.pref_dashboard);
+
+
+        fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle("Activity Monitor");
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_activity_monitor);
+
 
         fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle("Location Tracker");
@@ -131,6 +138,8 @@ public class SettingsActivity extends PreferenceActivity {
         bindPreferenceSummaryToValue(findPreference(UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS));
         bindPreferenceSummaryToValue(findPreference(UserPreferences.SCANSAMPLES));
         bindPreferenceSummaryToValue(findPreference(UserPreferences.MOTION_SAMPLE_SECONDS));
+        bindPreferenceSummaryToValue(findPreference(UserPreferences.TARGET_KWH_GROUP));
+        bindPreferenceSummaryToValue(findPreference(UserPreferences.TARGET_KWH_INDIVIDUAL));
     }
 
     /** {@inheritDoc} */
@@ -246,6 +255,24 @@ public class SettingsActivity extends PreferenceActivity {
                             .getString(preference.getKey(), ""));
         }
 
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class DashboardPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_dashboard);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+
+            bindPreferenceSummaryToValue(findPreference(UserPreferences.TARGET_KWH_GROUP));
+            bindPreferenceSummaryToValue(findPreference(UserPreferences.TARGET_KWH_INDIVIDUAL));
+
+        }
     }
 
 
