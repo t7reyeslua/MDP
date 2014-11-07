@@ -6,6 +6,7 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.appengine.repackaged.com.google.common.collect.Iterables;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,8 +19,10 @@ import javax.inject.Named;
 
 import tudelft.mdp.backend.Constants;
 import tudelft.mdp.backend.Utils;
+import tudelft.mdp.backend.records.DeviceUsageRecord;
 import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
+import tudelft.mdp.backend.records.RegistrationRecord;
 
 import static tudelft.mdp.backend.OfyService.ofy;
 
@@ -264,6 +267,118 @@ public class NfcLogRecordEndpoint {
         result.add(userStatus);
 
         return CollectionResponse.<Double>builder().setItems(result).build();
+    }
+
+    @ApiMethod(name = "getSingleUserDeviceTime", path = "get_single_user_device_time")
+    public CollectionResponse<Double> getSingleUserDeviceTime (
+            @Named("nfcId") String nfcId,
+            @Named("user") String user,
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
+
+        LOG.info("Calling getSingleUserDeviceTime method");
+
+        Double userTime = 0.0;
+
+        List<NfcLogRecord> userRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
+                user, minDate, maxDate).getItems());
+
+        String nowTimeStringOriginal = Utils.getCurrentTimestamp();
+        String nowTimeString = nowTimeStringOriginal;
+        LOG.info("USER NOW " + nowTimeString + " No. of Records: " + userRecords.size()
+                + " NFC:" + nfcId
+                + " minDate: " + minDate
+                + " maxDate: " + maxDate);
+
+        /* ========================================================*/
+        /* Calculate the time the user has made use of the device */
+        for (int i = userRecords.size() - 1; i >= 0; i--) {
+
+            /* An ON step is detected -> Measure how long it lasted */
+            String temp = userRecords.get(i).getTimestamp();
+            LOG.info("UserRecord: " + temp + " State:" + userRecords.get(i).getState());
+            if (userRecords.get(i).getState()){
+
+                long timeNewest = Utils.convertTimestampToSeconds(nowTimeString);
+                long timeOldest = Utils.convertTimestampToSeconds(temp);
+
+                double diff1 = (double) (timeNewest - timeOldest);
+                diff1 = diff1 / 1000;
+
+
+                Double diff = Utils.differenceBetweenDates(nowTimeString, temp);
+                userTime += diff;
+                LOG.info(nowTimeString + "-" + temp + "="+ diff + "-----------" + timeNewest + "-" + timeOldest + "="+ diff1 );
+            }
+            nowTimeString = temp;
+        }
+
+        /* The first transition was a Falling Edge.
+           It was already ON when the time window started */
+        if(userRecords.size() > 0) {
+            if (!userRecords.get(0).getState()) {
+                String temp = String.valueOf(userRecords.get(0).getTimestamp());
+                String minDateString = String.valueOf(minDate);
+                Double diff = Utils.differenceBetweenDates(temp, minDateString);
+                userTime += diff;
+                LOG.info(temp + "-" + minDateString + "="+ diff);
+            }
+        }
+
+
+        List<Double> result = new ArrayList<Double>();
+        result.add(userTime);
+
+        return CollectionResponse.<Double>builder().setItems(result).build();
+    }
+
+    @ApiMethod(name = "getUsersStatsOfAllDevices", path = "get_users_stats_all_devices")
+    public CollectionResponse<DeviceUsageRecord> getUsersStatsOfAllDevices () {
+
+        LOG.info("Calling getUserStatsOfAllDevices method");
+
+        List<NfcRecord> devices = ofy().load().type(NfcRecord.class).list();
+        List<RegistrationRecord> users = ofy().load().type(RegistrationRecord.class).list();
+        List<DeviceUsageRecord> usageRecords = new ArrayList<DeviceUsageRecord>();
+        List<Integer> timespans = new ArrayList<Integer>();
+        timespans.add(Constants.TODAY);
+        timespans.add(Constants.WEEK);
+        timespans.add(Constants.MONTH);
+
+        LOG.info("Devices: " + devices.size() + " Users: " + users.size());
+        RegistrationRecord anyUserRegistrationRecord = new RegistrationRecord();
+        anyUserRegistrationRecord.setUsername(Constants.ANYUSER);
+        users.add(anyUserRegistrationRecord);
+
+        for (RegistrationRecord user : users){
+            for (NfcRecord device : devices){
+                   for (Integer timespan : timespans){
+                       Collection<Double> userTimeResponse = getSingleUserDeviceTime(
+                               device.getNfcId(),
+                               user.getUsername(),
+                               Utils.getMinTimestamp(timespan),
+                               Utils.getCurrentTimestamp()).getItems();
+                       Double userTime = Iterables.get(userTimeResponse, 0);
+
+                       DeviceUsageRecord deviceUsageRecord = new DeviceUsageRecord();
+                       deviceUsageRecord.setUsername(user.getUsername());
+                       deviceUsageRecord.setDeviceId(device.getNfcId());
+                       deviceUsageRecord.setDeviceType(device.getType());
+                       deviceUsageRecord.setTimespan(timespan);
+                       deviceUsageRecord.setUserTime(userTime);
+
+                       usageRecords.add(deviceUsageRecord);
+
+                       LOG.info("Getting Stats of: "
+                       + user.getUsername() + " "
+                       + device.getNfcId() + "-" + device.getType() + " "
+                       + "timeSpan: " + timespan + " "
+                       + "userTime: " + userTime);
+                   }
+            }
+        }
+
+        return CollectionResponse.<DeviceUsageRecord>builder().setItems(usageRecords).build();
     }
 
 

@@ -31,6 +31,58 @@ public class Utils {
         return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
     }
 
+    public static String getMinTimestamp(int mode) {
+        Calendar calendar = Calendar.getInstance();
+        TimeZone timeZone = TimeZone.getTimeZone("CET");
+        calendar.setTimeZone(timeZone);
+
+        String minDate = "0";
+
+        // TODO
+        if (mode == Constants.ALLTIME){
+            minDate = "19880106000000";
+        }
+
+        if (mode == Constants.YEAR){
+            //Current year + 010101000000
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + "0101000000";
+
+        }
+
+        if (mode == Constants.MONTH){
+            //Current year + Current month + 01000000
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + String.format("%02d",calendar.get(Calendar.MONTH) + 1)
+                    + "01000000";
+        }
+
+        if (mode == Constants.WEEK){
+            int year = calendar.get(Calendar.YEAR);
+            int week = calendar.get(Calendar.WEEK_OF_YEAR);
+
+            calendar.clear();
+            calendar.set(Calendar.WEEK_OF_YEAR, week);
+            calendar.set(Calendar.YEAR, year);
+
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + String.format("%02d",calendar.get(Calendar.MONTH ) + 1)
+                    + String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH))
+                    + "115959";
+
+        }
+
+        if (mode == Constants.TODAY){
+            //Current year + Current month + Current Day + 000000
+            minDate = String.valueOf(calendar.get(Calendar.YEAR))
+                    + String.format("%02d",calendar.get(Calendar.MONTH ) + 1)
+                    + String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH))
+                    + "000000";
+        }
+
+        return minDate;
+    }
+
     public static long convertTimestampToSeconds(String timestamp){
         // Timestamp format: 20141102190401  -YYYY MM DD hh mm ss
                                             //0123 45 67 89 01 23
