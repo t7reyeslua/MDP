@@ -31,7 +31,9 @@ import tudelft.mdp.MainActivity;
 import tudelft.mdp.MdpWorkerService;
 import tudelft.mdp.R;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.DeviceUsageRecord;
+import tudelft.mdp.backend.endpoints.energyConsumptionRecordEndpoint.model.EnergyConsumptionRecord;
 import tudelft.mdp.deviceManager.RequestAllUsersStatsAsyncTask;
+import tudelft.mdp.deviceManager.RequestUserEnergyConsumptionHistoryAsyncTask;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.Devices;
 import tudelft.mdp.enums.UserPreferences;
@@ -40,6 +42,7 @@ import tudelft.mdp.utils.Utils;
 
 public class DashboardFragment extends Fragment implements
         ServiceConnection,
+        RequestUserEnergyConsumptionHistoryAsyncTask.RequestUserEnergyConsumptionHistoryAsyncResponse,
         RequestAllUsersStatsAsyncTask.RequestAllUsersStatsAsyncResponse{
 
 
@@ -54,6 +57,7 @@ public class DashboardFragment extends Fragment implements
 
     private String user;
 
+    private ArrayList<EnergyConsumptionRecord> userEnergyHistory = new ArrayList<EnergyConsumptionRecord>();
     private ArrayList<DeviceUsageRecord> userStatsRaw = new ArrayList<DeviceUsageRecord>();
     private HashMap<String, HashMap<Integer,ArrayList<DeviceUsageRecord>>> userStatsHM = new HashMap<String, HashMap<Integer, ArrayList<DeviceUsageRecord>>>();
     private HashMap<String, HashMap<Integer,ArrayList<DeviceUsageRecord>>> deviceStatsHM = new HashMap<String, HashMap<Integer, ArrayList<DeviceUsageRecord>>>();
@@ -101,14 +105,27 @@ public class DashboardFragment extends Fragment implements
 
     //Request Users Stats *************************************************************************
 
+
     private void requestUsersStats(){
         if (!requestInProcess) {
             RequestAllUsersStatsAsyncTask deviceListAsyncTask = new RequestAllUsersStatsAsyncTask();
             deviceListAsyncTask.delegate = this;
             deviceListAsyncTask.execute();
+
+            RequestUserEnergyConsumptionHistoryAsyncTask energyConsumptionHistory = new RequestUserEnergyConsumptionHistoryAsyncTask();
+            energyConsumptionHistory.delegate = this;
+            energyConsumptionHistory.execute(user, Utils.getMinTimestamp(UserPreferences.WEEK), Utils.getCurrentTimestamp());
         }
         requestInProcess = true;
     }
+
+    public void processFinishRequestEnergyConsumptionHistory(List<EnergyConsumptionRecord> outputList){
+        userEnergyHistory = new ArrayList<EnergyConsumptionRecord>(outputList);
+        Log.i(LOGTAG, "processFinishRequestEnergyConsumptionHistory " + userEnergyHistory.size());
+
+        //TODO graph
+    }
+
 
     public void processFinishRequestAllUsers(List<DeviceUsageRecord> outputList){
         Log.i(LOGTAG, "processFinishRequestAllUsers");
@@ -127,6 +144,8 @@ public class DashboardFragment extends Fragment implements
         calculateDevicesTotalEnergyConsumption();
         printRankingsLog();
         estimateDailyTarget();
+
+        //TODO graph
     }
 
     private void estimateDailyTarget(){
