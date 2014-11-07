@@ -48,6 +48,8 @@ import tudelft.mdp.Utilities.MessengerFragment;
 import tudelft.mdp.dashboard.DashboardFragment;
 import tudelft.mdp.deviceManager.DeviceDetectionAsyncTask;
 import tudelft.mdp.deviceManager.DeviceManagerFragment;
+import tudelft.mdp.deviceManager.RequestAllUsersStatsAsyncTask;
+import tudelft.mdp.deviceManager.RequestDeviceUsageByUserAsyncTask;
 import tudelft.mdp.enums.NavigationDrawer;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.gcm.GcmRegistrationAsyncTask;
@@ -484,6 +486,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
     }
 
+
+
+
+
     /**
      * Fetching user's information name, email, profile pic
      * */
@@ -537,6 +543,42 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             e.printStackTrace();
         }
     }
+
+
+    /**
+     * Background Async task to load user profile picture from url
+     * */
+    private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public LoadProfileImage(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+
+
+    }
+
+
+
+
+
 
     /**
      * NFC related methods.
@@ -782,35 +824,13 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         }
     }
 
-    /**
-     * Background Async task to load user profile picture from url
-     * */
-    private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public LoadProfileImage(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
 
 
-    }
+
+
+
+
+
 
     /* MdpWorkerService Routines*/
     private void automaticBinding() {
@@ -831,8 +851,6 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         Log.i(TAG, "MdpWorkerService: STOP");
         this.stopService(new Intent(this, MdpWorkerService.class));
     }
-
-
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {

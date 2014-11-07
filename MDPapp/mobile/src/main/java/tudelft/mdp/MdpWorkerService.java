@@ -85,6 +85,7 @@ public class MdpWorkerService extends Service implements
     public static final int MSG_TEST = 20;
     public static final int MSG_LOCATION_STEP_BY_STEP = 21;
     public static final int MSG_LOCATION_GAUSSIANS = 22;
+    public static final int MSG_LOG = 23;
 
     public static final String ARG_TEST = "TEST";
     public static final String ARG_SCHEDULE_NEXT = "SCHEDULE NEXT";
@@ -679,6 +680,12 @@ public class MdpWorkerService extends Service implements
         mLocationRequestedByLocatorStepByStep = true;
     }
 
+
+
+
+
+
+
     //Timer Tasks***********************************************************************************
 
     /**
@@ -725,6 +732,10 @@ public class MdpWorkerService extends Service implements
             }
         }
     }
+
+
+
+
 
 
     //Motion-Location *********************************************************************
@@ -835,6 +846,12 @@ public class MdpWorkerService extends Service implements
         mRecordedSensors.clear();
         mNetworkScansBroadcastTick.clear();
     }
+
+
+
+
+
+
 
 
     //Communication interaction routines with other services and threads****************************
