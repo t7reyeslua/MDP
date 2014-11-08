@@ -47,6 +47,7 @@ import java.util.TimerTask;
 
 import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.Text;
+import tudelft.mdp.backend.endpoints.locationLogEndpoint.model.LocationLogRecord;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
@@ -57,6 +58,7 @@ import tudelft.mdp.locationTracker.LocationEstimator;
 import tudelft.mdp.locationTracker.NetworkInfoObject;
 import tudelft.mdp.locationTracker.NetworkScanService;
 import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
+import tudelft.mdp.locationTracker.UploadCurrentLocationAsyncTask;
 import tudelft.mdp.utils.Utils;
 import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
 import tudelft.mdp.weka.WekaNetworkScansObject;
@@ -93,7 +95,9 @@ public class MdpWorkerService extends Service implements
     public static final String ARG_LOCATION_STEP_BY_STEP = "LOCATION STEP BY STEP";
     public static final String ARG_LOCATION_GAUSSIANS = "LOCATION GAUSSIANS";
 
-    private String locationCalculated;
+    private String locationCalculated = "";
+    private String lastLocation = "";
+    private String lastLocationTimestamp = "";
     private boolean mLocationRequestedByTimeTick = false;
     private boolean mLocationRequestedByBroadcast = false;
     private boolean mLocationRequestedByLocatorStepByStep = false;
@@ -536,14 +540,16 @@ public class MdpWorkerService extends Service implements
 
         int i  = 0;
         locationCalculated = "";
+        String placeOfLocation = locationEstimator.determineCurrentPlace();
+        Double locationProbability = 0.0;
         if (pmf != null) {
             for (String zone : pmf.keySet()) {
                 if (i < pmf.size() && i < 3) {
                     if (locationCalculated.length() == 0) {
                         locationCalculated = zone;
+                        locationProbability = pmf.get(zone);
                     }
-                  //  Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
-                    // TODO : Save 3 highest values in DB
+                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
                     i++;
                 } else {
                     break;
@@ -551,6 +557,25 @@ public class MdpWorkerService extends Service implements
             }
         }
 
+        if (!locationCalculated.equals(lastLocation)) {
+            String timestamp = Utils.getCurrentTimestamp();
+            LocationLogRecord locationLogRecord = new LocationLogRecord();
+
+            locationLogRecord.setTimestamp(timestamp);
+            locationLogRecord.setZone(locationCalculated);
+            locationLogRecord.setPlace(placeOfLocation);
+            locationLogRecord.setProbability(locationProbability);
+            locationLogRecord.setMode(Constants.LOC_BAYESSIAN);
+            locationLogRecord.setUser(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+
+            Log.w(LOGTAG, "Uploading current location to DB:" + locationCalculated + "|" + locationProbability);
+            new UploadCurrentLocationAsyncTask().execute(locationLogRecord);
+
+            lastLocation = locationCalculated;
+            lastLocationTimestamp = timestamp;
+        }
+
+        /*
         if (locationEstimator.calculateLocationBayessian_IntermediatePMFs() != null){
             i = 0;
             for (HashMap<String, Double> intPmf : locationEstimator.calculateLocationBayessian_IntermediatePMFs()){
@@ -560,7 +585,7 @@ public class MdpWorkerService extends Service implements
                     //Log.w(LOGTAG, "Zone:" + zone + " Prob:" + intPmf.get(zone));
                 }
             }
-        }
+        }*/
 
 
 
@@ -796,7 +821,7 @@ public class MdpWorkerService extends Service implements
         locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
 
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
-        deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "unknown"));
+        deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
         deviceMotionLocationRecord.setEvent(deviceEvent);
         deviceMotionLocationRecord.setDeviceType(deviceType);
         deviceMotionLocationRecord.setDeviceId(deviceId);
