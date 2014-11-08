@@ -238,7 +238,6 @@ public class MdpWorkerService extends Service implements
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.notify(7777, notification);
-        //startForeground(7777, notification);
     }
 
 
