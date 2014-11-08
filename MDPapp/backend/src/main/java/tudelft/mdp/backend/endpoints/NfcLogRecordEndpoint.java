@@ -8,16 +8,14 @@ import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.repackaged.com.google.common.collect.Iterables;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
 
-import tudelft.mdp.backend.Constants;
+import tudelft.mdp.backend.enums.Constants;
 import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.records.DeviceUsageRecord;
 import tudelft.mdp.backend.records.NfcLogRecord;

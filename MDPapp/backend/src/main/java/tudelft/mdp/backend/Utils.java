@@ -1,17 +1,15 @@
 package tudelft.mdp.backend;
 
-import com.google.appengine.repackaged.org.joda.time.DateTime;
-import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormat;
-import com.google.appengine.repackaged.org.joda.time.format.DateTimeFormatter;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
+import tudelft.mdp.backend.enums.Constants;
+import tudelft.mdp.backend.enums.Devices;
+import tudelft.mdp.backend.enums.Energy;
 import tudelft.mdp.backend.records.ApHistogramRecord;
 
 
@@ -22,8 +20,7 @@ public class Utils {
         Calendar calendar = Calendar.getInstance();
         // 2) get a java.util.Date from the calendar instance.
         //    this date will represent the current instant, or "now".
-        TimeZone timeZone = TimeZone.getTimeZone("CET");
-        calendar.setTimeZone(timeZone);
+        calendar.setTimeZone(TimeZone.getTimeZone("CET"));
         java.util.Date now = calendar.getTime();
         // 3) a java current time (now) instance
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
@@ -81,6 +78,66 @@ public class Utils {
         }
 
         return minDate;
+    }
+
+    public static Double getEnergyFromTime(String deviceType, Double time){
+        Double energy = 0.0;
+        if (deviceType.equals(Devices.COMPUTER)){
+            energy = time * Energy.KWH_COMPUTER;
+        } else if (deviceType.equals(Devices.TELEVISION)){
+            energy = time * Energy.KWH_TELEVISION;
+        } else if (deviceType.equals(Devices.WASHING_MACHINE)){
+            energy = time * Energy.KWH_WASHINGMACHINE;
+        } else if (deviceType.equals(Devices.VIDEO_GAME_CONSOLE)){
+            energy = time * Energy.KWH_VIDEOGAMECONSOLE;
+        } else if (deviceType.equals(Devices.HOTPLATES)){
+            energy = time * Energy.KWH_HOTPLATES;
+        } else if (deviceType.equals(Devices.MICROWAVE)){
+            energy = time * Energy.KWH_MICROWAVE;
+        } else if (deviceType.equals(Devices.LIGHTS)){
+            energy = time * Energy.KWH_LIGHTS;
+        } else if (deviceType.equals(Devices.STEREO)){
+            energy = time * Energy.KWH_STEREO;
+        } else if (deviceType.equals(Devices.FRIDGE)){
+            energy = time * Energy.KWH_FRIDGE;
+        } else if (deviceType.equals(Devices.COOKER)){
+            energy = time * Energy.KWH_COOKER;
+        } else if (deviceType.equals(Devices.GRILL)){
+            energy = time * Energy.KWH_GRILL;
+        } else if (deviceType.equals(Devices.VACUUM_CLEANER)){
+            energy = time * Energy.KWH_VACUUMCLEANER;
+        }
+        return energy;
+    }
+
+    public static Double getTimeFromEnergy(String deviceType, Double energy){
+        Double time = 0.0;
+        if (deviceType.equals(Devices.COMPUTER)){
+            time = energy / Energy.KWH_COMPUTER;
+        } else if (deviceType.equals(Devices.TELEVISION)){
+            time = energy / Energy.KWH_TELEVISION;
+        } else if (deviceType.equals(Devices.WASHING_MACHINE)){
+            time = energy / Energy.KWH_WASHINGMACHINE;
+        } else if (deviceType.equals(Devices.VIDEO_GAME_CONSOLE)){
+            time = energy / Energy.KWH_VIDEOGAMECONSOLE;
+        } else if (deviceType.equals(Devices.HOTPLATES)){
+            time = energy / Energy.KWH_HOTPLATES;
+        } else if (deviceType.equals(Devices.MICROWAVE)){
+            time = energy / Energy.KWH_MICROWAVE;
+        } else if (deviceType.equals(Devices.LIGHTS)){
+            time = energy / Energy.KWH_LIGHTS;
+        } else if (deviceType.equals(Devices.STEREO)){
+            time = energy / Energy.KWH_STEREO;
+        } else if (deviceType.equals(Devices.FRIDGE)){
+            time = energy / Energy.KWH_FRIDGE;
+        } else if (deviceType.equals(Devices.COOKER)){
+            time = energy / Energy.KWH_COOKER;
+        } else if (deviceType.equals(Devices.GRILL)){
+            time = energy / Energy.KWH_GRILL;
+        } else if (deviceType.equals(Devices.VACUUM_CLEANER)){
+            time = energy / Energy.KWH_VACUUMCLEANER;
+        }
+        return time;
     }
 
     public static long convertTimestampToSeconds(String timestamp){
