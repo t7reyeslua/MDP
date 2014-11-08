@@ -45,12 +45,14 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcRecord;
 import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.Text;
 import tudelft.mdp.backend.endpoints.locationLogEndpoint.model.LocationLogRecord;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
+import tudelft.mdp.deviceManager.RequestUserActiveDevicesAsyncTask;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
@@ -67,6 +69,7 @@ import tudelft.mdp.weka.WekaSensorsRawDataObject;
 public class MdpWorkerService extends Service implements
         ServiceConnection,
         RequestGaussiansAsyncTask.RequestGaussiansAsyncResponse,
+        RequestUserActiveDevicesAsyncTask.RequestUserActiveDevicesAsyncResponse,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -221,28 +224,9 @@ public class MdpWorkerService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
-        //startNotification();
-
         return START_STICKY; // Run until explicitly stopped.
     }
 
-    private void startNotification(){
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
-
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("MDP")
-                .setContentText("Application is running")
-                .setSmallIcon(R.drawable.plug128)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true).build();
-
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        mNotificationManager.notify(7777, notification);
-    }
 
 
     @Override
@@ -534,13 +518,34 @@ public class MdpWorkerService extends Service implements
 
     }
 
+    /**
+     * Estimate the most probable location using the scans done
+     * @param mNetworkScans input
+     */
     private void estimateLocation(ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans){
         LocationEstimator locationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
         HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
 
+        String placeOfLocation = locationEstimator.determineCurrentPlace();
+        Double locationProbability = getProbabilityOfEstimatedLocation(pmf);
+        saveEstimatedLocationToDB(placeOfLocation, locationProbability);
+
+
+        RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
+        requestUserActiveDevicesAsyncTask.delegate = this;
+        requestUserActiveDevicesAsyncTask.execute(
+                sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+
+    }
+
+    /**
+     * getProbabilityOfEstimatedLocation
+     * @param pmf with estimated probability of each zone
+     * @return probability
+     */
+    private Double getProbabilityOfEstimatedLocation(HashMap<String, Double> pmf){
         int i  = 0;
         locationCalculated = "";
-        String placeOfLocation = locationEstimator.determineCurrentPlace();
         Double locationProbability = 0.0;
         if (pmf != null) {
             for (String zone : pmf.keySet()) {
@@ -556,7 +561,15 @@ public class MdpWorkerService extends Service implements
                 }
             }
         }
+        return locationProbability;
+    }
 
+    /**
+     * Saves the estimated location to DB if it is different from the last estimated one.
+     * @param placeOfLocation Home/Office, etc.
+     * @param locationProbability 0..1
+     */
+    private void saveEstimatedLocationToDB(String placeOfLocation, Double locationProbability){
         if (!locationCalculated.equals(lastLocation)) {
             String timestamp = Utils.getCurrentTimestamp();
             LocationLogRecord locationLogRecord = new LocationLogRecord();
@@ -574,34 +587,65 @@ public class MdpWorkerService extends Service implements
             lastLocation = locationCalculated;
             lastLocationTimestamp = timestamp;
         }
-
-        /*
-        if (locationEstimator.calculateLocationBayessian_IntermediatePMFs() != null){
-            i = 0;
-            for (HashMap<String, Double> intPmf : locationEstimator.calculateLocationBayessian_IntermediatePMFs()){
-                //Log.e(LOGTAG, "Network " + (i++));
-                String zone = getHighest(intPmf);
-                if (zone.length() > 0) {
-                    //Log.w(LOGTAG, "Zone:" + zone + " Prob:" + intPmf.get(zone));
-                }
-            }
-        }*/
-
-
-
     }
 
-    public String getHighest(HashMap<String, Double> intPmf){
-        Double max = 0.0;
-        String zoneMax = "";
-        for (String zone : intPmf.keySet()){
-            if (intPmf.get(zone) > max){
-                max = intPmf.get(zone);
-                zoneMax = zone;
+    /**
+     * Checks if the user has active devices in places different from the current place where he is.
+     * @param outputList list of active devices of the user
+     */
+    public void processFinishRequestUserActiveDevices(List<NfcRecord> outputList){
+        ArrayList<String> guiltyDevices = new ArrayList<String>();
+        String message = "You have turned on devices in other locations.";
+        guiltyDevices.add(message);
+
+        for (NfcRecord device : outputList){
+            if (!device.getLocation().toLowerCase().equals(locationCalculated.toLowerCase())){
+                Log.i(LOGTAG, "Guilty:" + device.getType() + " at " + device.getLocation());
+                guiltyDevices.add(device.getType() + " at " + device.getLocation());
+            } else {
+                Log.i(LOGTAG, "OK:" + device.getType() + " at " + device.getLocation());
             }
         }
-        return zoneMax;
+
+        if (guiltyDevices.size() > 1) {
+            startNotification(7777, message, guiltyDevices);
+        }
     }
+
+
+    private void startNotification(int id, String mesage, ArrayList<String> events){
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
+        NotificationCompat.Builder  mBuilder =
+                new NotificationCompat.Builder(this);
+
+        mBuilder.setContentTitle("MDP")
+                .setContentText(mesage)
+                .setSmallIcon(R.drawable.plug128)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        if (events != null) {
+            /* Add Big View Specific Configuration */
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+
+            // Sets a title for the Inbox style big view
+            inboxStyle.setBigContentTitle("MDP");
+            // Moves events into the big view
+            for (String event : events) {
+                inboxStyle.addLine(event);
+            }
+            mBuilder.setStyle(inboxStyle);
+        }
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(id, mBuilder.build());
+    }
+
 
 
     /**
