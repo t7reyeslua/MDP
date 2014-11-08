@@ -54,7 +54,7 @@ public class NfcLogRecordEndpoint {
     }
 
     @ApiMethod(name = "listDeviceLogByDate", path = "list_deviceLog_date")
-    public CollectionResponse<NfcLogRecord> listDeviceLogByDate(@Named("nfcId") String nfcId, @Named("minDate") Double minDate, @Named("maxDate") Double maxDate) {
+    public CollectionResponse<NfcLogRecord> listDeviceLogByDate(@Named("nfcId") String nfcId, @Named("minDate") String minDate, @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listDeviceLogByDate method");
         List<NfcLogRecord> records = ofy().load().type(NfcLogRecord.class)
@@ -111,7 +111,10 @@ public class NfcLogRecordEndpoint {
     }
 
     @ApiMethod(name = "listUserDeviceLogByDate", path = "list_userDeviceLog_date")
-    public CollectionResponse<NfcLogRecord> listUserDeviceLogByDate(@Named("user") String user, @Named("minDate") Double minDate, @Named("maxDate") Double maxDate) {
+    public CollectionResponse<NfcLogRecord> listUserDeviceLogByDate(
+            @Named("user") String user,
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listUserDeviceLogByDate method");
 
@@ -143,6 +146,31 @@ public class NfcLogRecordEndpoint {
         return CollectionResponse.<NfcLogRecord>builder().setItems(records).build();
 
     }
+
+
+    @ApiMethod(name = "getUserActiveDevices", path = "get_user_active_devices")
+    public CollectionResponse<NfcRecord> getUserActiveDevices(
+            @Named("user") String user) {
+
+        LOG.info("Calling getUserActiveDevices method");
+
+        List<NfcRecord> devices = ofy().load().type(NfcRecord.class).list();
+        List<NfcRecord> activeDevices = new ArrayList<NfcRecord>();
+
+        for (NfcRecord device : devices){
+            NfcLogRecord record = getLastUserLogOfDevice(device.getNfcId(),user);
+            if (record != null){
+                LOG.info(user + "|" +device.getType() + " active: " + device.getState());
+                if (record.getState()){
+                    device.setDescription(record.getTimestamp());
+                    activeDevices.add(device);
+                }
+            }
+        }
+
+        return CollectionResponse.<NfcRecord>builder().setItems(activeDevices).build();
+    }
+
 
     @ApiMethod(name = "getUserStatsOfDevice", path = "get_user_stats_device")
     public CollectionResponse<Double> getUserStatsOfDevice (
