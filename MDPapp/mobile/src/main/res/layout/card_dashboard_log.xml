@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:paddingLeft="15dp"
+              android:paddingRight="15dp"
+              android:paddingBottom="8dp"
+              android:paddingTop="5dp"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content">
+
+
+    <com.devspark.robototextview.widget.RobotoTextView
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="80"
+            android:textColor="@android:color/darker_gray"
+            app:fontFamily="roboto"
+            app:textWeight="light"
+            android:textSize="11sp"
+            android:text="> Init"
+            android:maxLines = "5"
+            android:minLines = "5"
+            android:scrollHorizontally="true"
+            android:fadeScrollbars="false"
+            android:scrollbars = "vertical"
+            android:id="@+id/twLog"
+            android:paddingRight="2dp"/>
+</LinearLayout>

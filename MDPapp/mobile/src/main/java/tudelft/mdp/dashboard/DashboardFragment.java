@@ -1,5 +1,7 @@
 package tudelft.mdp.dashboard;
 
+import com.devspark.robototextview.widget.RobotoTextView;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,10 +18,13 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +32,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.MainActivity;
 import tudelft.mdp.MdpWorkerService;
 import tudelft.mdp.R;
@@ -37,6 +44,10 @@ import tudelft.mdp.deviceManager.RequestUserEnergyConsumptionHistoryAsyncTask;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.Devices;
 import tudelft.mdp.enums.UserPreferences;
+import tudelft.mdp.ui.DashboardLocationCard;
+import tudelft.mdp.ui.DashboardLogCard;
+import tudelft.mdp.ui.DashboardRankingsCard;
+import tudelft.mdp.ui.ExpandableListEnergyRanking;
 import tudelft.mdp.utils.Utils;
 
 
@@ -64,6 +75,33 @@ public class DashboardFragment extends Fragment implements
     private HashMap<Integer, ArrayList<DeviceUsageRecord>> usersTotals = new HashMap<Integer, ArrayList<DeviceUsageRecord>>();
     private HashMap<Integer, ArrayList<DeviceUsageRecord>> devicesTotals = new HashMap<Integer, ArrayList<DeviceUsageRecord>>();
 
+    private CardView mCardViewUserRankings;
+    private DashboardRankingsCard mCardUserRankings;
+    private ExpandableListView mExpandableListUsers;
+    private ArrayList<DeviceUsageRecord> groupItemUsers = new ArrayList<DeviceUsageRecord>();
+    private ArrayList<Object> childItemUsers = new ArrayList<Object>();
+    private RobotoTextView twNoDataUsers;
+
+    private CardView mCardViewDeviceRankings;
+    private DashboardRankingsCard mCardDeviceRankings;
+    private ExpandableListView mExpandableListDevices;
+    private ArrayList<DeviceUsageRecord> groupItemDevices = new ArrayList<DeviceUsageRecord>();
+    private ArrayList<Object> childItemDevices = new ArrayList<Object>();
+    private RobotoTextView twNoDataDevices;
+
+    private CardView mCardViewLocation;
+    private DashboardLocationCard mCardLocation;
+    private RobotoTextView twLocationTimestamp;
+    private RobotoTextView twLocationPlace;
+    private RobotoTextView twLocationZone;
+
+    private CardView mCardViewLog;
+    private DashboardLogCard mCardLog;
+    private RobotoTextView twLog;
+
+    private String placeOfLocation = "TBD";
+    private String locationCalculated = "TBD";
+
     public DashboardFragment() {
         // Required empty public constructor
     }
@@ -82,9 +120,9 @@ public class DashboardFragment extends Fragment implements
                    .getString(UserPreferences.USERNAME, "TBD");
         Log.i(LOGTAG, "Username:" + user);
 
+        configureCardsInit();
         automaticBinding();
         requestUsersStats();
-
 
 
         return rootView;
@@ -102,32 +140,221 @@ public class DashboardFragment extends Fragment implements
         }
     }
 
+    // Configure Cards ****************************************************************************
+
+    private void configureCardsInit(){
+        configureUserRankingsCard();
+        configureDeviceRankingsCard();
+        configureLocationCard();
+        configureLogCard();
+    }
+
+
+    private void configureUserRankingsCard(){
+        mCardViewUserRankings = (CardView) rootView.findViewById(R.id.cardUserRankings);
+        mCardUserRankings = new DashboardRankingsCard(rootView.getContext(), "User Rankings");
+        mCardUserRankings.setShadow(true);
+        mCardViewUserRankings.setCard(mCardUserRankings);
+
+        mExpandableListUsers = (ExpandableListView) mCardViewUserRankings.findViewById(R.id.exp_rankings);
+        twNoDataUsers = (RobotoTextView) mCardViewUserRankings.findViewById(R.id.empty);
+    }
+
+    private void configureDeviceRankingsCard(){
+        mCardViewDeviceRankings = (CardView) rootView.findViewById(R.id.cardDeviceRankings);
+        mCardDeviceRankings = new DashboardRankingsCard(rootView.getContext(), "Device Rankings");
+        mCardDeviceRankings.setShadow(true);
+        mCardViewDeviceRankings.setCard(mCardDeviceRankings);
+
+        mExpandableListDevices = (ExpandableListView) mCardViewDeviceRankings.findViewById(R.id.exp_rankings);
+        twNoDataDevices = (RobotoTextView) mCardViewDeviceRankings.findViewById(R.id.empty);
+    }
+
+    private void configureLocationCard(){
+        mCardViewLocation = (CardView) rootView.findViewById(R.id.cardLocation);
+        mCardLocation = new DashboardLocationCard(rootView.getContext());
+        mCardLocation.setShadow(true);
+        mCardViewLocation.setCard(mCardLocation);
+
+        twLocationTimestamp = (RobotoTextView) mCardViewLocation.findViewById(R.id.twTimestamp);
+        twLocationPlace = (RobotoTextView) mCardViewLocation.findViewById(R.id.twPlace);
+        twLocationZone  = (RobotoTextView) mCardViewLocation.findViewById(R.id.twZone);
+
+        refreshLocationCard(Utils.getCurrentTimestampMillis(), placeOfLocation, locationCalculated);
+    }
+
+    private void refreshLocationCard(String timestamp, String place, String zone){
+        twLocationTimestamp.setText(timestamp);
+        twLocationPlace.setText(place);
+        twLocationZone.setText(zone);
+    }
+
+    private void configureLogCard(){
+        mCardViewLog = (CardView) rootView.findViewById(R.id.cardLog);
+        mCardLog = new DashboardLogCard(rootView.getContext());
+        mCardLog.setShadow(true);
+        mCardViewLog.setCard(mCardLog);
+
+        twLog = (RobotoTextView) mCardViewLog.findViewById(R.id.twLog);
+        twLog.setMovementMethod(new ScrollingMovementMethod());
+
+        mCardViewLog.setVisibility(View.GONE);
+
+    }
+
+    private void refreshLogCard(String data){
+        String currentLog = twLog.getText().toString();
+        int count = currentLog.length() - currentLog.replace("\n", "").length();
+        if (count > 100){
+            currentLog = "> Init";
+        }
+        twLog.setText(currentLog + "\n> " + Utils.getCurrentTimestampMillis() + "  " + data);
+    }
+
+    private class ExpDrawerGroupClickListener implements ExpandableListView.OnGroupClickListener {
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                int groupPosition, long id) {
+
+            if (parent.isGroupExpanded(groupPosition)){
+                parent.collapseGroup(groupPosition);
+            }else {
+                parent.expandGroup(groupPosition, true);
+            }
+            return true;
+        }
+    }
+
+    private void updateUsersRankings(){
+        setUsersRankingsData();
+
+        mExpandableListUsers.setAdapter(new ExpandableListEnergyRanking(rootView.getContext(), groupItemUsers, childItemUsers));
+        mExpandableListUsers.setOnGroupClickListener(new ExpDrawerGroupClickListener());
+
+        mExpandableListUsers.expandGroup(0);
+
+    }
+
+    private void updateDevicesRankings(){
+        setDevicesRankingsData();
+
+        mExpandableListDevices.setAdapter(new ExpandableListEnergyRanking(rootView.getContext(), groupItemDevices, childItemDevices));
+        mExpandableListDevices.setOnGroupClickListener(new ExpDrawerGroupClickListener());
+
+        mExpandableListDevices.expandGroup(0);
+    }
+
+    private void setUsersRankingsData(){
+        groupItemUsers.clear();
+        childItemUsers.clear();
+
+        for (Integer timeSpan : usersTotals.keySet()){
+            DeviceUsageRecord anyUser = new DeviceUsageRecord();
+            int anyUserIndex = -1;
+            for (DeviceUsageRecord deviceUsageRecord : usersTotals.get(timeSpan)){
+                anyUserIndex++;
+                if (deviceUsageRecord.getUsername().equals(Constants.ANYUSER)){
+                    anyUser = deviceUsageRecord;
+                    break;
+                }
+            }
+            groupItemUsers.add(anyUser);
+            ArrayList<DeviceUsageRecord> child = new ArrayList<DeviceUsageRecord>(usersTotals.get(timeSpan));
+            /*Collections.sort(child, new Comparator<DeviceUsageRecord>() {
+                @Override
+                public int compare(DeviceUsageRecord item1, DeviceUsageRecord item2) {
+
+                    return item1.getUserTime().compareTo(item2.getUserTime());
+                }
+            });*/
+
+            child.remove(anyUserIndex);
+            childItemUsers.add(child);
+        }
+        if (groupItemUsers.size() > 0){
+            twNoDataUsers.setVisibility(View.GONE);
+        }
+    }
+
+
+
+    private void setDevicesRankingsData(){
+        groupItemDevices.clear();
+        childItemDevices.clear();
+
+        for (Integer timeSpan : devicesTotals.keySet()){
+            DeviceUsageRecord anyUser = new DeviceUsageRecord();
+            anyUser.setTimespan(timeSpan);
+            groupItemDevices.add(anyUser);
+            Log.e(LOGTAG, "Devices Group:" + anyUser.getUsername()
+                    + " Timespan: " + anyUser.getTimespan()
+                    + " Energy: " + anyUser.getUserTime()
+                    + " Type:" + anyUser.getDeviceType());
+
+            ArrayList<DeviceUsageRecord> child = devicesTotals.get(timeSpan);
+            for (DeviceUsageRecord deviceUsageRecord : child){
+
+                Log.w(LOGTAG, "Devices Child:" + deviceUsageRecord.getUsername()
+                        + " Timespan: " + deviceUsageRecord.getTimespan()
+                        + " Energy: " + deviceUsageRecord.getUserTime()
+                        + " Type:" + deviceUsageRecord.getDeviceType());
+            }
+            /*Collections.sort(child, new Comparator<DeviceUsageRecord>() {
+                @Override
+                public int compare(DeviceUsageRecord item1, DeviceUsageRecord item2) {
+
+                    return item1.getUserTime().compareTo(item2.getUserTime());
+                }
+            });*/
+
+            childItemDevices.add(child);
+        }
+
+        if (groupItemDevices.size() > 0){
+            twNoDataDevices.setVisibility(View.GONE);
+        }
+    }
 
     //Request Users Stats *************************************************************************
 
 
     private void requestUsersStats(){
         if (!requestInProcess) {
+            refreshLogCard("RequestAllUsersStatsAsyncTask invoked");
             RequestAllUsersStatsAsyncTask deviceListAsyncTask = new RequestAllUsersStatsAsyncTask();
             deviceListAsyncTask.delegate = this;
             deviceListAsyncTask.execute();
 
+            String logdata = "EnergyConsumptionHistory Request:" + user + " " + Utils.getMinTimestamp(UserPreferences.WEEK) + " " + Utils.getCurrentTimestamp();
+            Log.w(LOGTAG, logdata);
+            refreshLogCard(logdata);
             RequestUserEnergyConsumptionHistoryAsyncTask energyConsumptionHistory = new RequestUserEnergyConsumptionHistoryAsyncTask();
             energyConsumptionHistory.delegate = this;
-            energyConsumptionHistory.execute(user, Utils.getMinTimestamp(UserPreferences.WEEK), Utils.getCurrentTimestamp());
+            energyConsumptionHistory.execute(user, Utils.getMinTimestamp(UserPreferences.WEEK),
+                    Utils.getCurrentTimestamp());
         }
         requestInProcess = true;
     }
 
     public void processFinishRequestEnergyConsumptionHistory(List<EnergyConsumptionRecord> outputList){
+        if (outputList == null){
+            //No history of user energy consumption. This data is for showing historical bar graph.
+            refreshLogCard("EnergyConsumptionRecord Null");
+            return;
+        }
         userEnergyHistory = new ArrayList<EnergyConsumptionRecord>(outputList);
         Log.i(LOGTAG, "processFinishRequestEnergyConsumptionHistory " + userEnergyHistory.size());
+        refreshLogCard( "processFinishRequestEnergyConsumptionHistory " + userEnergyHistory.size());
 
         //TODO graph
     }
 
 
     public void processFinishRequestAllUsers(List<DeviceUsageRecord> outputList){
+        if (outputList == null){
+            refreshLogCard("AllUserStats data Null");
+            return;
+        }
         Log.i(LOGTAG, "processFinishRequestAllUsers");
         requestInProcess = false;
         userStatsRaw = new ArrayList<DeviceUsageRecord>(outputList);
@@ -145,6 +372,8 @@ public class DashboardFragment extends Fragment implements
         printRankingsLog();
         estimateDailyTarget();
 
+        updateUsersRankings();
+        updateDevicesRankings();
         //TODO graph
     }
 
@@ -206,6 +435,8 @@ public class DashboardFragment extends Fragment implements
                 if (!deviceUsageRecord.getUsername().equals(Constants.ANYUSER)) {
                     Log.i(LOGTAG, timeSpan + "|" + deviceUsageRecord.getUsername() + "|"
                             + deviceUsageRecord.getUserTime());
+                    refreshLogCard(timeSpan + "|" + deviceUsageRecord.getUsername() + "|"
+                            + deviceUsageRecord.getUserTime());
                 }
             }
         }
@@ -214,6 +445,7 @@ public class DashboardFragment extends Fragment implements
         for (Integer timeSpan : devicesTotals.keySet()){
             for (DeviceUsageRecord deviceUsageRecord : devicesTotals.get(timeSpan)){
                 Log.i(LOGTAG, timeSpan + "|" + deviceUsageRecord.getUsername() + "|" + deviceUsageRecord.getUserTime());
+                refreshLogCard( timeSpan + "|" + deviceUsageRecord.getUsername() + "|" + deviceUsageRecord.getUserTime());
             }
         }
     }
@@ -451,7 +683,13 @@ public class DashboardFragment extends Fragment implements
             //Log.d(LOGTAG, "handleMessage: " + msg.what);
             switch (msg.what) {
                 case MdpWorkerService.MSG_LOG:
-                    // TODO: add to log card.
+                    String data = msg.getData().getString(MdpWorkerService.ARG_LOG);
+                    refreshLogCard(data);
+                    break;
+                case MdpWorkerService.MSG_LOCATION_ACQUIRED:
+                    String location = msg.getData().getString(MdpWorkerService.ARG_LOCATION_ACQUIRED);
+                    String[] parts = location.split("\\|");
+                    refreshLocationCard(Utils.getCurrentTimestampMillis(), parts[0], parts[1]);
                     break;
                 default:
                     super.handleMessage(msg);

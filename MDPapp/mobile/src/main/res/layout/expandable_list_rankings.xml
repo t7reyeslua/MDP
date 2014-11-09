@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:paddingBottom="5dp"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <ExpandableListView
+                android:id="@+id/exp_rankings"
+                android:paddingTop="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_gravity="start"
+                android:background="#fff"
+                android:choiceMode="singleChoice"
+                android:divider="#d711030c"
+                android:groupIndicator="@android:color/transparent"
+                android:dividerHeight="0dp" android:clickable="false"/>
+
+        <include  layout="@layout/card_empty_view" android:id="@+id/emptyView" />
+
+    </LinearLayout>
+</LinearLayout>

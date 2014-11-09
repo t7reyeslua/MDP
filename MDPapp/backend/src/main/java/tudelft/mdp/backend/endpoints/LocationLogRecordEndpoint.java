@@ -86,8 +86,8 @@ public class LocationLogRecordEndpoint {
     @ApiMethod(name = "listLocationLogByUserDate", path = "list_location_user_date")
     public CollectionResponse<LocationLogRecord> listLocationLogByUserDate(
             @Named("user") String user,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByUserDate method");
 

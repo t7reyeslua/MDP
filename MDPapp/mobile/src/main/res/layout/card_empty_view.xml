@@ -8,7 +8,7 @@
     <com.devspark.robototextview.widget.RobotoTextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/text_header"
+            android:id="@+id/empty"
             app:fontFamily="roboto"
             app:textWeight="light"
             android:textSize="12sp"

@@ -27,6 +27,17 @@ public class Utils {
         return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
     }
 
+    public static String getCurrentTimestampMillis(){
+        // 1) create a java calendar instance
+        Calendar calendar = Calendar.getInstance();
+        // 2) get a java.util.Date from the calendar instance.
+        //    this date will represent the current instant, or "now".
+        java.util.Date now = calendar.getTime();
+        // 3) a java current time (now) instance
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+        return new SimpleDateFormat("HH:mm:ss.SSS").format(currentTimestamp);
+    }
+
     public static String getCurrentTimeOfDay(){
         Calendar calendar = Calendar.getInstance();
         java.util.Date now = calendar.getTime();
@@ -200,7 +211,7 @@ public class Utils {
             minDate = String.valueOf(calendar.get(Calendar.YEAR))
                     + String.format("%02d",calendar.get(Calendar.MONTH ) + 1)
                     + String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH))
-                    + "115959";
+                    + "000001";
 
             Log.i(LOGTAG, "Min Date WEEK " + minDate);
         }
@@ -277,6 +288,23 @@ public class Utils {
         return time;
     }
 
+    public static String getNameOfTimespan(int timespan){
+        String name = "";
+
+        if (timespan == UserPreferences.TODAY){
+            name = "Today";
+        } else if (timespan == UserPreferences.WEEK){
+            name = "This week";
+        } else if (timespan == UserPreferences.MONTH){
+            name = "This month";
+        } else if (timespan == UserPreferences.YEAR){
+            name = "This year";
+        } else if (timespan == UserPreferences.ALLTIME){
+            name = "All time";
+        }
+
+        return name;
+    }
 
     public static Double getStdInt(ArrayList<Integer> list){
         Double std = 0.0;

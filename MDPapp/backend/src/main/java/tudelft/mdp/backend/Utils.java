@@ -65,7 +65,7 @@ public class Utils {
             minDate = String.valueOf(calendar.get(Calendar.YEAR))
                     + String.format("%02d",calendar.get(Calendar.MONTH ) + 1)
                     + String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH))
-                    + "115959";
+                    + "000001";
 
         }
 

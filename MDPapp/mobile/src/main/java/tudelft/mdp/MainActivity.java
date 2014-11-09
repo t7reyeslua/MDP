@@ -320,7 +320,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
          * Add Data For Activity Monitor
          */
         child = new ArrayList<String>();
-        child.add("Activity History");
+        //child.add("Activity History");
         child.add("Sensors recorder");
         /*child.add("Training");
         child.add("Confusion Matrix");
@@ -362,10 +362,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
             if (groupPosition == NavigationDrawer.ACTIVITYMONITOR){
                 switch (childPosition){
                     case 0:
-                        position = NavigationDrawer.ACTIVITYHISTORY;
+                        position = NavigationDrawer.SENSORSVIEWER;
                         break;
                     case 1:
-                        position = NavigationDrawer.SENSORSVIEWER;
+                        position = NavigationDrawer.ACTIVITYHISTORY;
                         break;
                     default:
                         break;

@@ -95,9 +95,12 @@ public class MdpWorkerService extends Service implements
     public static final String ARG_TEST = "TEST";
     public static final String ARG_SCHEDULE_NEXT = "SCHEDULE NEXT";
     public static final String ARG_LOCATION_ACQUIRED = "LOCATION ACQUIRED";
+    public static final String ARG_LOG = "LOG DATA";
     public static final String ARG_LOCATION_STEP_BY_STEP = "LOCATION STEP BY STEP";
     public static final String ARG_LOCATION_GAUSSIANS = "LOCATION GAUSSIANS";
 
+    private String logData = "";
+    private String placeOfLocation = "";
     private String locationCalculated = "";
     private String lastLocation = "";
     private String lastLocationTimestamp = "";
@@ -526,10 +529,11 @@ public class MdpWorkerService extends Service implements
         LocationEstimator locationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
         HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
 
-        String placeOfLocation = locationEstimator.determineCurrentPlace();
+        placeOfLocation = locationEstimator.determineCurrentPlace();
         Double locationProbability = getProbabilityOfEstimatedLocation(pmf);
         saveEstimatedLocationToDB(placeOfLocation, locationProbability);
 
+        sendMessageToUI(MSG_LOCATION_ACQUIRED);
 
         RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
         requestUserActiveDevicesAsyncTask.delegate = this;
@@ -966,7 +970,7 @@ public class MdpWorkerService extends Service implements
                         messenger.send(msg);
                         break;
                     case MSG_LOCATION_ACQUIRED:
-                        bundle.putString(ARG_LOCATION_ACQUIRED, locationCalculated);
+                        bundle.putString(ARG_LOCATION_ACQUIRED, placeOfLocation + "|" + locationCalculated);
                         msg = Message.obtain(null, MSG_LOCATION_ACQUIRED);
                         msg.setData(bundle);
                         messenger.send(msg);
@@ -980,6 +984,12 @@ public class MdpWorkerService extends Service implements
                     case MSG_LOCATION_GAUSSIANS:
                         bundle.putSerializable(ARG_LOCATION_GAUSSIANS, mGaussianRecords);
                         msg = Message.obtain(null, MSG_LOCATION_GAUSSIANS);
+                        msg.setData(bundle);
+                        messenger.send(msg);
+                        break;
+                    case MSG_LOG:
+                        bundle.putSerializable(ARG_LOG, logData);
+                        msg = Message.obtain(null, MSG_LOG);
                         msg.setData(bundle);
                         messenger.send(msg);
                         break;
