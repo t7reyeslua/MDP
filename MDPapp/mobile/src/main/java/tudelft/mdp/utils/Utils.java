@@ -173,6 +173,15 @@ public class Utils {
         return name;
     }
 
+    public static String getDateDaysAgo(int days){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -days);
+        java.util.Date now = calendar.getTime();
+        // 3) a java current time (now) instance
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+        return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
+    }
+
     public static String getMinTimestamp(int mode) {
 
         Calendar calendar = Calendar.getInstance();

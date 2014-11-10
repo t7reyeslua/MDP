@@ -1,5 +1,23 @@
 package tudelft.mdp.dashboard;
 
+import com.androidplot.LineRegion;
+import com.androidplot.ui.AnchorPosition;
+import com.androidplot.ui.SeriesRenderer;
+import com.androidplot.ui.SizeLayoutType;
+import com.androidplot.ui.SizeMetrics;
+import com.androidplot.ui.TextOrientationType;
+import com.androidplot.ui.XLayoutStyle;
+import com.androidplot.ui.YLayoutStyle;
+import com.androidplot.ui.widget.TextLabelWidget;
+import com.androidplot.util.PixelUtils;
+import com.androidplot.xy.BarFormatter;
+import com.androidplot.xy.BarRenderer;
+import com.androidplot.xy.BoundaryMode;
+import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.PointLabelFormatter;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.XYSeries;
 import com.devspark.robototextview.widget.RobotoTextView;
 
 import android.app.Notification;
@@ -9,6 +27,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
@@ -20,16 +41,23 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -47,6 +75,7 @@ import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.ui.DashboardLocationCard;
 import tudelft.mdp.ui.DashboardLogCard;
 import tudelft.mdp.ui.DashboardRankingsCard;
+import tudelft.mdp.ui.DashboardUserHistoryCard;
 import tudelft.mdp.ui.ExpandableListEnergyRanking;
 import tudelft.mdp.utils.Utils;
 
@@ -99,8 +128,22 @@ public class DashboardFragment extends Fragment implements
     private DashboardLogCard mCardLog;
     private RobotoTextView twLog;
 
+
+    private CardView mCardViewUserHistory;
+    private DashboardUserHistoryCard mCardUserHistory;
+
+
     private String placeOfLocation = "TBD";
     private String locationCalculated = "TBD";
+
+
+    private static final String NO_SELECTION_TXT = "Touch bar to select";
+    private XYPlot plot;
+    private MyBarFormatter formatter1;
+    private MyBarFormatter formatter2;
+    private MyBarFormatter selectionFormatter;
+    private TextLabelWidget selectionWidget;
+    private Pair<Integer, XYSeries> selection;
 
     public DashboardFragment() {
         // Required empty public constructor
@@ -147,8 +190,199 @@ public class DashboardFragment extends Fragment implements
         configureDeviceRankingsCard();
         configureLocationCard();
         configureLogCard();
+        configureUserHistoryCard();
     }
 
+
+    private void configureUserHistoryCard(){
+        mCardViewUserHistory = (CardView) rootView.findViewById(R.id.cardUserHistory);
+        mCardUserHistory = new DashboardUserHistoryCard(rootView.getContext());
+        mCardUserHistory.setShadow(true);
+        mCardViewUserHistory.setCard(mCardUserHistory);
+
+        setUpPlot();
+    }
+
+    private void setUpPlot(){
+        // initialize our XYPlot reference:
+        plot = (XYPlot) mCardViewUserHistory.findViewById(R.id.mySimpleXYPlot);
+
+        formatter1 = new MyBarFormatter(Color.argb(200, 100, 150, 100), Color.LTGRAY);
+        formatter2 = new MyBarFormatter(Color.argb(200, 100, 100, 150), Color.LTGRAY);
+        selectionFormatter = new MyBarFormatter(Color.YELLOW, Color.WHITE);
+
+
+        selectionWidget = new TextLabelWidget(plot.getLayoutManager(), NO_SELECTION_TXT,
+                new SizeMetrics(
+                        PixelUtils.dpToPix(100), SizeLayoutType.ABSOLUTE,
+                        PixelUtils.dpToPix(100), SizeLayoutType.ABSOLUTE),
+                TextOrientationType.HORIZONTAL);
+
+        selectionWidget.getLabelPaint().setTextSize(PixelUtils.dpToPix(10));
+
+        // add a dark, semi-transparent background to the selection label widget:
+        Paint p = new Paint();
+        p.setARGB(100, 0, 0, 0);
+        selectionWidget.setBackgroundPaint(p);
+
+        selectionWidget.position(
+                0, XLayoutStyle.RELATIVE_TO_CENTER,
+                PixelUtils.dpToPix(0), YLayoutStyle.ABSOLUTE_FROM_TOP,
+                AnchorPosition.TOP_MIDDLE);
+        selectionWidget.pack();
+
+
+        // reduce the number of range labels
+        plot.setTicksPerRangeLabel(2);
+        plot.setRangeLowerBoundary(0, BoundaryMode.FIXED);
+        plot.getGraphWidget().setGridPadding(30, 10, 30, 0);
+        plot.setTicksPerDomainLabel(3);
+
+        plot.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    onPlotClicked(new PointF(motionEvent.getX(), motionEvent.getY()));
+                }
+                return true;
+            }
+        });
+
+        updatePlot(null);
+
+    }
+
+    private void updatePlot(ArrayList<EnergyConsumptionRecord> userEnergyHistory) {
+
+        if (userEnergyHistory == null){
+            return;
+        }
+
+        ArrayList<String> labels = new ArrayList<String>();
+        ArrayList<Double> userEnergy = new ArrayList<Double>();
+        ArrayList<Double> groupEnergy = new ArrayList<Double>();
+
+        for (EnergyConsumptionRecord energyConsumptionRecord : userEnergyHistory){
+            Log.i("UserEnergyHistory", energyConsumptionRecord.getUserEnergy() + "|"+ energyConsumptionRecord.getGroupEnergy());
+
+            String fullTimestamp = String.valueOf(energyConsumptionRecord.getTimestamp());
+            String MM   = fullTimestamp.substring(4,6);
+            String dd   = fullTimestamp.substring(6,8);
+            labels.add(MM +"-" + dd);
+            
+            // TODO: remove this
+            if (energyConsumptionRecord.getGroupEnergy() == 22532.0){
+                energyConsumptionRecord.setGroupEnergy(75.0);
+            }
+
+            userEnergy.add(energyConsumptionRecord.getUserEnergy());
+            groupEnergy.add(energyConsumptionRecord.getGroupEnergy());
+        }
+
+        // Remove all current series from each plot
+        Iterator<XYSeries> iterator1 = plot.getSeriesSet().iterator();
+        while(iterator1.hasNext()) {
+            XYSeries setElement = iterator1.next();
+            plot.removeSeries(setElement);
+        }
+
+        // Create a couple arrays of y-values to plot:
+        Number[] series1Numbers = {1, 5, 5, 2, 7, 4, 9};
+        Number[] series2Numbers = {4, 6, 8, 8, 9, 10, 12};
+
+        // Setup our Series with the selected number of elements
+        XYSeries series1 = new SimpleXYSeries(userEnergy, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "  You");
+        XYSeries series2 = new SimpleXYSeries(groupEnergy, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "  Everybody");
+
+        // add a new series' to the xyplot:
+        plot.addSeries(series1, formatter1);
+        plot.addSeries(series2, formatter2);
+
+        // Setup the BarRenderer with our selected options
+        MyBarRenderer renderer = ((MyBarRenderer)plot.getRenderer(MyBarRenderer.class));
+        renderer.setBarRenderStyle(BarRenderer.BarRenderStyle.OVERLAID);
+        renderer.setBarWidthStyle(BarRenderer.BarWidthStyle.FIXED_WIDTH);
+        renderer.setBarWidth(60f);
+        renderer.setBarGap(5f);
+
+
+        final Object[] xLabels = labels.toArray();
+        plot.setDomainValueFormat(new Format() {
+            @Override
+            public StringBuffer format(Object object, StringBuffer buffer, FieldPosition field) {
+                // TODO Auto-generated method stub
+                int parsedInt = Math.round(Float.parseFloat(object.toString()));
+                Log.d("test", parsedInt + " " + buffer + " " + field);
+                String labelString = (String) xLabels[parsedInt];
+                buffer.append(labelString);
+                return buffer;
+            }
+
+            @Override
+            public Object parseObject(String string, ParsePosition position) {
+                return java.util.Arrays.asList(xLabels).indexOf(string);
+            }
+        });
+
+        plot.setRangeTopMin(0);
+        plot.redraw();
+
+    }
+
+    private void onPlotClicked(PointF point) {
+
+        // make sure the point lies within the graph area.  we use gridrect
+        // because it accounts for margins and padding as well.
+        if (plot.getGraphWidget().getGridRect().contains(point.x, point.y)) {
+            Number x = plot.getXVal(point);
+            Number y = plot.getYVal(point);
+
+            selection = null;
+            double xDistance = 0;
+            double yDistance = 0;
+
+            // find the closest value to the selection:
+            for (XYSeries series : plot.getSeriesSet()) {
+                for (int i = 0; i < series.size(); i++) {
+                    Number thisX = series.getX(i);
+                    Number thisY = series.getY(i);
+                    if (thisX != null && thisY != null) {
+                        double thisXDistance =
+                                LineRegion.measure(x, thisX).doubleValue();
+                        double thisYDistance =
+                                LineRegion.measure(y, thisY).doubleValue();
+                        if (selection == null) {
+                            selection = new Pair<Integer, XYSeries>(i, series);
+                            xDistance = thisXDistance;
+                            yDistance = thisYDistance;
+                        } else if (thisXDistance < xDistance) {
+                            selection = new Pair<Integer, XYSeries>(i, series);
+                            xDistance = thisXDistance;
+                            yDistance = thisYDistance;
+                        } else if (thisXDistance == xDistance &&
+                                thisYDistance < yDistance &&
+                                thisY.doubleValue() >= y.doubleValue()) {
+                            selection = new Pair<Integer, XYSeries>(i, series);
+                            xDistance = thisXDistance;
+                            yDistance = thisYDistance;
+                        }
+                    }
+                }
+            }
+
+        } else {
+            // if the press was outside the graph area, deselect:
+            selection = null;
+        }
+
+        if(selection == null) {
+            selectionWidget.setText(NO_SELECTION_TXT);
+        } else {
+            selectionWidget.setText("Selected: " + selection.second.getTitle() +
+                    " | " + selection.second.getY(selection.first) + " kWh");
+        }
+        plot.redraw();
+    }
 
     private void configureUserRankingsCard(){
         mCardViewUserRankings = (CardView) rootView.findViewById(R.id.cardUserRankings);
@@ -325,12 +559,13 @@ public class DashboardFragment extends Fragment implements
             deviceListAsyncTask.delegate = this;
             deviceListAsyncTask.execute();
 
-            String logdata = "EnergyConsumptionHistory Request:" + user + " " + Utils.getMinTimestamp(UserPreferences.WEEK) + " " + Utils.getCurrentTimestamp();
+            String logdata = "EnergyConsumptionHistory Request:" + user + " " + Utils.getDateDaysAgo(
+                    7) + " " + Utils.getCurrentTimestamp();
             Log.w(LOGTAG, logdata);
             refreshLogCard(logdata);
             RequestUserEnergyConsumptionHistoryAsyncTask energyConsumptionHistory = new RequestUserEnergyConsumptionHistoryAsyncTask();
             energyConsumptionHistory.delegate = this;
-            energyConsumptionHistory.execute(user, Utils.getMinTimestamp(UserPreferences.WEEK),
+            energyConsumptionHistory.execute(user, Utils.getDateDaysAgo(7),
                     Utils.getCurrentTimestamp());
         }
         requestInProcess = true;
@@ -346,6 +581,7 @@ public class DashboardFragment extends Fragment implements
         Log.i(LOGTAG, "processFinishRequestEnergyConsumptionHistory " + userEnergyHistory.size());
         refreshLogCard( "processFinishRequestEnergyConsumptionHistory " + userEnergyHistory.size());
 
+        updatePlot(userEnergyHistory);
         //TODO graph
     }
 
@@ -689,10 +925,53 @@ public class DashboardFragment extends Fragment implements
                 case MdpWorkerService.MSG_LOCATION_ACQUIRED:
                     String location = msg.getData().getString(MdpWorkerService.ARG_LOCATION_ACQUIRED);
                     String[] parts = location.split("\\|");
-                    refreshLocationCard(Utils.getCurrentTimestampMillis(), parts[0], parts[1]);
+                    if (parts.length > 1) {
+                        refreshLocationCard(Utils.getCurrentTimestampMillis(), parts[0], parts[1]);
+                    }
                     break;
                 default:
                     super.handleMessage(msg);
+            }
+        }
+    }
+
+    class MyBarFormatter extends BarFormatter {
+        public MyBarFormatter(int fillColor, int borderColor) {
+            super(fillColor, borderColor);
+        }
+
+        @Override
+        public Class<? extends SeriesRenderer> getRendererClass() {
+            return MyBarRenderer.class;
+        }
+
+        @Override
+        public SeriesRenderer getRendererInstance(XYPlot plot) {
+            return new MyBarRenderer(plot);
+        }
+    }
+
+    class MyBarRenderer extends BarRenderer<MyBarFormatter> {
+
+        public MyBarRenderer(XYPlot plot) {
+            super(plot);
+        }
+
+        /**
+         * Implementing this method to allow us to inject our
+         * special selection formatter.
+         * @param index index of the point being rendered.
+         * @param series XYSeries to which the point being rendered belongs.
+         * @return
+         */
+        @Override
+        public MyBarFormatter getFormatter(int index, XYSeries series) {
+            if(selection != null &&
+                    selection.second == series &&
+                    selection.first == index) {
+                return selectionFormatter;
+            } else {
+                return getFormatter(series);
             }
         }
     }
