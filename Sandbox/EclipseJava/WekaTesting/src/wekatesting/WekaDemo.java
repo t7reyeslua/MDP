@@ -10,15 +10,35 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import weka.classifiers.Classifier;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
+
 
 public class WekaDemo { 
 	
 	public static void main(String[] args) throws Exception {
 		
-		String folderpath = "C:/Users/LG/Dropbox/MDP_LAG/WatchTest1"; //Watch out for escape char "\", use "\\" in case
-		String FileName = "Testa";
-		GetARFF(folderpath,FileName);
+//		DatasetQuickWekatest();
+		DatasetQuickLocationWekatest();
+//		EvalSensorWindowSize();
+//		String pathmodel="C:\\Users\\LG\\Desktop\\watchSession";
+//		String pathmodel="C:\\Users\\LG\\Dropbox\\MDP-Neo\\RUN_3_NOV";
+//		String arfffileName=pathmodel+"\\ResMotLoc";
+//		GetLocMotARFF(pathmodel,arfffileName,300,true);
+				
 		
+//		String pathmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\j48.model";
+//		String pathtest="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\Testa_1414769470674.arff";
+		  
+		
+//		WekaMethods.CreateModelJ48(pathmodel, pathtest);
+//		WekaMethods.FoldEvaluation(pathmodel, pathtest,10);
+		
+//		for(int i =0;i<40;i++)
+//			WekaMethods.PrintPredictedDistribution(pathmodel+model,pathtest,i);
+		
+
 
 //		PDistributionTest();
 //		ButtTest();
@@ -26,12 +46,49 @@ public class WekaDemo {
 		System.out.println("Program Done!");
 		
 	}
-	
+
+	/**
+	 * @author Luis Gonzalez
+	 * @throws Exception 
+	 * @brief prints the evaluation (Correctly Classified Instances) of a Set, by changing gradually the number of scans 
+	 * (lines) consider to compute the attributes of the .arff. 
+	 * 	 */
+	private static void EvalSensorWindowSize() throws Exception {
+		int maxScans=400;
+		int minScans=50;
+		int Step=10;
+		String scanspath="C:\\Users\\LG\\Dropbox\\MDP_LAG\\WatchTest1";
+		String tempArff="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\temp.arff";
+		String tempmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\temp.model";
+		ArrayList<String> Results = new ArrayList<String> ();
+		
+		for(int i=maxScans;i>minScans;i=i-Step){
+		
+		System.out.println("For "+i+" scans:");	
+		//Create .arff
+		GetLocMotARFF(scanspath,tempArff,i,false);
+		
+		//create .model
+		WekaMethods.CreateModelJ48(tempmodel,tempArff);
+				
+		//eval
+					
+		String[] parts=WekaMethods.FoldEvaluation(tempmodel, tempArff,10).split("\n");
+		System.out.println("With "+i+" Scans"+parts[1]);
+		Results.add("With "+i+" Scans"+parts[1]);
+		
+		}
+		System.out.println("\n\n Now the results are\n");
+		for(int r=0;r<Results.size();r++)
+			System.out.println(Results.get(r));
+		
+		
+	}
 	/**
 	 * @author Luis Gonzalez
 	 * @brief returns .arff given the root folder, must contain a folder "Motion" and one "Location"
 	 */
-	private static void GetARFF(String folderpath,String ResultsFileName) {
+	private static void GetLocMotARFF(String folderpath,String ResultsFileName,int numofScans,boolean nametimestamp) {
 		System.out.println("Getting ARRRRRFF!");
 		ArrayList<String> MotionNames = new ArrayList<String> ();
 		ArrayList<String> MotionValues = new ArrayList<String> ();
@@ -48,14 +105,16 @@ public class WekaDemo {
 		//Files need to be in separate folders "Location" & "Motion"
 		
 		getftofLocationlog(folderpath,LocationNames,LocationValues,LocationAttributes);
-		getftofMotionlog(folderpath,MotionNames,MotionValues,MotionAttributes);
+		getftofMotionlog(folderpath,MotionNames,MotionValues,MotionAttributes, numofScans);
 		
 		ClassNames=GetNameClass(LocationNames);
 		
 		System.out.println("\n\n Begin Merging \n");
 		//**Writting part**//
-		ResultsFileName=ResultsFileName+"_"+String.valueOf(System.currentTimeMillis())+".arff";
+		if(nametimestamp==true)
+			ResultsFileName=ResultsFileName+"_"+String.valueOf(System.currentTimeMillis());
 		ResultsFileName=ResultsFileName+".arff";
+//		ResultsFileName=ResultsFileName+".arff";
     	
     	Writer writer = null;
 
@@ -72,10 +131,12 @@ public class WekaDemo {
             	writer.write(MotionAttributes.get(i)+"\n");
                         	
             writer.write("@attribute activity {");
-            for(int a=0; a<(ClassNames.size()-1); a++)
-            	writer.write(NameDecomposition(ClassNames.get(a))+",");
-            
-        	writer.write(NameDecomposition(LocationNames.get(LocationNames.size()-1))+"}");
+            for(int a=0; a<(ClassNames.size()-1); a++){
+            	//TODO Change names to start with a letter
+            	writer.write("A"+NameDecomposition(ClassNames.get(a))+",");
+            }
+        	//TODO Change names to start with a letter
+        	writer.write("A"+NameDecomposition(LocationNames.get(LocationNames.size()-1))+"}");
             writer.write("\n\n");
             writer.write("@data\n");
             
@@ -100,13 +161,14 @@ public class WekaDemo {
             	}
             	if(fFlag==0){//No location found, fill with inf.
             		System.out.println(LocationNames.get(m)+" has no equal");
-            		for(int z=0;z<125;z++){
+            		for(int z=0;z<126;z++){
             			
-            			writer.write("99.99,");
+            			writer.write("?,");
             		}
             	}
                 //Writting Class
-        		writer.write(NameDecomposition(LocationNames.get(m))+"\n");
+            	//TODO Change names to start with a letter
+        		writer.write("A"+NameDecomposition(LocationNames.get(m))+"\n");
             }
     	    
     	} catch (IOException ex) {
@@ -116,9 +178,143 @@ public class WekaDemo {
     	}
     	
     }
+	
+	private static void GetLocARFF(String folderpath,String ResultsFileName,int numofScans) {
+		System.out.println("Getting Location ARRRRRFF!");
+		ArrayList<String> MotionNames = new ArrayList<String> ();
+		ArrayList<String> MotionValues = new ArrayList<String> ();
+		ArrayList<String> MotionAttributes = new ArrayList<String> ();
+		
+		ArrayList<String> LocationNames = new ArrayList<String> ();
+		ArrayList<String> LocationValues = new ArrayList<String> ();
+		ArrayList<String> LocationAttributes = new ArrayList<String> ();
+
+		ArrayList<String> ClassNames = new ArrayList<String> ();
 
 		
+		//TODO work with one folder
+		//Files need to be in separate folders "Location" & "Motion"
+		
+		getftofLocationlog(folderpath,LocationNames,LocationValues,LocationAttributes);
+		getftofMotionlog(folderpath,MotionNames,MotionValues,MotionAttributes,numofScans);
+		
+		ClassNames=GetNameClass(LocationNames);
+		
+		System.out.println("\n\n Begin Merging \n");
+		//**Writting part**//
+		ResultsFileName=ResultsFileName+"_Location_"+String.valueOf(System.currentTimeMillis())+".arff";
+		ResultsFileName=ResultsFileName+".arff";
+    	
+    	Writer writer = null;
+
+    	try {
+    	    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(ResultsFileName), "utf-8"));
+    	    
+    	    writer.write("@relation Events"+"\n\n");  
+    	    
+    	    //just Location Attributes
+            for(int i=0; i<LocationAttributes.size(); i++)
+            	writer.write(LocationAttributes.get(i)+"\n");
+
+            writer.write("@attribute activity {");
+            for(int a=0; a<(ClassNames.size()-1); a++){
+            	//TODO Change names to start with a letter
+            	writer.write("A"+NameDecomposition(ClassNames.get(a))+",");
+            }
+        	//TODO Change names to start with a letter
+        	writer.write("A"+NameDecomposition(LocationNames.get(LocationNames.size()-1))+"}");
+            writer.write("\n\n");
+            writer.write("@data\n");
+            
+            
+            //Writting values
+            for(int m=0; m<LocationValues.size(); m++){
+            	//first location
+            	writer.write(LocationValues.get(m));
+        		writer.write(",");
+            	
+
+                //Writting Class
+            	//TODO Change names to start with a letter
+        		writer.write("A"+NameDecomposition(LocationNames.get(m))+"\n");
+            }
+    	    
+    	} catch (IOException ex) {
+    	  // report
+    	} finally {
+    	   try {writer.close();} catch (Exception ex) {}
+    	}
+    	
+    }
 	
+		private static void GetMotARFF(String folderpath,String ResultsFileName,int numofScans) {
+		System.out.println("Getting Motion ARRRRFF!");
+		ArrayList<String> MotionNames = new ArrayList<String> ();
+		ArrayList<String> MotionValues = new ArrayList<String> ();
+		ArrayList<String> MotionAttributes = new ArrayList<String> ();
+		
+		ArrayList<String> LocationNames = new ArrayList<String> ();
+		ArrayList<String> LocationValues = new ArrayList<String> ();
+		ArrayList<String> LocationAttributes = new ArrayList<String> ();
+
+		ArrayList<String> ClassNames = new ArrayList<String> ();
+
+		
+		//TODO work with one folder
+		//Files need to be in separate folders "Location" & "Motion"
+		
+		getftofLocationlog(folderpath,LocationNames,LocationValues,LocationAttributes);
+		getftofMotionlog(folderpath,MotionNames,MotionValues,MotionAttributes,numofScans);
+		
+		ClassNames=GetNameClass(LocationNames);
+		
+		System.out.println("\n\n Begin Merging \n");
+		//**Writting part**//
+		ResultsFileName=ResultsFileName+"_Motion_"+String.valueOf(System.currentTimeMillis())+".arff";
+		ResultsFileName=ResultsFileName+".arff";
+    	
+    	Writer writer = null;
+
+    	try {
+    	    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(ResultsFileName), "utf-8"));
+    	    
+    	    writer.write("@relation Events"+"\n\n");  
+    	    
+    	    //Motion Attributes
+            
+            for(int i=0; i<MotionAttributes.size(); i++)
+            	writer.write(MotionAttributes.get(i)+"\n");
+                        	
+            writer.write("@attribute activity {");
+            for(int a=0; a<(ClassNames.size()-1); a++){
+            	//TODO Change names to start with a letter
+            	writer.write("A"+NameDecomposition(ClassNames.get(a))+",");
+            }
+        	//TODO Change names to start with a letter
+        	writer.write("A"+NameDecomposition(LocationNames.get(LocationNames.size()-1))+"}");
+            writer.write("\n\n");
+            writer.write("@data\n");
+            
+            
+            //Writting values
+            for(int m=0; m<MotionValues.size(); m++){
+            	//just Motion
+            	writer.write(MotionValues.get(m));
+        		writer.write(",");
+            	
+
+                //Writting Class
+            	//TODO Change names to start with a letter
+        		writer.write("A"+NameDecomposition(LocationNames.get(m))+"\n");
+            }
+    	    
+    	} catch (IOException ex) {
+    	  // report
+    	} finally {
+    	   try {writer.close();} catch (Exception ex) {}
+    	}
+    	
+    }
 
 	private static void getftofLocationlog(String Mainfolderpath,ArrayList<String> ftNames,ArrayList<String> ftValues,ArrayList<String> ftAttributes) {
 		System.out.println("Start ft Location Log");
@@ -234,7 +430,8 @@ public class WekaDemo {
 		
 		
 		for(int m=0;m<NetworkNames.size();m++){
-			AttributeNetworks.add("@attribute "+NetworkNames.get(m)+" numeric");
+			//TODO Change Networknames to start with a letter
+			AttributeNetworks.add("@attribute N"+NetworkNames.get(m)+" numeric");
 		}
 		
 //		Reader_From_Files.write2File(AttributeNetworks,"ftLocNets");
@@ -245,8 +442,7 @@ public class WekaDemo {
 		ftAttributes.addAll(AttributeNetworks);		
 	}
 
-
-	public static void getftofMotionlog(String Mainfolderpath,ArrayList<String> ftNames,ArrayList<String> ftValues,ArrayList<String> ftAttributes){
+	private static void getftofMotionlog(String Mainfolderpath,ArrayList<String> ftNames,ArrayList<String> ftValues,ArrayList<String> ftAttributes,int numofScans){
 		System.out.println("Start readlog()");
 		String folderpath = Mainfolderpath+"\\Motion\\";
 		String filepath;
@@ -277,7 +473,7 @@ public class WekaDemo {
 			SensorsArrays = new HashMap<String, ArrayList<Double>>(SensorRaw.getSensorsArrays());
 
 			
-			ftString=SensorRaw.getFeatures(400);
+			ftString=SensorRaw.getFeatures(numofScans);
 			
 			String[] fileNameparts = FileNames.get(p).split("_");
 			String[] roundtime = fileNameparts[5].split(".txt");
@@ -302,16 +498,15 @@ public class WekaDemo {
 		ftValues.addAll(ftMotionArray);
 		
 	}
-	
-	
-	
+		
 	public static void PDistributionTest()throws Exception{
 		
-		String rootPathmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\J48modelLocationWide.model"; 
-		String rootPathtest ="LocationWidetest.arff";
+//		String rootPathmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\J48modelLocationWide.model"; 
+		String rootPathmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\WideJ48_2.model"; 
+		String rootPathtest ="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\LocationWidetest.arff";
 					
-		for(int i =0;i<50;i++)
-		WekaMethods.PrintPredictedDistribution(rootPathmodel,rootPathtest,i);
+		for(int i =0;i<10;i++)
+			WekaMethods.PrintPredictedDistribution(rootPathmodel,rootPathtest,i);
 	}
 	
 	private static void ButtTest() {
@@ -367,6 +562,49 @@ public class WekaDemo {
 
 		return ClassNames;
 		
+	}
+	
+	//This will test the methods of creating a dataset from arraylist and generate the .arff
+	private static void DatasetQuickWekatest() throws IOException {
+		ArrayList<String> motionAttributes = new ArrayList<String>();
+		ArrayList<String> locationAttributes = new ArrayList<String>();
+		ArrayList<String> classAttributes = new ArrayList<String>();
+		ArrayList<String> features = new ArrayList<String>();
+
+		motionAttributes.add("Mot1");
+		motionAttributes.add("Mot2");
+		locationAttributes.add("Loc1");
+		locationAttributes.add("Loc2");
+		classAttributes.add("A");
+		classAttributes.add("B");
+		classAttributes.add("C");
+		features.add("1,2,3,4,A");
+		features.add("11,22,33,44,B");
+		features.add("111,222,333,444,C");
+					
+		Instances dataset;
+		dataset = WekaMethods.CreateInstanceSet("event", motionAttributes, locationAttributes, classAttributes, features);
+		WekaMethods.Intances2Arff(dataset, "C:\\Users\\LG\\Desktop\\DatasetQuickWekatest.arff");
+	}
+	private static void DatasetQuickLocationWekatest() throws IOException {
+		ArrayList<String> locationAttributes = new ArrayList<String>();
+		ArrayList<String> classAttributes = new ArrayList<String>();
+		ArrayList<String> features = new ArrayList<String>();
+
+		locationAttributes.add("Loc1");
+		locationAttributes.add("Loc2");
+		locationAttributes.add("Loc3");
+		locationAttributes.add("Loc4");
+		classAttributes.add("A");
+		classAttributes.add("B");
+		classAttributes.add("C");
+		features.add("1,2,3,4,A");
+		features.add("11,22,33,44,B");
+		features.add("111,222,333,444,C");
+					
+		Instances dataset;
+		dataset = WekaMethods.CreateLocationInstanceSet("event",locationAttributes, classAttributes, features);
+		WekaMethods.Intances2Arff(dataset, "C:\\Users\\LG\\Desktop\\DatasetQuickLocationWekatest.arff");
 	}
 }
 
