@@ -51,7 +51,7 @@
             android:defaultValue="30"
             android:title="Seconds between detections"
             android:dialogMessage="Please select the seconds to wait between detections:"
-            android:max="600"
+            android:max="900"
             custom:min="5" />
 
     <tudelft.mdp.ui.NumberPickerDialogPreference

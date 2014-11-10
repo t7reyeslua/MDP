@@ -5,11 +5,8 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.NotFoundException;
-import com.google.apphosting.datastore.EntityV4;
 
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.cmd.QueryKeys;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +16,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Named;
 
-import tudelft.mdp.backend.Constants;
+import tudelft.mdp.backend.enums.Constants;
 import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;

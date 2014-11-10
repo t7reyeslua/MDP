@@ -50,7 +50,19 @@ public class DeviceRegistrationAlertDialog extends DialogFragment {
     };
 
     private static final String[] LOCATIONS = new String[] {
-            "Home", "Office"
+            "Home", "Office",
+            "Kitchen",
+            "Shower",
+            "Bathroom",
+            "Toilet",
+            "Laundry room",
+            "Living room",
+            "Bedroom A",
+            "Bedroom B",
+            "Bedroom C",
+            "Bedroom D",
+            "Hall",
+            "Coffee Room"
     };
 
 

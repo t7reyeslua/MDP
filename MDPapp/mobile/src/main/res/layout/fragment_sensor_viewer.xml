@@ -13,6 +13,21 @@
             android:layout_marginRight="12dp"
             android:layout_marginTop="12dp"/>
 
+    <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/scrollView1">
+    <it.gmariotti.cardslib.library.view.CardView
+            android:id="@+id/cardSensorsAvailable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:paddingBottom="8dp"/>
+    </ScrollView>
+
     <it.gmariotti.cardslib.library.view.CardListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -21,6 +36,8 @@
             android:layout_marginTop="5dp"
             android:id="@+id/myList"/>
 
+
+<!--
     <ScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -95,6 +112,6 @@
                     android:text="Gravity" />
         </LinearLayout>
     </ScrollView>
-
+-->
 </LinearLayout>
 

@@ -3,6 +3,7 @@ package tudelft.mdp.ui;
 import com.devspark.robototextview.widget.RobotoTextView;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -68,12 +69,19 @@ public class UserHistoryCard extends Card {
         mZone       = (RobotoTextView) parent.findViewById(R.id.twZone);
 
         String fullTimestamp = String.valueOf(mLocationLogRecord.getTimestamp());
-        String YYYY = fullTimestamp.substring(0,5).replace(".","");
-        String MM   = fullTimestamp.substring(5,7);
-        String dd   = fullTimestamp.substring(7,9);
-        String HH   = fullTimestamp.substring(9,11);
-        String mm   = fullTimestamp.substring(11,13);
-        String ss   = fullTimestamp.substring(13,15);
+        Log.i(TAG, fullTimestamp);
+        String YYYY = fullTimestamp.substring(0,4).replace(".","");
+        Log.i(TAG, YYYY);
+        String MM   = fullTimestamp.substring(4,6);
+        Log.i(TAG, MM);
+        String dd   = fullTimestamp.substring(6,8);
+        Log.i(TAG, dd);
+        String HH   = fullTimestamp.substring(8,10);
+        Log.i(TAG, HH);
+        String mm   = fullTimestamp.substring(10,12);
+        Log.i(TAG, mm);
+        String ss   = fullTimestamp.substring(12,14);
+        Log.i(TAG, ss);
 
         String month = calculateMonth(MM);
 

@@ -8,14 +8,13 @@ import com.google.api.server.spi.response.ConflictException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.ReadPolicy;
 
+import com.googlecode.objectify.Work;
+
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
 
-import tudelft.mdp.backend.Constants;
-import tudelft.mdp.backend.Utils;
-import tudelft.mdp.backend.records.NfcLogRecord;
 import tudelft.mdp.backend.records.NfcRecord;
 
 import static tudelft.mdp.backend.OfyService.ofy;
@@ -94,12 +93,34 @@ public class NfcRecordEndpoint {
 
         LOG.info("Calling increaseNFC method");
 
+        final String recordId = id;
+        NfcRecord nfcRecord = ofy().transact(new Work<NfcRecord>() {
+              @Override
+              public NfcRecord run() {
+                  NfcRecord nr = findRecord(recordId);
+                  if (nr == null){
+                      return null;
+                  }
+
+                  LOG.info("Increasing. Old value: " + nr.getState());
+                  nr.setState(nr.getState()+1);
+                  LOG.info("Increasing. New value: " + nr.getState());
+                  ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nr).now();
+
+                  return nr;
+              }
+          }
+        );
+
+        /*
         NfcRecord nfcRecord = findRecord(id);
         if (findRecord(id) == null) {
             throw new NotFoundException("NFC Record does not exist");
         }
+        LOG.info("Increasing. Old value: " + nfcRecord.getState());
         nfcRecord.setState(nfcRecord.getState()+1);
-        ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nfcRecord).now();
+        LOG.info("Increasing. New value: " + nfcRecord.getState());
+        ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nfcRecord).now();*/
 
         return nfcRecord;
     }
@@ -114,13 +135,36 @@ public class NfcRecordEndpoint {
 
         LOG.info("Calling decreaseNFC method");
 
+        final String recordId = id;
+        NfcRecord nfcRecord = ofy().transact(new Work<NfcRecord>() {
+                                                 @Override
+                                                 public NfcRecord run() {
+                                                     NfcRecord nr = findRecord(recordId);
+                                                     if (nr == null){
+                                                         return null;
+                                                     }
+
+                                                     LOG.info("Decreasing. Old value: " + nr.getState());
+                                                     nr.setState(nr.getState()-1);
+                                                     LOG.info("Decreasing. New value: " + nr.getState());
+                                                     ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nr).now();
+
+                                                     return nr;
+                                                 }
+                                             }
+        );
+
+        /*
         NfcRecord nfcRecord = findRecord(id);
         if (findRecord(id) == null) {
             throw new NotFoundException("NFC Record does not exist");
         }
-        nfcRecord.setState(nfcRecord.getState()-1);
-        ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nfcRecord).now();
 
+        LOG.info("Decreasing. Old value: " + nfcRecord.getState());
+        nfcRecord.setState(nfcRecord.getState()-1);
+        LOG.info("Decreasing. New value: " + nfcRecord.getState());
+
+        ofy().consistency(ReadPolicy.Consistency.STRONG).save().entity(nfcRecord).now();*/
 
         return nfcRecord;
     }

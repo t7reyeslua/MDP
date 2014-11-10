@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="darker_gray">#aaa</color>
     <color name="card_base_cardwithlist_background_list_color">#FFFF</color>
     <color name="SpecialRed">#fc6767</color>
     <color name="SpecialGray">#e0181818</color>

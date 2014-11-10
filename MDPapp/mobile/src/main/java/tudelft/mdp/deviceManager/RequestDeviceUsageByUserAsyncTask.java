@@ -46,12 +46,12 @@ public class RequestDeviceUsageByUserAsyncTask extends AsyncTask<Object, Void, B
             mDeviceLogEndpointService = builder.build();
         }
 
-        Double maxDate = Double.valueOf(Utils.getCurrentTimestamp());
-        Double minDate = Utils.getMinTimestamp(UserPreferences.ALLTIME);
+        String maxDate =Utils.getCurrentTimestamp();
+        String minDate = Utils.getMinTimestamp(UserPreferences.ALLTIME);
 
 
         try {
-            Log.e(TAG, "Requesting device usage (" + nfcTag +") by user " + username);
+            Log.e(TAG, "Requesting device usage (" + nfcTag +") by user " + username + "from min:" + minDate + " to max:" + maxDate);
             result  = mDeviceLogEndpointService.getUserStatsOfDevice(maxDate, minDate, nfcTag, username).execute().getItems();
 
             if (result.size() >= 0) {

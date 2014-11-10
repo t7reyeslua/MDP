@@ -39,6 +39,7 @@ public class ListenerService extends WearableListenerService {
 
         DataMap dataMap;
         for (DataEvent event : dataEvents) {
+
             if (event.getType() == DataEvent.TYPE_CHANGED) {
                 dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
                 Log.v(LOGTAG, "DataMap received from watch: " + dataMap);

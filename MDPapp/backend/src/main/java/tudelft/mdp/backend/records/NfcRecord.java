@@ -11,8 +11,11 @@ public class NfcRecord {
     @Id
     private String nfcId;
 
+    @Index
     private String type;
+    @Index
     private String description;
+    @Index
     private Integer state;
     @Index
     private String Location;

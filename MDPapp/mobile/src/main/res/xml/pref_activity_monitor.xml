@@ -8,4 +8,10 @@
             android:max="12"
             custom:min="1" />
 
+    <CheckBoxPreference
+            android:key="@string/sensors_consolidated"
+            android:title="Consolidate sensors records"
+            android:summary="Save all sensors values in a single record"
+            android:defaultValue="true" />
+
 </PreferenceScreen>

@@ -84,7 +84,7 @@ public class LocationEstimator {
      */
     public HashMap<String,Double> calculateLocationBayessian(){
 
-        Log.i(LOGTAG, "calculateLocationBayessian");
+        //Log.i(LOGTAG, "calculateLocationBayessian");
         consolidateNetworkScans();
         sortNetworksByRSSI();
         //ignoreUnknownNetworks();
@@ -106,7 +106,7 @@ public class LocationEstimator {
      */
     public ArrayList<HashMap<String,Double>> calculateLocationBayessian_IntermediatePMFs(){
 
-        Log.i(LOGTAG, "calculateLocationBayessian_IntermediatePMFs");
+        //Log.i(LOGTAG, "calculateLocationBayessian_IntermediatePMFs");
         consolidateNetworkScans();
         sortNetworksByRSSI();
         //ignoreUnknownNetworks();
@@ -140,7 +140,7 @@ public class LocationEstimator {
      */
     public void consolidateNetworkScans(){
 
-        Log.i(LOGTAG, "consolidateNetworkScans");
+        //Log.i(LOGTAG, "consolidateNetworkScans");
         for (ArrayList<NetworkInfoObject> networkScanArray : mNetworkScansRaw){
 
             for(NetworkInfoObject networkInfoObject : networkScanArray){
@@ -191,7 +191,7 @@ public class LocationEstimator {
      */
     public void sortNetworksByRSSI(){
 
-        Log.i(LOGTAG, "sortNetworksByRSSI");
+        //Log.i(LOGTAG, "sortNetworksByRSSI");
         Collections.sort(mNetworkScans, new Comparator<NetworkInfoObject>() {
             @Override
             public int compare(NetworkInfoObject item1, NetworkInfoObject item2) {
@@ -236,7 +236,7 @@ public class LocationEstimator {
                 if (scannedNetwork.getBSSID().equals(apGaussianRecord.getBssid())){
                     //This apGaussianRecord hold information from this network
 
-                    Log.i(LOGTAG, "determineCurrentPlace: " + currentPlace);
+                    //Log.i(LOGTAG, "determineCurrentPlace: " + currentPlace);
                     currentPlace = apGaussianRecord.getPlace();
                     return apGaussianRecord.getPlace();
                 }
@@ -244,7 +244,7 @@ public class LocationEstimator {
         }
 
 
-        Log.i(LOGTAG, "determineCurrentPlace: " + "UNKNOWN");
+        //Log.i(LOGTAG, "determineCurrentPlace: " + "UNKNOWN");
         //You are in an unknown place
         return null;
     }
@@ -262,7 +262,7 @@ public class LocationEstimator {
 
         String currentPlace = determineCurrentPlace();
 
-        Log.i(LOGTAG, "determineExistingZones: " + currentPlace);
+        //Log.i(LOGTAG, "determineExistingZones: " + currentPlace);
         if (currentPlace != null) {
             for (ApGaussianRecord apGaussianRecord : mGaussianRecords) {
                 if (apGaussianRecord.getPlace().equals(currentPlace)) {
@@ -277,7 +277,7 @@ public class LocationEstimator {
      */
     public void setInitialBelief(){
 
-        Log.i(LOGTAG, "setInitialBelief");
+        //Log.i(LOGTAG, "setInitialBelief");
         Double numberOfZones = (double) pmf.size();
         if (pmf.size() > 0) {
             Double initialProbability = 1.0 / numberOfZones;
@@ -297,7 +297,7 @@ public class LocationEstimator {
     public void calculatePMFofZones(){
 
 
-        Log.i(LOGTAG, "calculatePMFofZones");
+        //Log.i(LOGTAG, "calculatePMFofZones");
         //Use each scanned network to calculate the probabilities of the zones (rooms)
         for (NetworkInfoObject scannedNetwork : mNetworkScans){
 
@@ -410,7 +410,7 @@ public class LocationEstimator {
         int index = -1;
 
 
-        Log.i(LOGTAG, "getPmfWithHighestProbability");
+        //Log.i(LOGTAG, "getPmfWithHighestProbability");
         for (int i = 0; i < pmfIntermediateResults.size(); i++){
             HashMap<String,Double> intermediatePMFresult = pmfIntermediateResults.get(i);
             for (Double probability : intermediatePMFresult.values()){
@@ -420,7 +420,7 @@ public class LocationEstimator {
                 }
             }
             if (max > 0.9){
-                Log.e(LOGTAG, "Stopped at pmf no. " + index);
+                //Log.e(LOGTAG, "Stopped at pmf no. " + index);
                 break;
             }
         }
@@ -451,7 +451,7 @@ public class LocationEstimator {
      */
     public static HashMap<String, Double> sortByProbability(HashMap<String, Double> unsortedMap) {
 
-        Log.i(LOGTAG, "sortByProbability");
+        //Log.i(LOGTAG, "sortByProbability");
         // Convert Map to List
         List<Map.Entry<String, Double>> list =
                 new LinkedList<Map.Entry<String, Double>>(unsortedMap.entrySet());

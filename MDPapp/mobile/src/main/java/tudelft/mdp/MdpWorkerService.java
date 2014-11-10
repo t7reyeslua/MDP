@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,21 +45,31 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcRecord;
+import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.DeviceMotionLocationRecord;
+import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.Text;
+import tudelft.mdp.backend.endpoints.locationLogEndpoint.model.LocationLogRecord;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
+import tudelft.mdp.deviceManager.RequestUserActiveDevicesAsyncTask;
+import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.locationTracker.LocationEstimator;
 import tudelft.mdp.locationTracker.NetworkInfoObject;
 import tudelft.mdp.locationTracker.NetworkScanService;
 import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
+import tudelft.mdp.locationTracker.UploadCurrentLocationAsyncTask;
+import tudelft.mdp.utils.Utils;
+import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
 import tudelft.mdp.weka.WekaNetworkScansObject;
 import tudelft.mdp.weka.WekaSensorsRawDataObject;
 
 public class MdpWorkerService extends Service implements
         ServiceConnection,
         RequestGaussiansAsyncTask.RequestGaussiansAsyncResponse,
+        RequestUserActiveDevicesAsyncTask.RequestUserActiveDevicesAsyncResponse,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -79,14 +90,20 @@ public class MdpWorkerService extends Service implements
     public static final int MSG_TEST = 20;
     public static final int MSG_LOCATION_STEP_BY_STEP = 21;
     public static final int MSG_LOCATION_GAUSSIANS = 22;
+    public static final int MSG_LOG = 23;
 
     public static final String ARG_TEST = "TEST";
     public static final String ARG_SCHEDULE_NEXT = "SCHEDULE NEXT";
     public static final String ARG_LOCATION_ACQUIRED = "LOCATION ACQUIRED";
+    public static final String ARG_LOG = "LOG DATA";
     public static final String ARG_LOCATION_STEP_BY_STEP = "LOCATION STEP BY STEP";
     public static final String ARG_LOCATION_GAUSSIANS = "LOCATION GAUSSIANS";
 
-    private String locationCalculated;
+    private String logData = "";
+    private String placeOfLocation = "";
+    private String locationCalculated = "";
+    private String lastLocation = "";
+    private String lastLocationTimestamp = "";
     private boolean mLocationRequestedByTimeTick = false;
     private boolean mLocationRequestedByBroadcast = false;
     private boolean mLocationRequestedByLocatorStepByStep = false;
@@ -107,6 +124,7 @@ public class MdpWorkerService extends Service implements
     private boolean dataCompleteMotion;
     private boolean dataCompleteLocation;
     private String deviceEvent;
+    private int msgCount = 0;
     private Timer mTimerDetection = new Timer();
     private Timer mTimerMotion = new Timer();
 
@@ -115,6 +133,9 @@ public class MdpWorkerService extends Service implements
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansTimerTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScansBroadcastTick = new ArrayList<ArrayList<NetworkInfoObject>>();
     private ArrayList<ApGaussianRecord> mGaussianRecords = new ArrayList<ApGaussianRecord>();
+
+    private HashMap<Integer, ArrayList<String>> mRecordedSensors = new HashMap<Integer, ArrayList<String>>();
+    private Integer currentlyReceivingSensor;
 
     PowerManager pm;
     WifiManager wm;
@@ -152,6 +173,7 @@ public class MdpWorkerService extends Service implements
         int scanWindow = sharedPrefs.getInt(UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS, 30);
         mTimerDetection.scheduleAtFixedRate(new DetectLocationTick(), 0, scanWindow * 1000);
 
+        v = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
         updateGaussians();
 
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -164,8 +186,9 @@ public class MdpWorkerService extends Service implements
         wifiLock.acquire();
         Log.e(LOGTAG,"WifiLock Acquired");
 
-
     }
+
+
 
     @Override
     public void onDestroy() {
@@ -204,29 +227,9 @@ public class MdpWorkerService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOGTAG, "Received start id " + startId + ": " + intent);
-        //startNotification();
-
         return START_STICKY; // Run until explicitly stopped.
     }
 
-    private void startNotification(){
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
-
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("MDP")
-                .setContentText("Application is running")
-                .setSmallIcon(R.drawable.plug128)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true).build();
-
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        mNotificationManager.notify(7777, notification);
-        //startForeground(7777, notification);
-    }
 
 
     @Override
@@ -412,6 +415,30 @@ public class MdpWorkerService extends Service implements
         dataMap.putInt(MessagesProtocol.SENDER, MessagesProtocol.ID_MOBILE);
         dataMap.putInt(MessagesProtocol.MSGTYPE, msgType);
         dataMap.putString(MessagesProtocol.MESSAGE, message);
+        dataMap.putDouble(MessagesProtocol.TIMESTAMP, System.currentTimeMillis());
+
+        if (msgType.equals(MessagesProtocol.STARTSENSING)){
+            ArrayList<Integer> mSensorListToRecord = new ArrayList<Integer>();
+            mSensorListToRecord.add(Sensor.TYPE_ACCELEROMETER);
+            mSensorListToRecord.add(Sensor.TYPE_GYROSCOPE);
+            mSensorListToRecord.add(Sensor.TYPE_MAGNETIC_FIELD);
+            mSensorListToRecord.add(Sensor.TYPE_LINEAR_ACCELERATION);
+            mSensorListToRecord.add(Constants.SAMSUNG_TILT);
+            mSensorListToRecord.add(Sensor.TYPE_ROTATION_VECTOR);
+
+            Double hz = 50.0;
+            Integer duration = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
+
+            Boolean consolidated = PreferenceManager
+                    .getDefaultSharedPreferences(this)
+                    .getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+
+            dataMap.putBoolean(MessagesProtocol.SENSORSCONSOLIDATED, consolidated);
+
+            dataMap.putDouble(MessagesProtocol.SENSORHZ, hz);
+            dataMap.putInt(MessagesProtocol.SENSOR_RECORDING_SECONDS, duration);
+            dataMap.putIntegerArrayList(MessagesProtocol.SENSORSTORECORD, mSensorListToRecord);
+        }
 
         new SendDataSyncThread(mGoogleApiClient, MessagesProtocol.DATAPATH, dataMap).start();
     }
@@ -426,16 +453,36 @@ public class MdpWorkerService extends Service implements
         Integer msgType = Integer.valueOf(parts[0]);
         String msgLoad = parts[1];
 
+
+
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
-                Log.w(LOGTAG,"Start sensor streaming from wear");
+                currentlyReceivingSensor = Integer.valueOf(msgLoad);
+                msgCount = 0;
+                Log.w(LOGTAG,"Start sensor streaming from wear: " + Utils.getSensorName(currentlyReceivingSensor) + " Records Count:" + msgCount);
+                break;
+            case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
+                Log.w(LOGTAG, msgLoad);
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
                 Log.i(LOGTAG, msgLoad);
                 mSensorReadings.add(msgLoad);
+                msgCount++;
                 break;
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
-                Log.w(LOGTAG,"Stop sensor streaming from wear");
+                ArrayList<String> recordedSensor = new ArrayList<String>(mSensorReadings);
+                mSensorReadings.clear();
+                mRecordedSensors.put(currentlyReceivingSensor, recordedSensor);
+
+                Log.w(LOGTAG, "Stop sensor streaming from wear: " + Utils.getSensorName(currentlyReceivingSensor)
+                        + " Records Count:" + msgCount
+                        + " mSensorReadings:" + mSensorReadings.size()
+                        + " mRecordedSensors:" + mRecordedSensors.get(currentlyReceivingSensor).size());
+                msgCount = 0;
+                break;
+
+            case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
+                Log.w(LOGTAG,"Stop sensor service from wear: SENDSENSEORSNAPSHOT_END");
                 sendNotificationToWear(MessagesProtocol.STOPSENSINGSERVICE);
                 dataCompleteMotion = true;
                 consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
@@ -474,53 +521,135 @@ public class MdpWorkerService extends Service implements
 
     }
 
+    /**
+     * Estimate the most probable location using the scans done
+     * @param mNetworkScans input
+     */
     private void estimateLocation(ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans){
         LocationEstimator locationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
         HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
 
+        placeOfLocation = locationEstimator.determineCurrentPlace();
+        Double locationProbability = getProbabilityOfEstimatedLocation(pmf);
+        saveEstimatedLocationToDB(placeOfLocation, locationProbability);
+
+        sendMessageToUI(MSG_LOCATION_ACQUIRED);
+
+        RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
+        requestUserActiveDevicesAsyncTask.delegate = this;
+        requestUserActiveDevicesAsyncTask.execute(
+                sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+
+    }
+
+    /**
+     * getProbabilityOfEstimatedLocation
+     * @param pmf with estimated probability of each zone
+     * @return probability
+     */
+    private Double getProbabilityOfEstimatedLocation(HashMap<String, Double> pmf){
         int i  = 0;
         locationCalculated = "";
+        Double locationProbability = 0.0;
         if (pmf != null) {
             for (String zone : pmf.keySet()) {
                 if (i < pmf.size() && i < 3) {
                     if (locationCalculated.length() == 0) {
                         locationCalculated = zone;
+                        locationProbability = pmf.get(zone);
                     }
                     Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
-                    // TODO : Save 3 highest values in DB
                     i++;
                 } else {
                     break;
                 }
             }
         }
+        return locationProbability;
+    }
 
-        if (locationEstimator.calculateLocationBayessian_IntermediatePMFs() != null){
-            i = 0;
-            for (HashMap<String, Double> intPmf : locationEstimator.calculateLocationBayessian_IntermediatePMFs()){
-                Log.e(LOGTAG, "Network " + (i++));
-                String zone = getHighest(intPmf);
-                if (zone.length() > 0) {
-                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + intPmf.get(zone));
-                }
+    /**
+     * Saves the estimated location to DB if it is different from the last estimated one.
+     * @param placeOfLocation Home/Office, etc.
+     * @param locationProbability 0..1
+     */
+    private void saveEstimatedLocationToDB(String placeOfLocation, Double locationProbability){
+        if (!locationCalculated.equals(lastLocation)) {
+            String timestamp = Utils.getCurrentTimestamp();
+            LocationLogRecord locationLogRecord = new LocationLogRecord();
+
+            locationLogRecord.setTimestamp(timestamp);
+            locationLogRecord.setZone(locationCalculated);
+            locationLogRecord.setPlace(placeOfLocation);
+            locationLogRecord.setProbability(locationProbability);
+            locationLogRecord.setMode(Constants.LOC_BAYESSIAN);
+            locationLogRecord.setUser(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+
+            Log.w(LOGTAG, "Uploading current location to DB:" + locationCalculated + "|" + locationProbability);
+            new UploadCurrentLocationAsyncTask().execute(locationLogRecord);
+
+            lastLocation = locationCalculated;
+            lastLocationTimestamp = timestamp;
+        }
+    }
+
+    /**
+     * Checks if the user has active devices in places different from the current place where he is.
+     * @param outputList list of active devices of the user
+     */
+    public void processFinishRequestUserActiveDevices(List<NfcRecord> outputList){
+        ArrayList<String> guiltyDevices = new ArrayList<String>();
+        String message = "You have turned on devices in other locations.";
+        guiltyDevices.add(message);
+
+        for (NfcRecord device : outputList){
+            if (!device.getLocation().toLowerCase().equals(locationCalculated.toLowerCase())){
+                Log.i(LOGTAG, "Guilty:" + device.getType() + " at " + device.getLocation());
+                guiltyDevices.add(device.getType() + " at " + device.getLocation());
+            } else {
+                Log.i(LOGTAG, "OK:" + device.getType() + " at " + device.getLocation());
             }
         }
 
-
-
-    }
-
-    public String getHighest(HashMap<String, Double> intPmf){
-        Double max = 0.0;
-        String zoneMax = "";
-        for (String zone : intPmf.keySet()){
-            if (intPmf.get(zone) > max){
-                max = intPmf.get(zone);
-                zoneMax = zone;
-            }
+        if (guiltyDevices.size() > 1) {
+            startNotification(7777, message, guiltyDevices);
         }
-        return zoneMax;
     }
+
+
+    private void startNotification(int id, String mesage, ArrayList<String> events){
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
+        NotificationCompat.Builder  mBuilder =
+                new NotificationCompat.Builder(this);
+
+        mBuilder.setContentTitle("MDP")
+                .setContentText(mesage)
+                .setSmallIcon(R.drawable.plug128)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        if (events != null) {
+            /* Add Big View Specific Configuration */
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+
+            // Sets a title for the Inbox style big view
+            inboxStyle.setBigContentTitle("MDP");
+            // Moves events into the big view
+            for (String event : events) {
+                inboxStyle.addLine(event);
+            }
+            mBuilder.setStyle(inboxStyle);
+        }
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(id, mBuilder.build());
+    }
+
 
 
     /**
@@ -623,6 +752,12 @@ public class MdpWorkerService extends Service implements
         mLocationRequestedByLocatorStepByStep = true;
     }
 
+
+
+
+
+
+
     //Timer Tasks***********************************************************************************
 
     /**
@@ -654,8 +789,7 @@ public class MdpWorkerService extends Service implements
             Log.w(LOGTAG, "MotionWearTick");
             try {
                 if (motionTickDone){
-                    sendDataMapToWear(MessagesProtocol.STOPSENSING,
-                            "STOP: MOTION DATA REQUESTED BY MOBILE");
+                    //sendDataMapToWear(MessagesProtocol.STOPSENSING,   "STOP: MOTION DATA REQUESTED BY MOBILE");
 
                     Log.i(LOGTAG, "Stop Motion Tick.");
                     this.cancel();
@@ -672,6 +806,10 @@ public class MdpWorkerService extends Service implements
     }
 
 
+
+
+
+
     //Motion-Location *********************************************************************
     /**
      * consolidateMotionLocationData
@@ -683,23 +821,63 @@ public class MdpWorkerService extends Service implements
 
         Log.w(LOGTAG, "consolidateMotionLocationData");
         if (isDataCompleteLocation && isDataCompleteMotion){
-            //TODO Save/upload both data sets
+            if (v != null) {
+                v.vibrate(500);
+            }
 
             Log.w(LOGTAG, "Data and Motion Completed");
             WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(mNetworkScansBroadcastTick);
-            WekaSensorsRawDataObject wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
+            WekaSensorsRawDataObject wekaSensorsRawDataObject;
+            Boolean consolidated = sharedPrefs.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+            if (consolidated) {
+                wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mSensorReadings);
+            } else {
+                wekaSensorsRawDataObject = new WekaSensorsRawDataObject(mRecordedSensors);
 
-            boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, false);
+                for (Integer t : mRecordedSensors.keySet()){
+                    Log.i(LOGTAG, "Array: " + Utils.getSensorName(t) + " size: " + mRecordedSensors.get(t).size());
+                }
+            }
+
+            uploadFeaturesToDB(wekaNetworkScansObject, wekaSensorsRawDataObject);
+
+            boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, true);
             if (trainingPhase){
-                if (wekaSensorsRawDataObject.getSensorReadings().size() > 0) {
-                    wekaSensorsRawDataObject.saveToFile(deviceEvent);
-                }
-                if (wekaNetworkScansObject.getNetworkScans().size() > 0) {
-                    wekaNetworkScansObject.saveToFile(deviceEvent);
-                }
+                wekaSensorsRawDataObject.saveToFile(deviceEvent, consolidated);
+                wekaNetworkScansObject.saveToFile(deviceEvent);
             }
         }
 
+    }
+
+    /**
+     * Uploads the sensed data to DB
+     * @param wekaNetworkScansObject location features
+     * @param wekaSensorsRawDataObject motion features
+     */
+    private void uploadFeaturesToDB(WekaNetworkScansObject wekaNetworkScansObject, WekaSensorsRawDataObject wekaSensorsRawDataObject){
+        Log.i(LOGTAG, "uploadFeaturesToDB:" + deviceEvent);
+        //TODO Save/upload both data sets
+        Boolean consolidated = sharedPrefs.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
+        String[] parts = deviceEvent.split("_");
+        String deviceId = parts[0];
+        String deviceType = parts[1];
+        String timestamp = parts[2];
+        Text motionFeatures = new Text();
+        Text locationFeatures = new Text();
+        motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
+        locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
+
+        DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
+        deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+        deviceMotionLocationRecord.setEvent(deviceEvent);
+        deviceMotionLocationRecord.setDeviceType(deviceType);
+        deviceMotionLocationRecord.setDeviceId(deviceId);
+        deviceMotionLocationRecord.setTimestamp(timestamp);
+        deviceMotionLocationRecord.setMotionFeatures(motionFeatures);
+        deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
+
+        new UploadMotionLocationFeaturesAsyncTask().execute(this.getApplicationContext(), deviceMotionLocationRecord);
     }
 
     /**
@@ -710,6 +888,10 @@ public class MdpWorkerService extends Service implements
 
         Log.i(LOGTAG, "Start Motion Location Data Recollection by BROADCAST.");
 
+        msgCount = 0;
+        if (v != null) {
+            v.vibrate(500);
+        }
 
         dataCompleteLocation = false;
         dataCompleteMotion = true;
@@ -733,8 +915,15 @@ public class MdpWorkerService extends Service implements
         numScansCountForMotionLocation = 0;
 
         mSensorReadings.clear();
+        mRecordedSensors.clear();
         mNetworkScansBroadcastTick.clear();
     }
+
+
+
+
+
+
 
 
     //Communication interaction routines with other services and threads****************************
@@ -781,7 +970,7 @@ public class MdpWorkerService extends Service implements
                         messenger.send(msg);
                         break;
                     case MSG_LOCATION_ACQUIRED:
-                        bundle.putString(ARG_LOCATION_ACQUIRED, locationCalculated);
+                        bundle.putString(ARG_LOCATION_ACQUIRED, placeOfLocation + "|" + locationCalculated);
                         msg = Message.obtain(null, MSG_LOCATION_ACQUIRED);
                         msg.setData(bundle);
                         messenger.send(msg);
@@ -795,6 +984,12 @@ public class MdpWorkerService extends Service implements
                     case MSG_LOCATION_GAUSSIANS:
                         bundle.putSerializable(ARG_LOCATION_GAUSSIANS, mGaussianRecords);
                         msg = Message.obtain(null, MSG_LOCATION_GAUSSIANS);
+                        msg.setData(bundle);
+                        messenger.send(msg);
+                        break;
+                    case MSG_LOG:
+                        bundle.putSerializable(ARG_LOG, logData);
+                        msg = Message.obtain(null, MSG_LOG);
                         msg.setData(bundle);
                         messenger.send(msg);
                         break;

@@ -111,6 +111,9 @@ public class GcmIntentService extends IntentService {
                 messageIntent.putExtra(MessagesProtocol.MESSAGE, msgLoad);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
                 break;
+            case MessagesProtocol.SENDGCM_CMD_KEEPGCMALIVE:
+                Log.i(LOGTAG, "CMD received from GCM: " + MessagesProtocol.KEEPGCMALIVE);
+                break;
             default:
                 showToast(msgLoad);
                 break;

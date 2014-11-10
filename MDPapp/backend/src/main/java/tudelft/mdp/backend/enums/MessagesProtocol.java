@@ -1,4 +1,4 @@
-package tudelft.mdp.backend;
+package tudelft.mdp.backend.enums;
 
 /**
  * Created by t7 on 9-10-14.
@@ -48,6 +48,7 @@ public class MessagesProtocol {
     public static final int SENDGCM_CMD_LOCATION = 3002;
     public static final int SENDGCM_CMD_MOTIONLOCATION = 3003;
     public static final int SENDGCM_CMD_UPDATEGAUSSIANS = 4000;
+    public static final int SENDGCM_CMD_KEEPGCMALIVE = 5000;
 
     /* MSG Payloads */
     //Data Bundle

@@ -24,6 +24,8 @@ public class UserPreferences {
     public static final String TIME_BETWEEN_LOCATION_DETECTIONS = "TIME_BETWEEN_LOCATION_DETECTIONS";
     public static final String ALPHA_TRIMMER_COEFFICIENT = "ALPHA_TRIMMER_COEFFICIENT";
     public static final String MOTION_SAMPLE_SECONDS = "MOTION_SAMPLE_SECONDS";
+    public static final String TARGET_KWH_GROUP = "TARGET_KWH_GROUP";
+    public static final String TARGET_KWH_INDIVIDUAL = "TARGET_KWH_INDIVIDUAL";
 
     public static final String SCANSAMPLES = "SCANS_PER_SAMPLE";
 
@@ -33,8 +35,8 @@ public class UserPreferences {
     public static final Integer TODAY = 0;
     public static final Integer WEEK = 1;
     public static final Integer MONTH = 2;
-    public static final Integer YEAR = 2;
-    public static final Integer ALLTIME = 3;
+    public static final Integer YEAR = 3;
+    public static final Integer ALLTIME = 4;
 
     public static double ALPHA_TRIMMER_COEFF_VALUE = 0.2;
     public static int CALIBRATION_NUM_SCANS = 10;

@@ -1,13 +1,12 @@
 package tudelft.mdp.backend.records;
 
+import com.google.appengine.api.datastore.Text;
+
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @Entity
 public class DeviceMotionLocationRecord {
@@ -16,15 +15,73 @@ public class DeviceMotionLocationRecord {
     private Long id;
 
     @Index
+    private String username;
+
+    @Index
+    private String event;
+
+    @Index
+    private String deviceType;
+
+    @Index
     private String deviceId;
 
     @Index
-    private String deviceName;
+    private String timestamp;
 
-    ArrayList<String> sensorValues = new ArrayList<String>();
-    ArrayList<String> networkValues = new ArrayList<String>();
+    private Text motionFeatures;
+    private Text locationFeatures;
+
 
     public DeviceMotionLocationRecord() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEvent() {
+        return event;
+    }
+
+    public void setEvent(String event) {
+        this.event = event;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Text getMotionFeatures() {
+        return motionFeatures;
+    }
+
+    public void setMotionFeatures(Text motionFeatures) {
+        this.motionFeatures = motionFeatures;
+    }
+
+    public Text getLocationFeatures() {
+        return locationFeatures;
+    }
+
+    public void setLocationFeatures(Text locationFeatures) {
+        this.locationFeatures = locationFeatures;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     public String getDeviceId() {
@@ -33,29 +90,5 @@ public class DeviceMotionLocationRecord {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
-    }
-
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
-
-    public ArrayList<String> getSensorValues() {
-        return sensorValues;
-    }
-
-    public void setSensorValues(ArrayList<String> sensorValues) {
-        this.sensorValues = sensorValues;
-    }
-
-    public ArrayList<String> getNetworkValues() {
-        return networkValues;
-    }
-
-    public void setNetworkValues(ArrayList<String> networkValues) {
-        this.networkValues = networkValues;
     }
 }

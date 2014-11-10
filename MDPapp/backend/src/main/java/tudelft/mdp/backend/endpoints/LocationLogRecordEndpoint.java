@@ -36,7 +36,7 @@ public class LocationLogRecordEndpoint {
 
         LOG.info("Calling insertLocationLogRecord method");
 
-        locationLogRecord.setTimestamp(Double.valueOf(Utils.getCurrentTimestamp()));
+        locationLogRecord.setTimestamp(Utils.getCurrentTimestamp());
         ofy().save().entity(locationLogRecord).now();
 
         return locationLogRecord;
@@ -47,7 +47,7 @@ public class LocationLogRecordEndpoint {
 
         LOG.info("Calling insertLocationLogRecordTimestamp method");
 
-        locationLogRecord.setTimestamp(Double.valueOf(timestamp));
+        locationLogRecord.setTimestamp(timestamp);
         ofy().save().entity(locationLogRecord).now();
 
         return locationLogRecord;
@@ -59,7 +59,7 @@ public class LocationLogRecordEndpoint {
         LOG.info("Calling getServerTimestamp method");
 
         LocationLogRecord locationLogRecord = new LocationLogRecord();
-        locationLogRecord.setTimestamp(Double.valueOf(Utils.getCurrentTimestamp()));
+        locationLogRecord.setTimestamp(Utils.getCurrentTimestamp());
 
         return locationLogRecord;
     }
@@ -86,8 +86,8 @@ public class LocationLogRecordEndpoint {
     @ApiMethod(name = "listLocationLogByUserDate", path = "list_location_user_date")
     public CollectionResponse<LocationLogRecord> listLocationLogByUserDate(
             @Named("user") String user,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByUserDate method");
 

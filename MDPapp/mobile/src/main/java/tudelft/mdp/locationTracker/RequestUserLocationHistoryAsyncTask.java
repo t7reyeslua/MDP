@@ -46,8 +46,8 @@ public class RequestUserLocationHistoryAsyncTask extends AsyncTask<Object, Void,
             mLocationLogEndpointService = builder.build();
         }
 
-        Double maxDate = Double.valueOf(Utils.getCurrentTimestamp());
-        Double minDate = Utils.getMinTimestamp(UserPreferences.ALLTIME);
+        String maxDate = Utils.getCurrentTimestamp();
+        String minDate = Utils.getMinTimestamp(UserPreferences.WEEK);
 
 
         try {

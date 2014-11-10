@@ -2,6 +2,7 @@ package tudelft.mdp.ui;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.text.DecimalFormat;
 
@@ -181,6 +182,7 @@ public class DeviceCardBuilder {
         int seconds = (int ) (timeInSeconds % 60);
 
         result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        Log.w("MDP-DeviceCardBuilder", "original=" + timeInSeconds + " result=" + result);
         return result;
     }
 

@@ -12,6 +12,7 @@
                 tudelft.mdp.backend.endpoints.NfcLogRecordEndpoint,
                 tudelft.mdp.backend.endpoints.LocationLogRecordEndpoint,
                 tudelft.mdp.backend.endpoints.RadioMapFingerprintEndpoint,
+                tudelft.mdp.backend.endpoints.EnergyConsumptionRecordEndpoint,
                 tudelft.mdp.backend.endpoints.DeviceMotionLocationRecordEndpoint
             </param-value>
         </init-param>
@@ -37,6 +38,25 @@
         <servlet-name>KeepAliveGcmCronServlet</servlet-name>
         <url-pattern>/cron/keepAliveGCM</url-pattern>
     </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>CalculateDailyEnergyConsumptionCronServlet</servlet-name>
+        <servlet-class>tudelft.mdp.backend.cron.CalculateDailyEnergyConsumptionCronServlet</servlet-class>
+        <init-param>
+            <param-name>services</param-name>
+            <param-value>
+                tudelft.mdp.backend.endpoints.NfcLogRecordEndpoint,
+                tudelft.mdp.backend.endpoints.EnergyConsumptionRecordEndpoint
+            </param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CalculateDailyEnergyConsumptionCronServlet</servlet-name>
+        <url-pattern>/cron/calculateDailyEnergyConsumption</url-pattern>
+    </servlet-mapping>
+
 
 
 
