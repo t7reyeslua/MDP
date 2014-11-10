@@ -30,7 +30,8 @@ public class DeviceRegistrationAsyncTask extends AsyncTask<Object, Void, Boolean
         String deviceType          = (String)  params[1];
         String deviceDescription   = (String)  params[2];
         String deviceLocation      = (String)  params[3];
-        context                    = (Context) params[4];
+        String devicePlace         = (String)  params[4];
+        context                    = (Context) params[5];
 
 
         if (mDeviceEndpointService == null) {
@@ -46,6 +47,7 @@ public class DeviceRegistrationAsyncTask extends AsyncTask<Object, Void, Boolean
             mDeviceInfo.setType(deviceType);
             mDeviceInfo.setDescription(deviceDescription);
             mDeviceInfo.setLocation(deviceLocation);
+            mDeviceInfo.setPlace(devicePlace);
 
             Log.e(TAG, "Calling mDeviceEndpointService.insertDevice");
             mDeviceEndpointService.insertDevice(mDeviceInfo).execute();

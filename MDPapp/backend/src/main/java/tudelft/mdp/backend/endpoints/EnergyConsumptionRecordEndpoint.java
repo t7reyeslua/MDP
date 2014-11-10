@@ -5,6 +5,8 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 
+import com.googlecode.objectify.ObjectifyFactory;
+
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -57,6 +59,7 @@ public class EnergyConsumptionRecordEndpoint {
             @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listEnergyRecordsByUserDate method for " + user  );
+        ofy().factory().begin();
 
         List<EnergyConsumptionRecord> records= ofy().load().type(EnergyConsumptionRecord.class)
                 .filter("username", user)

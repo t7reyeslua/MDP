@@ -18,7 +18,9 @@ import com.androidplot.xy.PointLabelFormatter;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
+import com.androidplot.xy.XYStepMode;
 import com.devspark.robototextview.widget.RobotoTextView;
+import com.etsy.android.grid.ExtendableListView;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -236,7 +238,7 @@ public class DashboardFragment extends Fragment implements
         plot.setTicksPerRangeLabel(2);
         plot.setRangeLowerBoundary(0, BoundaryMode.FIXED);
         plot.getGraphWidget().setGridPadding(30, 10, 30, 0);
-        plot.setTicksPerDomainLabel(3);
+        //plot.setTicksPerDomainLabel(5);
 
         plot.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -269,7 +271,7 @@ public class DashboardFragment extends Fragment implements
             String MM   = fullTimestamp.substring(4,6);
             String dd   = fullTimestamp.substring(6,8);
             labels.add(MM +"-" + dd);
-            
+
             // TODO: remove this
             if (energyConsumptionRecord.getGroupEnergy() == 22532.0){
                 energyConsumptionRecord.setGroupEnergy(75.0);
@@ -323,6 +325,8 @@ public class DashboardFragment extends Fragment implements
                 return java.util.Arrays.asList(xLabels).indexOf(string);
             }
         });
+
+        plot.setDomainStep(XYStepMode.SUBDIVIDE, labels.size());
 
         plot.setRangeTopMin(0);
         plot.redraw();
@@ -392,6 +396,7 @@ public class DashboardFragment extends Fragment implements
 
         mExpandableListUsers = (ExpandableListView) mCardViewUserRankings.findViewById(R.id.exp_rankings);
         twNoDataUsers = (RobotoTextView) mCardViewUserRankings.findViewById(R.id.empty);
+
     }
 
     private void configureDeviceRankingsCard(){
@@ -415,6 +420,9 @@ public class DashboardFragment extends Fragment implements
         twLocationZone  = (RobotoTextView) mCardViewLocation.findViewById(R.id.twZone);
 
         refreshLocationCard(Utils.getCurrentTimestampMillis(), placeOfLocation, locationCalculated);
+
+
+        mCardViewLocation.setVisibility(View.GONE);
     }
 
     private void refreshLocationCard(String timestamp, String place, String zone){
@@ -445,26 +453,74 @@ public class DashboardFragment extends Fragment implements
         twLog.setText(currentLog + "\n> " + Utils.getCurrentTimestampMillis() + "  " + data);
     }
 
-    private class ExpDrawerGroupClickListener implements ExpandableListView.OnGroupClickListener {
+    private class ExpDrawerGroupClickListenerUsers implements ExpandableListView.OnGroupClickListener {
         @Override
         public boolean onGroupClick(ExpandableListView parent, View v,
                 int groupPosition, long id) {
 
+
+            ViewGroup.LayoutParams layoutParams = parent.getLayoutParams();
+            int n = 0;
+            if (usersTotals != null){
+                int nUsers = usersTotals.get(groupPosition).size() - 1;
+                n = nUsers * 30;
+                Log.w("ExpListUsers", nUsers + "|"+ n + "|"+ layoutParams.height);
+            }
+            n=0;
             if (parent.isGroupExpanded(groupPosition)){
                 parent.collapseGroup(groupPosition);
+                layoutParams.height = layoutParams.height - n;
             }else {
                 parent.expandGroup(groupPosition, true);
+                layoutParams.height = layoutParams.height + n;
             }
+            parent.setLayoutParams(layoutParams);
             return true;
         }
     }
 
+    private class ExpDrawerGroupClickListenerDevices implements ExpandableListView.OnGroupClickListener {
+        @Override
+        public boolean onGroupClick(ExpandableListView parent, View v,
+                int groupPosition, long id) {
+
+
+            ViewGroup.LayoutParams layoutParams = parent.getLayoutParams();
+            int n = 0;
+            if (devicesTotals != null){
+                int nUsers = devicesTotals.get(groupPosition).size();
+                n = nUsers * 40;
+                Log.w("ExpListDevices", nUsers + "|"+ n + "|"+ layoutParams.height);
+            }
+            n=0;
+            if (parent.isGroupExpanded(groupPosition)){
+                parent.collapseGroup(groupPosition);
+                layoutParams.height = layoutParams.height - n;
+            }else {
+                parent.expandGroup(groupPosition, true);
+                layoutParams.height = layoutParams.height + n;
+            }
+            parent.setLayoutParams(layoutParams);
+            return true;
+        }
+    }
     private void updateUsersRankings(){
         setUsersRankingsData();
 
         mExpandableListUsers.setAdapter(new ExpandableListEnergyRanking(rootView.getContext(), groupItemUsers, childItemUsers));
-        mExpandableListUsers.setOnGroupClickListener(new ExpDrawerGroupClickListener());
+        mExpandableListUsers.setOnGroupClickListener(new ExpDrawerGroupClickListenerUsers());
 
+/*
+        ViewGroup.LayoutParams layoutParams = mExpandableListUsers.getLayoutParams();
+        int n = 0;
+        if (usersTotals != null){
+            n = 3 * 40;
+            layoutParams.height = n;
+            Log.w("ExpListUsers INIT", 3 + "|"+ n + "|"+ mExpandableListUsers.getLayoutParams().height);
+            mExpandableListUsers.setLayoutParams(layoutParams);
+            Log.w("ExpListUsers INIT", 3 + "|"+ n + "|"+ mExpandableListUsers.getLayoutParams().height);
+        }
+*/
         mExpandableListUsers.expandGroup(0);
 
     }
@@ -473,7 +529,20 @@ public class DashboardFragment extends Fragment implements
         setDevicesRankingsData();
 
         mExpandableListDevices.setAdapter(new ExpandableListEnergyRanking(rootView.getContext(), groupItemDevices, childItemDevices));
-        mExpandableListDevices.setOnGroupClickListener(new ExpDrawerGroupClickListener());
+        mExpandableListDevices.setOnGroupClickListener(new ExpDrawerGroupClickListenerDevices());
+
+        /*
+        ViewGroup.LayoutParams layoutParams = mExpandableListDevices.getLayoutParams();
+        int n = 0;
+        if (devicesTotals != null){
+            n = 3 * 30;
+            final float scale = rootView.getContext().getResources().getDisplayMetrics().density;
+            int pixels = (int) (n * scale + 0.5f);
+            layoutParams.height = pixels;
+            Log.w("ExpListUsers INIT", 3 + "|"+ n + "|"+ mExpandableListDevices.getLayoutParams().height);
+            mExpandableListDevices.setLayoutParams(layoutParams);
+            Log.w("ExpListUsers INIT", 3 + "|"+ n + "|"+ mExpandableListDevices.getLayoutParams().height);
+        }*/
 
         mExpandableListDevices.expandGroup(0);
     }
@@ -560,7 +629,7 @@ public class DashboardFragment extends Fragment implements
             deviceListAsyncTask.execute();
 
             String logdata = "EnergyConsumptionHistory Request:" + user + " " + Utils.getDateDaysAgo(
-                    7) + " " + Utils.getCurrentTimestamp();
+                    8) + " " + Utils.getCurrentTimestamp();
             Log.w(LOGTAG, logdata);
             refreshLogCard(logdata);
             RequestUserEnergyConsumptionHistoryAsyncTask energyConsumptionHistory = new RequestUserEnergyConsumptionHistoryAsyncTask();

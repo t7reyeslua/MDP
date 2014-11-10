@@ -25,6 +25,7 @@ public class DeviceRegistrationAlertDialog extends DialogFragment {
     private AutoCompleteTextView mDeviceType;
     private EditText mDeviceDescription;
     private AutoCompleteTextView mDeviceLocation;
+    private AutoCompleteTextView mDevicePlace;
     private String mNfcTag;
     private Dialog mDialog;
 
@@ -50,7 +51,6 @@ public class DeviceRegistrationAlertDialog extends DialogFragment {
     };
 
     private static final String[] LOCATIONS = new String[] {
-            "Home", "Office",
             "Kitchen",
             "Shower",
             "Bathroom",
@@ -63,6 +63,10 @@ public class DeviceRegistrationAlertDialog extends DialogFragment {
             "Bedroom D",
             "Hall",
             "Coffee Room"
+    };
+
+    private static final String[] PLACES = new String[] {
+            "Home", "Office"
     };
 
 
@@ -89,15 +93,16 @@ public class DeviceRegistrationAlertDialog extends DialogFragment {
                         String mType = mDeviceType.getText().toString();
                         String mDescription = mDeviceDescription.getText().toString();
                         String mLocation = mDeviceLocation.getText().toString();
+                        String mPlace = mDevicePlace.getText().toString();
 
-                        if (mType.isEmpty() || mLocation.isEmpty()) {
+                        if (mType.isEmpty() || mLocation.isEmpty() || mPlace.isEmpty()) {
                             Toast.makeText(getActivity().getApplicationContext(), "Some fields are empty. Rescan the tag and try again.", Toast.LENGTH_LONG)
                                     .show();
                         } else {
                             Toast.makeText(getActivity().getApplicationContext(), "Registering the device", Toast.LENGTH_LONG)
                                     .show();
                             Log.i(TAG, "Registering the device");
-                            new DeviceRegistrationAsyncTask().execute(mNfcTag, mType, mDescription, mLocation, getActivity().getApplicationContext());
+                            new DeviceRegistrationAsyncTask().execute(mNfcTag, mType, mDescription, mLocation, mPlace, getActivity().getApplicationContext());
 
                         }
 
@@ -116,18 +121,23 @@ public class DeviceRegistrationAlertDialog extends DialogFragment {
         mDeviceType = (AutoCompleteTextView) view.findViewById(R.id.deviceType);
         mDeviceDescription = (EditText) view.findViewById(R.id.deviceDescription);
         mDeviceLocation = (AutoCompleteTextView) view.findViewById(R.id.deviceLocation);
+        mDevicePlace = (AutoCompleteTextView) view.findViewById(R.id.devicePlace);
 
         mDeviceType.setThreshold(1);
         mDeviceLocation.setThreshold(1);
+        mDevicePlace.setThreshold(1);
 
         ArrayAdapter<String> deviceAdapter   = new ArrayAdapter<String>(mDialog.getContext(), android.R.layout.simple_dropdown_item_1line, DEVICES);
+        ArrayAdapter<String> placeAdapter    = new ArrayAdapter<String>(mDialog.getContext(), android.R.layout.simple_dropdown_item_1line, PLACES);
         ArrayAdapter<String> locationAdapter = new ArrayAdapter<String>(mDialog.getContext(), android.R.layout.simple_dropdown_item_1line, LOCATIONS);
 
         mDeviceType.setAdapter(deviceAdapter);
         mDeviceLocation.setAdapter(locationAdapter);
+        mDevicePlace.setAdapter(placeAdapter);
 
         deviceAdapter.notifyDataSetChanged();
         locationAdapter.notifyDataSetChanged();
+        placeAdapter.notifyDataSetChanged();
 
         return mDialog;
     }

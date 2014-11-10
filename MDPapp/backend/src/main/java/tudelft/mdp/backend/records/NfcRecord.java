@@ -19,6 +19,8 @@ public class NfcRecord {
     private Integer state;
     @Index
     private String Location;
+    @Index
+    private String Place;
 
 
 
@@ -71,4 +73,11 @@ public class NfcRecord {
         this.state = state;
     }
 
+    public String getPlace() {
+        return Place;
+    }
+
+    public void setPlace(String place) {
+        Place = place;
+    }
 }
