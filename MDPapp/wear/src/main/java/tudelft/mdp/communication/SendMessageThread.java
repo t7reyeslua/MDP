@@ -35,7 +35,7 @@ public class SendMessageThread extends Thread {
                     Log.v(LOGTAG, "Message: {" + message + "} sent to: " + node.getDisplayName());
                 } else {
                     // Log an error
-                    Log.v(LOGTAG, "ERROR: failed to send Message");
+                    Log.v(LOGTAG, "ERROR:  failed to send Message");
                 }
             }
         }

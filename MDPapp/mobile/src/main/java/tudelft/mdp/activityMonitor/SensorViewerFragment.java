@@ -466,6 +466,7 @@ public class SensorViewerFragment extends Fragment implements
         switch (msgType){
             case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
                 stopRecording_UI();
+                Log.w(LOGTAG, "FileCreated:" + fileCreated + " mAClength:" + mActionAutoComplete.getText().length() + " SessionRequested:" + sessionRequested);
                 if (mActionAutoComplete.getText().length() > 0){
                     if (!fileCreated) {
                         Log.w(LOGTAG,"Start saving file");
@@ -509,7 +510,6 @@ public class SensorViewerFragment extends Fragment implements
                 if (mActionAutoComplete.getText().length() > 0){
                     mFileCreator.closeFileWriter();
                     Toast.makeText(rootView.getContext(),"File created: " + mFileCreator.getPath(), Toast.LENGTH_SHORT).show();
-                    sessionRequested = false;
                     fileCreated = false;
                     //sendDataMap(MessagesProtocol.KILLSERVICE, "Kill service");
                 }
@@ -523,6 +523,7 @@ public class SensorViewerFragment extends Fragment implements
 
             case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
                 Log.w(LOGTAG,"Stop sensor service from wear: SENDSENSEORSNAPSHOT_END");
+                sessionRequested = false;
                 sendNotification(MessagesProtocol.STOPSENSINGSERVICE);
                 break;
 

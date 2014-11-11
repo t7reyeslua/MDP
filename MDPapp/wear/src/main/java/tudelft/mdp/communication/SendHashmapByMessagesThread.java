@@ -74,7 +74,7 @@ public class SendHashmapByMessagesThread extends Thread {
                         sendMsg(record, node);
                     }
 
-                    Log.w(LOGTAG, "Info - Stop sending file from thread");
+                    Log.w(LOGTAG, "Info - Stop sending file from thread: " + Utils.getSensorName(sensorType));
                     String finishMsg = MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH
                             + "|" + sensorType;
                     sendMsg(finishMsg, node);

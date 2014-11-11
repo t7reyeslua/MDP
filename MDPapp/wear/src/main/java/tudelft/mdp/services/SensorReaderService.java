@@ -527,7 +527,7 @@ public class SensorReaderService extends Service implements
             }
         } else {
             if (mRecordedSensors.size() == 0) {
-                Log.e(LOGTAG,"Preparing buildup of hm to send");
+                Log.e(LOGTAG,"Preparing buildup of hm to send ");
 
                 if (mAccelerometerAL.size() > 0){
                     buildALrecordsToSend(Sensor.TYPE_ACCELEROMETER, mAccelerometerAL);
@@ -566,6 +566,7 @@ public class SensorReaderService extends Service implements
                     buildALrecordsToSend(Sensor.TYPE_STEP_DETECTOR, mStepDetectorAL);
                 }
 
+                printRecordedSensorsData();
 
                 new SendHashmapByMessagesThread(mGoogleApiClient, MessagesProtocol.MSGPATH,
                         mRecordedSensors).start();
@@ -573,6 +574,15 @@ public class SensorReaderService extends Service implements
 
         }
     }
+
+    private void printRecordedSensorsData(){
+        for (Integer sensorType : mRecordedSensors.keySet()){
+            Log.w(LOGTAG, "Recorded Sensors: " + Utils.getSensorName(sensorType) + " | " +
+            mRecordedSensors.get(sensorType).size());
+        }
+    }
+
+
 
     private void buildALrecordsToSend(int sensorType, ArrayList<MySensorEventObject> records){
         ArrayList<String> recordsToSend = new ArrayList<String>();
@@ -673,7 +683,7 @@ public class SensorReaderService extends Service implements
 
         if (duration > 0) {
             Long mRecodingSessionSamplingRate = (long) 1000 * duration;
-            Log.i(LOGTAG, "Recording Session Tick:" + mRecodingSessionSamplingRate.toString());
+            Log.i(LOGTAG, "Recording Session Tick: " + mRecodingSessionSamplingRate.toString());
             mTimerRecordingSessionSnapshot = new Timer();
             mTimerRecordingSessionSnapshot
                     .scheduleAtFixedRate(new RecordingSessionSnapshotTick(), 0, mRecodingSessionSamplingRate);
@@ -687,23 +697,27 @@ public class SensorReaderService extends Service implements
         Log.e(LOGTAG,"Stop sensing");
         if (mSensorManager != null){ mSensorManager.unregisterListener(this); }
 
-        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(500);
+
 
         if (mTimerSendSnapshot != null) {
-            Log.e(LOGTAG,"Stop Timer mTimerSendSnapshot");
+            Log.e(LOGTAG,"Stop Timer mTimerSendSnapshot ");
             mTimerSendSnapshot.cancel();
+            mTimerSendSnapshot = null;
+
+            Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(500);
         }
 
         if (mTimerDoSnapshot != null) {
-            Log.e(LOGTAG,"Stop Timer mTimerDoSnapshot");
+            Log.e(LOGTAG,"Stop Timer mTimerDoSnapshot ");
             mTimerDoSnapshot.cancel();
         }
 
+        /*
         if (mTimerRecordingSessionSnapshot != null) {
             Log.e(LOGTAG,"Stop Timer mTimerRecordingSessionSnapshot");
             mTimerRecordingSessionSnapshot.cancel();
-        }
+        }*/
 
         if (saveFileRequired){
             Log.e(LOGTAG,"Call sendRecordsToMobile()");
@@ -841,6 +855,8 @@ public class SensorReaderService extends Service implements
                     return;
                 }
                 sensingFinish();
+                Log.e(LOGTAG,"Stop Timer mTimerRecordingSessionSnapshot");
+                this.cancel();
             } catch (Throwable t) {
                 Log.e("RecordingSessionSnapshotTick", "RecordingSessionSnapshotTick Failed.", t);
             }

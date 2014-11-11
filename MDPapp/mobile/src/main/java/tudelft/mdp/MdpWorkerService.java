@@ -7,7 +7,6 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -34,14 +33,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -121,6 +115,8 @@ public class MdpWorkerService extends Service implements
     private int numScansForMotionLocation = 4;
     private int numScansCountForMotionLocation;
     private boolean motionTickDone;
+    private boolean dataRecollectionInProgress;
+    private boolean motionDataExpected;
     private boolean dataCompleteMotion;
     private boolean dataCompleteLocation;
     private String deviceEvent;
@@ -426,7 +422,7 @@ public class MdpWorkerService extends Service implements
             mSensorListToRecord.add(Constants.SAMSUNG_TILT);
             mSensorListToRecord.add(Sensor.TYPE_ROTATION_VECTOR);
 
-            Double hz = 50.0;
+            Double hz = 100.0;
             Integer duration = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
 
             Boolean consolidated = PreferenceManager
@@ -449,55 +445,66 @@ public class MdpWorkerService extends Service implements
      * @param msg received from Android Wear
      */
     private void handleWearMessage(String msg){
-        String[] parts = msg.split("\\|");
-        Integer msgType = Integer.valueOf(parts[0]);
-        String msgLoad = parts[1];
+        if (motionDataExpected) {
+            String[] parts = msg.split("\\|");
+            Integer msgType = Integer.valueOf(parts[0]);
+            String msgLoad = parts[1];
 
+            switch (msgType) {
+                case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
+                    currentlyReceivingSensor = Integer.valueOf(msgLoad);
+                    msgCount = 0;
+                    Log.w(LOGTAG, "Start sensor streaming from wear: " + Utils
+                            .getSensorName(currentlyReceivingSensor) + " Records Count:"
+                            + msgCount);
+                    break;
+                case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
+                    Log.w(LOGTAG, msgLoad);
+                    break;
+                case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
+                    Log.i(LOGTAG, msgLoad);
+                    mSensorReadings.add(msgLoad);
+                    msgCount++;
+                    break;
+                case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
+                    ArrayList<String> recordedSensor = new ArrayList<String>(mSensorReadings);
+                    mSensorReadings.clear();
+                    mRecordedSensors.put(currentlyReceivingSensor, recordedSensor);
 
+                    Log.w(LOGTAG, "Stop sensor streaming from wear: " + Utils
+                            .getSensorName(currentlyReceivingSensor)
+                            + " Records Count:" + msgCount
+                            + " mSensorReadings:" + mSensorReadings.size()
+                            + " mRecordedSensors:" + mRecordedSensors.get(currentlyReceivingSensor)
+                            .size());
+                    msgCount = 0;
+                    break;
 
-        switch (msgType){
-            case MessagesProtocol.SENDSENSEORSNAPSHOTREC_START:
-                currentlyReceivingSensor = Integer.valueOf(msgLoad);
-                msgCount = 0;
-                Log.w(LOGTAG,"Start sensor streaming from wear: " + Utils.getSensorName(currentlyReceivingSensor) + " Records Count:" + msgCount);
-                break;
-            case MessagesProtocol.SENDSENSEORSNAPSHOTHEADER:
-                Log.w(LOGTAG, msgLoad);
-                break;
-            case MessagesProtocol.SENDSENSEORSNAPSHOTREC:
-                Log.i(LOGTAG, msgLoad);
-                mSensorReadings.add(msgLoad);
-                msgCount++;
-                break;
-            case MessagesProtocol.SENDSENSEORSNAPSHOTREC_FINISH:
-                ArrayList<String> recordedSensor = new ArrayList<String>(mSensorReadings);
-                mSensorReadings.clear();
-                mRecordedSensors.put(currentlyReceivingSensor, recordedSensor);
+                case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
+                    Log.w(LOGTAG, "Stop sensor service from wear: SENDSENSEORSNAPSHOT_END");
+                    printRecordedSensorsData();
+                    sendNotificationToWear(MessagesProtocol.STOPSENSINGSERVICE);
+                    dataCompleteMotion = true;
+                    motionDataExpected = false;
+                    consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
+                    break;
 
-                Log.w(LOGTAG, "Stop sensor streaming from wear: " + Utils.getSensorName(currentlyReceivingSensor)
-                        + " Records Count:" + msgCount
-                        + " mSensorReadings:" + mSensorReadings.size()
-                        + " mRecordedSensors:" + mRecordedSensors.get(currentlyReceivingSensor).size());
-                msgCount = 0;
-                break;
-
-            case MessagesProtocol.SENDSENSEORSNAPSHOT_END:
-                Log.w(LOGTAG,"Stop sensor service from wear: SENDSENSEORSNAPSHOT_END");
-                sendNotificationToWear(MessagesProtocol.STOPSENSINGSERVICE);
-                dataCompleteMotion = true;
-                consolidateMotionLocationData(dataCompleteMotion, dataCompleteLocation);
-                break;
-
-            case MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE:
-                Log.w(LOGTAG,"Current sensors readings");
-                break;
-            default:
-                break;
+                case MessagesProtocol.SENDSENSEORSNAPSHOTUPDATE:
+                    Log.w(LOGTAG, "Current sensors readings");
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
 
-
+    private void printRecordedSensorsData(){
+        for (Integer sensorType : mRecordedSensors.keySet()){
+            Log.w(LOGTAG, "Recorded Sensors: " + Utils.getSensorName(sensorType) + " | " +
+                    mRecordedSensors.get(sensorType).size());
+        }
+    }
 
 
     //Location Detection methods *******************************************************************
@@ -846,6 +853,8 @@ public class MdpWorkerService extends Service implements
                 wekaSensorsRawDataObject.saveToFile(deviceEvent, consolidated);
                 wekaNetworkScansObject.saveToFile(deviceEvent);
             }
+
+            dataRecollectionInProgress = false;
         }
 
     }
@@ -884,39 +893,44 @@ public class MdpWorkerService extends Service implements
      * Initializes the required variables for requesting motion and location data
      */
     private void startMotionLocationDataRecollection(String event){
-        deviceEvent = event;
+        if (!dataRecollectionInProgress) {
+            dataRecollectionInProgress = true;
+            deviceEvent = event;
 
-        Log.i(LOGTAG, "Start Motion Location Data Recollection by BROADCAST.");
+            Log.i(LOGTAG, "Start Motion Location Data Recollection by BROADCAST.");
 
-        msgCount = 0;
-        if (v != null) {
-            v.vibrate(500);
-        }
+            msgCount = 0;
+            if (v != null) {
+                v.vibrate(500);
+            }
 
-        dataCompleteLocation = false;
-        dataCompleteMotion = true;
-        motionTickDone = true;
-        if (sharedPrefs.getBoolean(UserPreferences.WEARCONNECTED, false)) {
-            dataCompleteMotion = false;
-            sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
-            sendDataMapToWear(MessagesProtocol.STARTSENSING,
-                    "START: MOTION DATA REQUESTED BY MOBILE");
+            dataCompleteLocation = false;
+            dataCompleteMotion = true;
+            motionTickDone = true;
+            if (sharedPrefs.getBoolean(UserPreferences.WEARCONNECTED, false)) {
+                dataCompleteMotion = false;
+                motionDataExpected = true;
+                sendNotificationToWear(MessagesProtocol.STARTSENSINGSERVICE);
+                sendDataMapToWear(MessagesProtocol.STARTSENSING,
+                        "START: MOTION DATA REQUESTED BY MOBILE");
 
 
+            /*
             Log.i(LOGTAG, "Start Motion Tick.");
             motionTickDone = false;
             int motionWindow = sharedPrefs.getInt(UserPreferences.MOTION_SAMPLE_SECONDS, 6);
             mTimerMotion = new Timer();
-            mTimerMotion.scheduleAtFixedRate(new MotionWearTick(), 0, motionWindow * 1000);
+            mTimerMotion.scheduleAtFixedRate(new MotionWearTick(), 0, motionWindow * 1000);*/
+            }
+
+            sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_BROADCAST);
+            mLocationRequestedByBroadcast = true;
+            numScansCountForMotionLocation = 0;
+
+            mSensorReadings.clear();
+            mRecordedSensors.clear();
+            mNetworkScansBroadcastTick.clear();
         }
-
-        sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_BROADCAST);
-        mLocationRequestedByBroadcast = true;
-        numScansCountForMotionLocation = 0;
-
-        mSensorReadings.clear();
-        mRecordedSensors.clear();
-        mNetworkScansBroadcastTick.clear();
     }
 
 
