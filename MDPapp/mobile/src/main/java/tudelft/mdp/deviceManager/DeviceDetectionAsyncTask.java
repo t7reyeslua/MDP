@@ -99,17 +99,22 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             NfcLogRecord insertedDeviceLog = mDeviceLogEndpointService.insertDeviceLog(newLogRecord).execute();
 
 
-            Log.d(TAG, "Updating device info.");
+            int nUsers = 0;
             NfcRecord deviceInfoUpdated;
             if (newLogRecord.getState()){
-                deviceInfoUpdated = mDeviceEndpointService.increaseDeviceUsers(nfcTag).execute();
+                nUsers = (mDeviceInfo.getState() + 1);
+                //deviceInfoUpdated = mDeviceEndpointService.increaseDeviceUsers(nfcTag).execute();
             } else {
-                deviceInfoUpdated = mDeviceEndpointService.decreaseDeviceUsers(nfcTag).execute();
+                nUsers = (mDeviceInfo.getState() - 1);
+                //deviceInfoUpdated = mDeviceEndpointService.decreaseDeviceUsers(nfcTag).execute();
             }
 
+            Log.d(TAG, "Updating device info. From " + mDeviceInfo.getState() + " to " + nUsers);
+            mDeviceInfo.setState(nUsers);
+            deviceInfoUpdated = mDeviceEndpointService.updateDevice(mDeviceInfo).execute();
             /* Check if there was a OFF/ON-ON/OFF transition of the device */
 
-            if (deviceInfoUpdated.getState() <= 1){
+            if ((deviceInfoUpdated.getState() == 1) || (deviceInfoUpdated.getState() == 0)){
                 insertedDeviceLog.setId(null);
                 insertedDeviceLog.setUser(Constants.ANYUSER);
                 Log.e(TAG, "Inserting ANYUSER log record. " + insertedDeviceLog.getState().toString() );

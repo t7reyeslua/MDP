@@ -39,6 +39,8 @@ public class NfcRecordEndpoint {
         if(record == null) {
             throw new NotFoundException("NFC Record does not exist");
         }
+
+        ofy().clear();
         return record;
     }
 
