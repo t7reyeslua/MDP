@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -113,6 +115,14 @@ public class DeviceManagerFragment extends Fragment implements
     public void processFinishRequestDeviceList(List<NfcRecord> outputList) {
         mCardsArrayList = new ArrayList<Card>();
         deviceList = outputList;
+
+        Collections.sort(deviceList, new Comparator<NfcRecord>() {
+            @Override
+            public int compare(NfcRecord item1, NfcRecord item2) {
+
+                return item1.getType().compareTo(item2.getType());
+            }
+        });
 
         if (deviceList != null) {
 
