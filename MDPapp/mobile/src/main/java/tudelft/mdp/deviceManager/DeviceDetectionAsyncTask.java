@@ -109,12 +109,16 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
 
             // Calculate ANY USER
             int nUsers = 0;
+            boolean userIncremented = false;
+            boolean userDecremented = false;
             NfcRecord deviceInfoUpdated;
             if (newLogRecord.getState()){
                 nUsers = (mDeviceInfo.getState() + 1);
+                userIncremented = true;
                 //deviceInfoUpdated = mDeviceEndpointService.increaseDeviceUsers(nfcTag).execute();
             } else {
                 nUsers = (mDeviceInfo.getState() - 1);
+                userDecremented = true;
                 //deviceInfoUpdated = mDeviceEndpointService.decreaseDeviceUsers(nfcTag).execute();
             }
 
@@ -123,7 +127,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             deviceInfoUpdated = mDeviceEndpointService.updateDevice(mDeviceInfo).execute();
             /* Check if there was a OFF/ON-ON/OFF transition of the device */
 
-            if ((deviceInfoUpdated.getState() == 1) || (deviceInfoUpdated.getState() == 0)){
+            if ((deviceInfoUpdated.getState() == 1 && userIncremented) || (deviceInfoUpdated.getState() == 0 && userDecremented)){
                 insertedDeviceLog.setId(null);
                 insertedDeviceLog.setUser(Constants.ANYUSER);
                 Log.e(TAG, "Inserting ANYUSER log record. " + insertedDeviceLog.getState().toString() );

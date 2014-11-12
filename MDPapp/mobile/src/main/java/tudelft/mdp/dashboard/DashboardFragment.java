@@ -606,6 +606,7 @@ public class DashboardFragment extends Fragment implements
     }
 
     private void updateDevicesRankings(){
+
         setDevicesRankingsData();
 
         mExpandableListDevices.setAdapter(new ExpandableListEnergyRanking(rootView.getContext(), groupItemDevices, childItemDevices));
@@ -759,6 +760,7 @@ public class DashboardFragment extends Fragment implements
         userStatsHM.clear();
         deviceStatsHM.clear();
         usersTotals.clear();
+        devicesTotals.clear();
 
         for (DeviceUsageRecord deviceUsageRecord : userStatsRaw){
             addDeviceUsageRecordToUserInfo(deviceUsageRecord);
@@ -890,7 +892,7 @@ public class DashboardFragment extends Fragment implements
                 totalEnergyUsage.setDeviceId(Devices.TOTAL);
                 Double energy = 0.0;
                 for (DeviceUsageRecord deviceUsageRecord : deviceUsageRecordsInTimeSpan){
-                    if (!deviceUsageRecord.getUsername().equals(Constants.ANYUSER)) {
+                    if (deviceUsageRecord.getUsername().equals(Constants.ANYUSER)) {
                         energy += Utils.getEnergyFromTime(deviceUsageRecord.getDeviceType(),
                                 deviceUsageRecord.getUserTime());
                     }

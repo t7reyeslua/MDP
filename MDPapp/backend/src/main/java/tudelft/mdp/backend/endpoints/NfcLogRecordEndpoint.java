@@ -97,6 +97,7 @@ public class NfcLogRecordEndpoint {
             if (lastLogOfUser != null){
                 if (lastLogOfUser.getState()){
                     activeUsers++;
+                    LOG.warning("LastLogID: " + lastLogOfUser.getId() + "|" + user.getUsername() + " " + nfcId + " ON. Active Users: " + activeUsers );
                 }
             }
         }
@@ -313,6 +314,15 @@ public class NfcLogRecordEndpoint {
             }
         }
 
+        NfcRecordEndpoint nfcRecordEndpoint = new NfcRecordEndpoint();
+        NfcRecord device;
+        try {
+            device = nfcRecordEndpoint.getNFC(nfcId);
+            totalPower = Utils.getEnergyFromTime(device.getType(), totalTime);
+            userPower = Utils.getEnergyFromTime(device.getType(), userTime);
+        } catch (NotFoundException e){
+            LOG.info(e.getMessage());
+        }
 
         List<Double> result = new ArrayList<Double>();
         result.add(totalTime);
