@@ -135,6 +135,7 @@ public class LocationCalibrationFragment extends Fragment implements ServiceConn
         calibrationScans = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                 .getInt(UserPreferences.CALIBRATION_SCANS, UserPreferences.CALIBRATION_NUM_SCANS);
 
+        Log.w(TAG, "Calibration Scans " + calibrationScans);
         return rootView;
     }
 

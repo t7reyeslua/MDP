@@ -8,7 +8,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
+              android:layout_height="30dp"
               android:orientation="horizontal"
               android:background="#DEDEDE"
               android:gravity="center_vertical|center_horizontal">
@@ -28,7 +28,7 @@
             android:textColor="@android:color/darker_gray"
             app:fontFamily="roboto"
             app:textWeight="bold"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:gravity="center_vertical"
             android:fontFamily="sans-serif-light"
             android:layout_height="wrap_content" />
@@ -44,7 +44,7 @@
             android:textColor="@android:color/darker_gray"
             app:fontFamily="roboto"
             app:textWeight="light"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:fontFamily="sans-serif-light"
             android:background="?android:attr/activatedBackgroundIndicator"/>
     <com.devspark.robototextview.widget.RobotoTextView
@@ -58,7 +58,7 @@
             android:textColor="@android:color/darker_gray"
             app:fontFamily="roboto"
             app:textWeight="light"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:fontFamily="sans-serif-light"
             android:background="?android:attr/activatedBackgroundIndicator"/>
     <ImageView

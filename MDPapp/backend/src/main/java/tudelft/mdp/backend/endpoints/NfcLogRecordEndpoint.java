@@ -162,7 +162,7 @@ public class NfcLogRecordEndpoint {
             if (record != null){
                 LOG.info(user + "|" +device.getType() + " active: " + device.getState());
                 if (record.getState()){
-                    device.setDescription(record.getTimestamp());
+                    //device.setDescription(record.getTimestamp());
                     activeDevices.add(device);
                 }
             }
@@ -302,19 +302,20 @@ public class NfcLogRecordEndpoint {
             @Named("minDate") String minDate,
             @Named("maxDate") String maxDate) {
 
-        LOG.info("Calling getSingleUserDeviceTime method");
+        //LOG.info("Calling getSingleUserDeviceTime method");
 
         Double userTime = 0.0;
 
         List<NfcLogRecord> userRecords = new ArrayList<NfcLogRecord>(listUserDeviceLogByDateDevice(nfcId,
                 user, minDate, maxDate).getItems());
 
-        String nowTimeStringOriginal = Utils.getCurrentTimestamp();
-        String nowTimeString = nowTimeStringOriginal;
-        LOG.info("USER NOW " + nowTimeString + " No. of Records: " + userRecords.size()
-                + " NFC:" + nfcId
-                + " minDate: " + minDate
-                + " maxDate: " + maxDate);
+        String nowTimeString = Utils.getCurrentTimestamp();
+        if (userRecords.size() > 0) {
+            LOG.severe("USER NOW " + nowTimeString + " No. of Records: " + userRecords.size()
+                    + " NFC:" + nfcId
+                    + " minDate: " + minDate
+                    + " maxDate: " + maxDate);
+        }
 
         /* ========================================================*/
         /* Calculate the time the user has made use of the device */
@@ -322,7 +323,7 @@ public class NfcLogRecordEndpoint {
 
             /* An ON step is detected -> Measure how long it lasted */
             String temp = userRecords.get(i).getTimestamp();
-            LOG.info("UserRecord: " + temp + " State:" + userRecords.get(i).getState());
+            //LOG.info("UserRecord: "+ user + "|" + temp + " State:" + userRecords.get(i).getState());
             if (userRecords.get(i).getState()){
 
                 long timeNewest = Utils.convertTimestampToSeconds(nowTimeString);
@@ -334,7 +335,7 @@ public class NfcLogRecordEndpoint {
 
                 Double diff = Utils.differenceBetweenDates(nowTimeString, temp);
                 userTime += diff;
-                LOG.info(nowTimeString + "-" + temp + "="+ diff + "-----------" + timeNewest + "-" + timeOldest + "="+ diff1 );
+                LOG.info(user + "|" + nfcId + "|" + minDate + "|"+ "-----------" +nowTimeString + "-" + temp + "="+ diff + "-----------" + timeNewest + "-" + timeOldest + "="+ diff1 );
             }
             nowTimeString = temp;
         }
@@ -379,11 +380,15 @@ public class NfcLogRecordEndpoint {
         for (RegistrationRecord user : users){
             for (NfcRecord device : devices){
                    for (Integer timespan : timespans){
+                       String minTimestamp = Utils.getMinTimestamp(timespan);
+                       String maxTimestamp = Utils.getCurrentTimestamp();
+
+
                        Collection<Double> userTimeResponse = getSingleUserDeviceTime(
                                device.getNfcId(),
                                user.getUsername(),
-                               Utils.getMinTimestamp(timespan),
-                               Utils.getCurrentTimestamp()).getItems();
+                               minTimestamp,
+                               maxTimestamp).getItems();
                        Double userTime = Iterables.get(userTimeResponse, 0);
 
                        DeviceUsageRecord deviceUsageRecord = new DeviceUsageRecord();
@@ -395,11 +400,15 @@ public class NfcLogRecordEndpoint {
 
                        usageRecords.add(deviceUsageRecord);
 
-                       LOG.info("Getting Stats of: "
-                       + user.getUsername() + " "
-                       + device.getNfcId() + "-" + device.getType() + " "
-                       + "timeSpan: " + timespan + " "
-                       + "userTime: " + userTime);
+                       if (userTime > 0) {
+                           LOG.warning("Stats of: "
+                                   + user.getUsername() + " "
+                                   + device.getNfcId() + "-" + device.getType() + " "
+                                   + "timeSpan: " + timespan + " "
+                                   + "from: " + minTimestamp + " "
+                                   + "to: " + maxTimestamp + " "
+                                   + "userTime: " + userTime);
+                       }
                    }
             }
         }

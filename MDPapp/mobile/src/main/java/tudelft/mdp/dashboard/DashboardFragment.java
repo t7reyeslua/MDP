@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.method.ScrollingMovementMethod;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -422,7 +423,7 @@ public class DashboardFragment extends Fragment implements
         refreshLocationCard(Utils.getCurrentTimestampMillis(), placeOfLocation, locationCalculated);
 
 
-        mCardViewLocation.setVisibility(View.GONE);
+        //mCardViewLocation.setVisibility(View.GONE);
     }
 
     private void refreshLocationCard(String timestamp, String place, String zone){
@@ -453,6 +454,12 @@ public class DashboardFragment extends Fragment implements
         twLog.setText(currentLog + "\n> " + Utils.getCurrentTimestampMillis() + "  " + data);
     }
 
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = rootView.getContext().getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
+    }
+
     private class ExpDrawerGroupClickListenerUsers implements ExpandableListView.OnGroupClickListener {
         @Override
         public boolean onGroupClick(ExpandableListView parent, View v,
@@ -463,13 +470,16 @@ public class DashboardFragment extends Fragment implements
             int n = 0;
             if (usersTotals != null){
                 int nUsers = usersTotals.get(groupPosition).size() - 1;
-                n = nUsers * 30;
+                n = nUsers * dpToPx(16);
                 Log.w("ExpListUsers", nUsers + "|"+ n + "|"+ layoutParams.height);
             }
-            n=0;
             if (parent.isGroupExpanded(groupPosition)){
                 parent.collapseGroup(groupPosition);
-                layoutParams.height = layoutParams.height - n;
+                if ((layoutParams.height - n) < dpToPx(120)){
+                    layoutParams.height = dpToPx(120);
+                } else {
+                    layoutParams.height = layoutParams.height - n;
+                }
             }else {
                 parent.expandGroup(groupPosition, true);
                 layoutParams.height = layoutParams.height + n;
@@ -489,13 +499,17 @@ public class DashboardFragment extends Fragment implements
             int n = 0;
             if (devicesTotals != null){
                 int nUsers = devicesTotals.get(groupPosition).size();
-                n = nUsers * 40;
+                n = nUsers *  dpToPx(17);
                 Log.w("ExpListDevices", nUsers + "|"+ n + "|"+ layoutParams.height);
             }
-            n=0;
+            //n=0;
             if (parent.isGroupExpanded(groupPosition)){
                 parent.collapseGroup(groupPosition);
-                layoutParams.height = layoutParams.height - n;
+                if ((layoutParams.height - n) < dpToPx(120)){
+                    layoutParams.height = dpToPx(120);
+                } else {
+                    layoutParams.height = layoutParams.height - n;
+                }
             }else {
                 parent.expandGroup(groupPosition, true);
                 layoutParams.height = layoutParams.height + n;
@@ -521,7 +535,7 @@ public class DashboardFragment extends Fragment implements
             Log.w("ExpListUsers INIT", 3 + "|"+ n + "|"+ mExpandableListUsers.getLayoutParams().height);
         }
 */
-        mExpandableListUsers.expandGroup(0);
+        //mExpandableListUsers.expandGroup(0);
 
     }
 
@@ -544,7 +558,7 @@ public class DashboardFragment extends Fragment implements
             Log.w("ExpListUsers INIT", 3 + "|"+ n + "|"+ mExpandableListDevices.getLayoutParams().height);
         }*/
 
-        mExpandableListDevices.expandGroup(0);
+        //mExpandableListDevices.expandGroup(0);
     }
 
     private void setUsersRankingsData(){
@@ -737,12 +751,10 @@ public class DashboardFragment extends Fragment implements
         Log.w(LOGTAG, "Rankings USERS");
         for (Integer timeSpan : usersTotals.keySet()){
             for (DeviceUsageRecord deviceUsageRecord : usersTotals.get(timeSpan)){
-                if (!deviceUsageRecord.getUsername().equals(Constants.ANYUSER)) {
                     Log.i(LOGTAG, timeSpan + "|" + deviceUsageRecord.getUsername() + "|"
                             + deviceUsageRecord.getUserTime());
                     refreshLogCard(timeSpan + "|" + deviceUsageRecord.getUsername() + "|"
                             + deviceUsageRecord.getUserTime());
-                }
             }
         }
 

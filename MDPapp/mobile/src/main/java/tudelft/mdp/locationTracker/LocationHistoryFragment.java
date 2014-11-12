@@ -142,10 +142,13 @@ public class LocationHistoryFragment extends Fragment implements
 
             String lastZone = "";
             List<LocationLogRecord> reducedUserHistory = new ArrayList<LocationLogRecord>();
+
             for (LocationLogRecord record : userLocationHistory){
-                if (!record.getZone().equals(lastZone)){
-                    lastZone = record.getZone();
-                    reducedUserHistory.add(record);
+                if (record.getZone() != null) {
+                    if (!record.getZone().equals(lastZone)) {
+                        lastZone = record.getZone();
+                        reducedUserHistory.add(record);
+                    }
                 }
             }
 

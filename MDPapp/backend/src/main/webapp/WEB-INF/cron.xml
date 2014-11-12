@@ -8,6 +8,6 @@
     <cron>
         <url>/cron/calculateDailyEnergyConsumption</url>
         <description>Calculate Daily Energy Consumption</description>
-        <schedule>every day 23:55</schedule>
+        <schedule>every day 22:55</schedule>
     </cron>
 </cronentries>

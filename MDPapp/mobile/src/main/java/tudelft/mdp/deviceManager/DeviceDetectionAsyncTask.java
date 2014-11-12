@@ -150,7 +150,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     private void askForMotionLocation(NfcRecord mDeviceInfo){
         Log.w(TAG, "Broadcast to ALL users");
         new GcmMessagingAsyncTask().execute(String.valueOf(MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION),
-                nfcTag + "_" + mDeviceInfo.getType() + "_" + Utils.getCurrentTimestamp(),
+                nfcTag + "_" + mDeviceInfo.getType() + "_" + Utils.getCurrentTimestamp() + "_" + mDeviceInfo.getLocation(),
                 context);
 
         /*

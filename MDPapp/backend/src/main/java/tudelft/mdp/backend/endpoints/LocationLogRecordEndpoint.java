@@ -64,6 +64,28 @@ public class LocationLogRecordEndpoint {
         return locationLogRecord;
     }
 
+    @ApiMethod(name = "getServerTimestampCET", path = "get_server_timestamp_cet")
+    public LocationLogRecord getServerTimestampCET() {
+
+        LOG.info("Calling getServerTimestampCET method");
+
+        LocationLogRecord locationLogRecord = new LocationLogRecord();
+        locationLogRecord.setTimestamp(Utils.getHoursLater(1));
+
+        return locationLogRecord;
+    }
+
+    @ApiMethod(name = "getServerTimestampInFuture", path = "get_server_timestamp_future")
+    public LocationLogRecord getServerTimestampInFuture(@Named("hours") Integer hours) {
+
+        LOG.info("Calling getServerTimestampInFuture method");
+
+        LocationLogRecord locationLogRecord = new LocationLogRecord();
+        locationLogRecord.setTimestamp(Utils.getHoursLater(hours));
+
+        return locationLogRecord;
+    }
+
 
     @ApiMethod(name = "listLocationLogByUser", path = "list_location_user")
     public CollectionResponse<LocationLogRecord> listLocationLogByUser(@Named("user") String user) {

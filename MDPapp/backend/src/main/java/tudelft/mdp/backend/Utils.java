@@ -16,6 +16,7 @@ import tudelft.mdp.backend.records.ApHistogramRecord;
 public class Utils {
 
     public static String getCurrentTimestamp(){
+        /*
         // 1) create a java calendar instance
         Calendar calendar = Calendar.getInstance();
         // 2) get a java.util.Date from the calendar instance.
@@ -25,6 +26,17 @@ public class Utils {
         // 3) a java current time (now) instance
         java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
 
+        return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
+        */
+        return getHoursLater(1);
+    }
+
+    public static String getHoursLater(int hours){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR_OF_DAY, hours);
+        java.util.Date now = calendar.getTime();
+        // 3) a java current time (now) instance
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
         return new SimpleDateFormat("yyyyMMddHHmmss").format(currentTimestamp);
     }
 

@@ -581,6 +581,11 @@ public class MdpWorkerService extends Service implements
      * @param locationProbability 0..1
      */
     private void saveEstimatedLocationToDB(String placeOfLocation, Double locationProbability){
+        if (placeOfLocation == null){
+            placeOfLocation = "Unknown";
+            locationCalculated = "Unknown";
+        }
+
         if (!locationCalculated.equals(lastLocation)) {
             String timestamp = Utils.getCurrentTimestamp();
             LocationLogRecord locationLogRecord = new LocationLogRecord();
@@ -850,7 +855,13 @@ public class MdpWorkerService extends Service implements
 
             boolean trainingPhase = sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, true);
             if (trainingPhase){
-                wekaSensorsRawDataObject.saveToFile(deviceEvent, consolidated);
+                String[] parts = deviceEvent.split("_");
+                String deviceId = parts[0];
+                String deviceType = parts[1];
+                String timestamp = parts[2];
+                String deviceLocation = parts[3];
+
+                wekaSensorsRawDataObject.saveToFile(deviceType+"-"+deviceLocation+"-"+deviceId+"-"+timestamp, consolidated);
                 wekaNetworkScansObject.saveToFile(deviceEvent);
             }
 
@@ -872,6 +883,7 @@ public class MdpWorkerService extends Service implements
         String deviceId = parts[0];
         String deviceType = parts[1];
         String timestamp = parts[2];
+        String deviceLocation = parts[3];
         Text motionFeatures = new Text();
         Text locationFeatures = new Text();
         motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
@@ -879,7 +891,7 @@ public class MdpWorkerService extends Service implements
 
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
         deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
-        deviceMotionLocationRecord.setEvent(deviceEvent);
+        deviceMotionLocationRecord.setEvent(deviceType+"-"+deviceLocation+"-"+deviceId);
         deviceMotionLocationRecord.setDeviceType(deviceType);
         deviceMotionLocationRecord.setDeviceId(deviceId);
         deviceMotionLocationRecord.setTimestamp(timestamp);

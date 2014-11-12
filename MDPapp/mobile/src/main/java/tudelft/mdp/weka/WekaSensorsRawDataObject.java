@@ -476,7 +476,7 @@ public class WekaSensorsRawDataObject {
     public String getFeatures(int nSamples, boolean consolidated){
         Log.i(LOGTAG, "Getting Features");
         if (mRecordedSensorsHM.size() == 0){
-            return "";
+            return "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
         }
 
         buildSensorArrays(consolidated);
