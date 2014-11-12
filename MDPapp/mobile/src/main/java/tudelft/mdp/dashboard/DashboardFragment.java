@@ -46,11 +46,15 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.FieldPosition;
 import java.text.Format;
@@ -69,12 +73,15 @@ import tudelft.mdp.MainActivity;
 import tudelft.mdp.MdpWorkerService;
 import tudelft.mdp.R;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.DeviceUsageRecord;
+import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcRecord;
 import tudelft.mdp.backend.endpoints.energyConsumptionRecordEndpoint.model.EnergyConsumptionRecord;
 import tudelft.mdp.deviceManager.RequestAllUsersStatsAsyncTask;
+import tudelft.mdp.deviceManager.RequestUserActiveDevicesAsyncTask;
 import tudelft.mdp.deviceManager.RequestUserEnergyConsumptionHistoryAsyncTask;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.Devices;
 import tudelft.mdp.enums.UserPreferences;
+import tudelft.mdp.ui.DashboardActiveDevicesCard;
 import tudelft.mdp.ui.DashboardLocationCard;
 import tudelft.mdp.ui.DashboardLogCard;
 import tudelft.mdp.ui.DashboardRankingsCard;
@@ -85,6 +92,7 @@ import tudelft.mdp.utils.Utils;
 
 public class DashboardFragment extends Fragment implements
         ServiceConnection,
+        RequestUserActiveDevicesAsyncTask.RequestUserActiveDevicesAsyncResponse,
         RequestUserEnergyConsumptionHistoryAsyncTask.RequestUserEnergyConsumptionHistoryAsyncResponse,
         RequestAllUsersStatsAsyncTask.RequestAllUsersStatsAsyncResponse{
 
@@ -135,6 +143,9 @@ public class DashboardFragment extends Fragment implements
     private CardView mCardViewUserHistory;
     private DashboardUserHistoryCard mCardUserHistory;
 
+    private CardView mCardViewActiveDevices;
+    private DashboardActiveDevicesCard mCardActiveDevices;
+
 
     private String placeOfLocation = "TBD";
     private String locationCalculated = "TBD";
@@ -161,6 +172,7 @@ public class DashboardFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView =  inflater.inflate(R.layout.fragment_dashboard, container, false);
+        setHasOptionsMenu(true);
 
         user = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                    .getString(UserPreferences.USERNAME, "TBD");
@@ -188,14 +200,68 @@ public class DashboardFragment extends Fragment implements
 
     // Configure Cards ****************************************************************************
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.device_manager_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        Log.d(LOGTAG, "Refresh clicked");
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                requestUsersStats();
+                Toast.makeText(rootView.getContext(),"Refreshing Data...", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void configureCardsInit(){
         configureUserRankingsCard();
         configureDeviceRankingsCard();
         configureLocationCard();
         configureLogCard();
         configureUserHistoryCard();
+        configureActiveDevicesCard();
     }
 
+    private void configureActiveDevicesCard(){
+        mCardActiveDevices = new DashboardActiveDevicesCard(rootView.getContext());
+        mCardActiveDevices.init();
+        mCardActiveDevices.setShadow(true);
+
+        mCardViewActiveDevices = (CardView) rootView.findViewById(R.id.cardActiveDevices);
+        mCardViewActiveDevices.setCard(mCardActiveDevices);
+
+
+        ArrayList<NfcRecord> updatedResults = new ArrayList<NfcRecord>();
+        NfcRecord noDevice = new NfcRecord();
+        noDevice.setType("");
+        noDevice.setPlace("Requesting");
+        noDevice.setLocation("Data");
+        updatedResults.add(noDevice);
+        mCardActiveDevices.updateItems(updatedResults);
+    }
+
+    private void refreshActiveDevicesCard(ArrayList<NfcRecord> updatedResults){
+        if (updatedResults != null) {
+           if (updatedResults.size() > 0) {
+               mCardActiveDevices.updateItems(updatedResults);
+               return;
+           }
+        }
+        updatedResults = new ArrayList<NfcRecord>();
+        NfcRecord noDevice = new NfcRecord();
+        noDevice.setType("");
+        noDevice.setPlace("zero");
+        noDevice.setLocation("Active Devices");
+        updatedResults.add(noDevice);
+        mCardActiveDevices.updateItems(updatedResults);
+
+    }
 
     private void configureUserHistoryCard(){
         mCardViewUserHistory = (CardView) rootView.findViewById(R.id.cardUserHistory);
@@ -650,8 +716,21 @@ public class DashboardFragment extends Fragment implements
             energyConsumptionHistory.delegate = this;
             energyConsumptionHistory.execute(user, Utils.getDateDaysAgo(7),
                     Utils.getCurrentTimestamp());
+
+
+
+            RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
+            requestUserActiveDevicesAsyncTask.delegate = this;
+            requestUserActiveDevicesAsyncTask.execute(
+                    PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
+                            .getString(UserPreferences.USERNAME, "TBD"));
         }
         requestInProcess = true;
+    }
+
+    public void processFinishRequestUserActiveDevices(List<NfcRecord> outputList){
+        ArrayList<NfcRecord> activeDevices = new ArrayList<NfcRecord>(outputList);
+        refreshActiveDevicesCard(activeDevices);
     }
 
     public void processFinishRequestEnergyConsumptionHistory(List<EnergyConsumptionRecord> outputList){

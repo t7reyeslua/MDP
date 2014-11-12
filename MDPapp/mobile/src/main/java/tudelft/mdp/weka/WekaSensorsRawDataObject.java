@@ -474,7 +474,7 @@ public class WekaSensorsRawDataObject {
      * @brief it returns a string (line) with all the features for motion sensors
      */
     public String getFeatures(int nSamples, boolean consolidated){
-        Log.i(LOGTAG, "Getting Features");
+        Log.i(LOGTAG, "Getting Features ");
         if (mRecordedSensorsHM.size() == 0){
             return "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
         }

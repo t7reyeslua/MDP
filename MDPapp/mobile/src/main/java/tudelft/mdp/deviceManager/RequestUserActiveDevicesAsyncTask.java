@@ -50,11 +50,12 @@ public class RequestUserActiveDevicesAsyncTask extends AsyncTask<Object, Void, B
     protected void onPostExecute(Boolean result) {
         if (result) {
             if (mUserStats != null) {
-                Log.i(TAG, "Active devices: "  + mUserStats.size());
-                delegate.processFinishRequestUserActiveDevices(mUserStats);
+                Log.i(TAG, "Active devices: " + mUserStats.size());
             } else {
                 Log.i(TAG, "Active devices: 0");
+                mUserStats = new ArrayList<NfcRecord>();
             }
+            delegate.processFinishRequestUserActiveDevices(mUserStats);
         }
     }
 
