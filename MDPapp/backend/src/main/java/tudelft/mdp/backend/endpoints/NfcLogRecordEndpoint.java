@@ -84,6 +84,36 @@ public class NfcLogRecordEndpoint {
         }
     }
 
+    @ApiMethod(name = "getActiveUsersOfDevice", path = "get_active_users_device")
+    public NfcRecord getActiveUsersOfDevice(@Named("nfcId") String nfcId) {
+
+        LOG.info("Calling getActiveUsersOfDevice method");
+
+        List<RegistrationRecord> users = ofy().load().type(RegistrationRecord.class).list();
+
+        int activeUsers = 0;
+        for (RegistrationRecord user : users){
+            NfcLogRecord lastLogOfUser = getLastUserLogOfDevice(nfcId, user.getUsername());
+            if (lastLogOfUser != null){
+                if (lastLogOfUser.getState()){
+                    activeUsers++;
+                }
+            }
+        }
+
+        NfcRecordEndpoint nfcRecordEndpoint = new NfcRecordEndpoint();
+        NfcRecord deviceInfo;
+        try {
+            deviceInfo = nfcRecordEndpoint.getNFC(nfcId);
+        } catch (NotFoundException e){
+            deviceInfo = new NfcRecord();
+            deviceInfo.setNfcId(nfcId);
+        }
+        deviceInfo.setState(activeUsers);
+        return deviceInfo;
+
+    }
+
     @ApiMethod(name = "listDeviceLogFromUser", path = "list_deviceLog_user")
     public CollectionResponse<NfcLogRecord> listDeviceLogFromUser(@Named("nfcId") String nfcId, @Named("user") String user) {
 

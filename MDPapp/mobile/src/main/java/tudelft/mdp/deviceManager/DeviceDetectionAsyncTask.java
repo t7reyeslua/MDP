@@ -59,7 +59,14 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         }
 
         try {
-            NfcRecord mDeviceInfo = mDeviceEndpointService.getDevice(nfcTag).execute();
+            tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcRecord mDeviceInfoTemp = mDeviceLogEndpointService.getActiveUsersOfDevice(nfcTag).execute();
+            NfcRecord mDeviceInfo = new NfcRecord();
+            mDeviceInfo.setNfcId(mDeviceInfoTemp.getNfcId());
+            mDeviceInfo.setPlace(mDeviceInfoTemp.getPlace());
+            mDeviceInfo.setLocation(mDeviceInfoTemp.getLocation());
+            mDeviceInfo.setType(mDeviceInfoTemp.getType());
+            mDeviceInfo.setDescription(mDeviceInfoTemp.getDescription());
+            mDeviceInfo.setState(mDeviceInfoTemp.getState());
             Log.e(TAG, "Previously registered device: TRUE");
 
 
@@ -89,8 +96,8 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
 
                 //Ask for motion location data if the user is turning on the device
                 if (newLogRecord.getState()) {
-                    // TODO remove comment
                     Log.w(TAG, "User is turning ON device. Ask for motion-location data");
+                    // TODO remove comment of broadcast
                     //askForMotionLocation(mDeviceInfo);
                 }
 
@@ -100,6 +107,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
             NfcLogRecord insertedDeviceLog = mDeviceLogEndpointService.insertDeviceLog(newLogRecord).execute();
 
 
+            // Calculate ANY USER
             int nUsers = 0;
             NfcRecord deviceInfoUpdated;
             if (newLogRecord.getState()){
