@@ -25,6 +25,11 @@
     </datastore-index>
 
 
+    <datastore-index kind="DeviceMotionLocationRecord" ancestor="false" source="manual">
+        <property name="timestamp" direction="asc"/>
+        <property name="event" direction="asc"/>
+    </datastore-index>
+
 
     <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
         <property name="place" direction="asc"/>

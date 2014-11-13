@@ -80,7 +80,7 @@ public class WekaSensorsRawDataObject {
         FileCreator mFileCreator;
         String motionFeatures = getFeatures(10000, consolidated);
         if (motionFeatures.length() > 0) {
-            mFileCreator = new FileCreator("MOTION_" + event + "_", Constants.DIRECTORY_TRAINING);
+            mFileCreator = new FileCreator("MOTION_" + event, Constants.DIRECTORY_TRAINING);
             mFileCreator.openFileWriter();
             mFileCreator.saveData(motionFeatures);
             mFileCreator.closeFileWriter();
@@ -469,6 +469,57 @@ public class WekaSensorsRawDataObject {
 
     /**
      * @author Luis Gonzalez
+     * @version 1, 30/10/14
+     *
+     * @brief it returns a Arraylist of strings (line) with all attributes for printing
+     */
+    public ArrayList<String> getAttributes(){
+        ArrayList<String> AttributesList = new ArrayList<String>();
+
+
+
+        for(int i=2;i<(18)+2;i=i+3){
+//    		for(int i=2;i<18;i++){
+
+            String[] sensornameX = getAxisName(i).split("_");
+            String[] sensornameY = getAxisName(i + 1).split("_");
+            String[] sensornameZ = getAxisName(i + 2).split("_");
+
+            AttributesList.add("@attribute mean_"+sensornameX[1]+sensornameX[2]+" numeric");
+            AttributesList.add("@attribute mean_"+sensornameY[1]+sensornameY[2]+" numeric");
+            AttributesList.add("@attribute mean_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+            AttributesList.add("@attribute meanMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
+
+            AttributesList.add("@attribute std_"+sensornameX[1]+sensornameX[2]+" numeric");
+            AttributesList.add("@attribute std_"+sensornameY[1]+sensornameY[2]+" numeric");
+            AttributesList.add("@attribute std_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+            AttributesList.add("@attribute stdMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
+
+            AttributesList.add("@attribute var_"+sensornameX[1]+sensornameX[2]+" numeric");
+            AttributesList.add("@attribute var_"+sensornameY[1]+sensornameY[2]+" numeric");
+            AttributesList.add("@attribute var_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+            AttributesList.add("@attribute varMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
+
+            AttributesList.add("@attribute FundF_"+sensornameX[1]+sensornameX[2]+" numeric");
+            AttributesList.add("@attribute FundF_"+sensornameY[1]+sensornameY[2]+" numeric");
+            AttributesList.add("@attribute FundF_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+
+            AttributesList.add("@attribute ZXing_"+sensornameX[1]+sensornameX[2]+" numeric");
+            AttributesList.add("@attribute ZXing_"+sensornameY[1]+sensornameY[2]+" numeric");
+            AttributesList.add("@attribute ZXing_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+
+            AttributesList.add("@attribute SCount_"+sensornameX[1]+sensornameX[2]+" numeric");
+            AttributesList.add("@attribute SCount_"+sensornameY[1]+sensornameY[2]+" numeric");
+            AttributesList.add("@attribute SCount_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+
+        }
+
+
+        return AttributesList;
+    }
+
+    /**
+     * @author Luis Gonzalez
      * @version 1, 29/10/14
      *
      * @brief it returns a string (line) with all the features for motion sensors
@@ -599,57 +650,6 @@ public class WekaSensorsRawDataObject {
 
 
         return deletelastchar(features,',');
-    }
-
-    /**
-     * @author Luis Gonzalez
-     * @version 1, 30/10/14
-     *
-     * @brief it returns a Arraylist of strings (line) with all attributes for printing
-     */
-    public ArrayList<String> getAttributes(){
-        ArrayList<String> AttributesList = new ArrayList<String>();
-
-
-
-        for(int i=2;i<(18)+2;i=i+3){
-//    		for(int i=2;i<18;i++){
-
-            String[] sensornameX = getAxisName(i).split("_");
-            String[] sensornameY = getAxisName(i + 1).split("_");
-            String[] sensornameZ = getAxisName(i + 2).split("_");
-
-            AttributesList.add("@attribute mean_"+sensornameX[1]+sensornameX[2]+" numeric");
-            AttributesList.add("@attribute mean_"+sensornameY[1]+sensornameY[2]+" numeric");
-            AttributesList.add("@attribute mean_"+sensornameZ[1]+sensornameZ[2]+" numeric");
-            AttributesList.add("@attribute meanMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
-
-            AttributesList.add("@attribute std_"+sensornameX[1]+sensornameX[2]+" numeric");
-            AttributesList.add("@attribute std_"+sensornameY[1]+sensornameY[2]+" numeric");
-            AttributesList.add("@attribute std_"+sensornameZ[1]+sensornameZ[2]+" numeric");
-            AttributesList.add("@attribute stdMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
-
-            AttributesList.add("@attribute var_"+sensornameX[1]+sensornameX[2]+" numeric");
-            AttributesList.add("@attribute var_"+sensornameY[1]+sensornameY[2]+" numeric");
-            AttributesList.add("@attribute var_"+sensornameZ[1]+sensornameZ[2]+" numeric");
-            AttributesList.add("@attribute varMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
-
-            AttributesList.add("@attribute FundF_"+sensornameX[1]+sensornameX[2]+" numeric");
-            AttributesList.add("@attribute FundF_"+sensornameY[1]+sensornameY[2]+" numeric");
-            AttributesList.add("@attribute FundF_"+sensornameZ[1]+sensornameZ[2]+" numeric");
-
-            AttributesList.add("@attribute ZXing_"+sensornameX[1]+sensornameX[2]+" numeric");
-            AttributesList.add("@attribute ZXing_"+sensornameY[1]+sensornameY[2]+" numeric");
-            AttributesList.add("@attribute ZXing_"+sensornameZ[1]+sensornameZ[2]+" numeric");
-
-            AttributesList.add("@attribute SCount_"+sensornameX[1]+sensornameX[2]+" numeric");
-            AttributesList.add("@attribute SCount_"+sensornameY[1]+sensornameY[2]+" numeric");
-            AttributesList.add("@attribute SCount_"+sensornameZ[1]+sensornameZ[2]+" numeric");
-
-        }
-
-
-        return AttributesList;
     }
 
     /**

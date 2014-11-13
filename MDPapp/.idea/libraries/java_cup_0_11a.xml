@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="java-cup-0.11a">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.squirrel-sql.thirdparty-non-maven/java-cup/0.11a/1de46cc85d147d9f91af59d4a0107091c8b112d6/java-cup-0.11a.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.squirrel-sql.thirdparty-non-maven/java-cup/0.11a/70aeeb122a93d6c72b13384f50acc2d85334caae/java-cup-0.11a-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

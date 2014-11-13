@@ -43,7 +43,7 @@ public class FileCreator {
      */
     public FileCreator(String filename, String foldername){
         String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(System.currentTimeMillis());
-        this.filename = "log_" + filename + "_" +date + ".txt" ;
+        this.filename = "log_" + filename + ".txt" ;
         this.foldername = foldername;
     }
 

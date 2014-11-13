@@ -263,6 +263,8 @@ public class Utils {
             energy = time * Energy.KWH_GRILL;
         } else if (deviceType.equals(Devices.VACUUM_CLEANER)){
             energy = time * Energy.KWH_VACUUMCLEANER;
+        }else if (deviceType.equals(Devices.COFFEE_MACHINE)){
+            energy = time * Energy.KWH_COFFEEMACHINE;
         }
         return energy;
     }

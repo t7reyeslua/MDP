@@ -83,16 +83,16 @@ public class WekaNetworkScansObject {
             return;
         }
 
-        FileCreator mFileCreator = new FileCreator("LOCATION_" + event + "_", Constants.DIRECTORY_TRAINING);
+        FileCreator mFileCreator = new FileCreator("LOCATION_" + event, Constants.DIRECTORY_TRAINING);
         mFileCreator.openFileWriter();
 
         //Write Header
         String header = "";
         for (String networkBSSID : mNetworksFeatures.keySet()){
-             header += networkBSSID + "_mean," +
-                          networkBSSID + "_std,"  +
-                          networkBSSID + "_min,"  +
-                          networkBSSID + "_max,";
+            header += "N_" + networkBSSID + "_mean," +
+                    "N_" + networkBSSID + "_std,"  +
+                    "N_" + networkBSSID + "_min,"  +
+                    "N_" + networkBSSID + "_max,";
         }
         header = header.substring(0, header.length()-1);
         mFileCreator.saveData(header + "\n");
@@ -103,7 +103,7 @@ public class WekaNetworkScansObject {
 
             ArrayList<Double> features = mNetworksFeatures.get(networkBSSID);
             for (Double feature : features){
-                values += feature + ",";
+                values += String.format("%.4f",feature) + ",";
             }
 
         }
@@ -135,7 +135,7 @@ public class WekaNetworkScansObject {
 
             ArrayList<Double> networkFeatures = mNetworksFeatures.get(networkBSSID);
             for (Double feature : networkFeatures){
-                values += feature + ",";
+                values += String.format("%.4f",feature) + ",";
             }
 
         }

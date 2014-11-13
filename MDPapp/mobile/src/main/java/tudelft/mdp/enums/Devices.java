@@ -17,6 +17,7 @@ public class Devices {
     public static final String COOKER = "Cooker";
     public static final String GRILL = "Grill";
     public static final String VACUUM_CLEANER = "Vacuum cleaner";
+    public static final String COFFEE_MACHINE = "CoffeeMachine";
     public static final String TOTAL = "TOTAL";
 
 

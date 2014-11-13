@@ -857,12 +857,13 @@ public class MdpWorkerService extends Service implements
             if (trainingPhase){
                 String[] parts = deviceEvent.split("_");
                 String deviceId = parts[0];
-                String deviceType = parts[1];
+                String deviceType = parts[1].replaceAll("\\s","");
                 String timestamp = parts[2];
-                String deviceLocation = parts[3];
+                String deviceLocation = parts[3].replaceAll("\\s","");
 
-                wekaSensorsRawDataObject.saveToFile(deviceType+"-"+deviceLocation+"-"+deviceId+"-"+timestamp, consolidated);
-                wekaNetworkScansObject.saveToFile(deviceEvent);
+                String filename = deviceType+"-"+deviceLocation+"-"+deviceId+"_"+timestamp;
+                wekaSensorsRawDataObject.saveToFile(filename.replaceAll("\\s",""), consolidated);
+                wekaNetworkScansObject.saveToFile(filename.replaceAll("\\s",""));
             }
 
             dataRecollectionInProgress = false;
@@ -881,9 +882,9 @@ public class MdpWorkerService extends Service implements
         Boolean consolidated = sharedPrefs.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
         String[] parts = deviceEvent.split("_");
         String deviceId = parts[0];
-        String deviceType = parts[1];
+        String deviceType = parts[1].replaceAll("\\s","");
         String timestamp = parts[2];
-        String deviceLocation = parts[3];
+        String deviceLocation = parts[3].replaceAll("\\s","");
         Text motionFeatures = new Text();
         Text locationFeatures = new Text();
         motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));

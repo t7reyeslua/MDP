@@ -7,7 +7,13 @@ import com.google.api.server.spi.response.CollectionResponse;
 import com.google.appengine.api.datastore.Text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -15,6 +21,9 @@ import javax.inject.Named;
 import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.records.NfcRecord;
+import tudelft.mdp.backend.weka.WekaMethods;
+import tudelft.mdp.backend.weka.WekaMotionUtils;
+import weka.core.Instances;
 
 import static tudelft.mdp.backend.OfyService.ofy;
 
@@ -164,6 +173,257 @@ public class DeviceMotionLocationRecordEndpoint {
     }
 
 
+    private ArrayList<String> getLocationAttributesSTR(
+            String minDate,
+            String maxDate){
+
+        List<DeviceMotionLocationRecord> records= ofy().load().type(DeviceMotionLocationRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .list();
+
+        LOG.info("Records:" + records.size());
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributes = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributes.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+
+        }
+        LOG.info("Distinct Attributes:" + locationAttributesSet.size());
+        LOG.info("Distinct Networks:" + (locationAttributesSet.size()/4));
+
+        ArrayList<String> result  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(result);
+        return result;
+
+    }
+
+    @ApiMethod(name = "getLocationAttributes", path = "get_location_attributes")
+    public CollectionResponse<DeviceMotionLocationRecord> getLocationAttributes(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
+
+        LOG.info("Calling getLocationAttributes method from: " + minDate + " to " + maxDate);
+
+        ArrayList<String> locationAttributes    = new ArrayList<String>(getLocationAttributesSTR(
+                minDate, maxDate));
+        ArrayList<DeviceMotionLocationRecord> records = new ArrayList<DeviceMotionLocationRecord>();
+
+        for (String s : locationAttributes){
+            DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
+            deviceMotionLocationRecord.setEvent(s);
+            records.add(deviceMotionLocationRecord);
+        }
+
+        return CollectionResponse.<DeviceMotionLocationRecord>builder().setItems(records).build();
+    }
+
+
+    private ArrayList<String> getClassAttributesSTR(
+            String minDate,
+            String maxDate){
+
+        List<DeviceMotionLocationRecord> records= ofy().load().type(DeviceMotionLocationRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .list();
+
+        LOG.info("Records:" + records.size());
+        HashSet<String> hashSet = new HashSet<String>();
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            hashSet.add(deviceMotionLocationRecord.getEvent().replaceAll("\\s",""));
+        }
+        LOG.info("Distinct Records:" + hashSet.size());
+
+        return new ArrayList<String>(hashSet);
+
+    }
+
+    @ApiMethod(name = "getClassAttributes", path = "get_class_attributes")
+    public CollectionResponse<DeviceMotionLocationRecord> getClassAttributes(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
+
+        LOG.info("Calling getClassAttributes method from: " + minDate + " to " + maxDate);
+
+        ArrayList<String> classAttributes    = new ArrayList<String>(getClassAttributesSTR(minDate,maxDate));
+        ArrayList<DeviceMotionLocationRecord> records = new ArrayList<DeviceMotionLocationRecord>();
+
+        for (String s : classAttributes){
+            DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
+            deviceMotionLocationRecord.setEvent(s);
+            records.add(deviceMotionLocationRecord);
+        }
+
+        return CollectionResponse.<DeviceMotionLocationRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "getMotionLocationFeaturesProcessed", path = "get_motion_location_features_processed")
+    public CollectionResponse<DeviceMotionLocationRecord> getMotionLocationFeaturesProcessed(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
+
+        LOG.info("Calling getMotionLocationFeaturesProcessed method from: " + minDate + " to " + maxDate);
+
+        // Ask for the corresponding records
+        List<DeviceMotionLocationRecord> records= ofy().load().type(
+                DeviceMotionLocationRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .list();
+        LOG.info("Records:" + records.size());
+
+        ArrayList<String> locationAttributes;
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributesStr.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+        }
+        LOG.info("Distinct Attributes:" + locationAttributesSet.size());
+        LOG.info("Distinct Networks:" + (locationAttributesSet.size()/4));
+
+        locationAttributes  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(locationAttributes);
+
+        // Once you know all existing location attributes, build the location features
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+            String locationFeaturesStr = lines[1];
+
+            String attributes[] = locationAttributesStr.split(",");
+            String values[]     = locationFeaturesStr.split(",");
+
+            HashMap<String,String> recordFeatures = new HashMap<String, String>();
+            for (int i = 0; i < attributes.length; i++){
+                recordFeatures.put(attributes[i], values[i]);
+            }
+
+            String recordLocationFeatures = "";
+            for (String locationAttribute : locationAttributes){
+                if (recordFeatures.containsKey(locationAttribute)){
+                    recordLocationFeatures += recordFeatures.get(locationAttribute) + ",";
+                } else {
+                    recordLocationFeatures += "?,";
+                }
+            }
+            //remove the last comma
+            recordLocationFeatures = recordLocationFeatures.substring(0, recordLocationFeatures.length()-1);
+            deviceMotionLocationRecord.setLocationFeatures(new Text(recordLocationFeatures));
+        }
+        return CollectionResponse.<DeviceMotionLocationRecord>builder().setItems(records).build();
+    }
+
+
+    @ApiMethod(name = "createInstanceSetFromDB", path = "create_instance_set_from_db")
+    public void createInstanceSetFromDB(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
+
+        LOG.info("Calling createInstanceSetFromDB method from: " + minDate + " to " + maxDate);
+
+        // Ask for the corresponding records
+        List<DeviceMotionLocationRecord> records= ofy().load().type(
+                DeviceMotionLocationRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .order("timestamp")
+                .list();
+
+        LOG.info("Records:" + records.size());
+
+        createInstanceSet(records);
+
+    }
+
+
+    private void createInstanceSet(List<DeviceMotionLocationRecord> records){
+        String relation  = "Events";
+        ArrayList<String> classAttributes;
+        ArrayList<String> locationAttributes;
+        ArrayList<String> motionAttributes;
+        ArrayList<String> features = new ArrayList<String>();
+
+
+        HashSet<String> classAttributesSet = new HashSet<String>();
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            classAttributesSet.add(deviceMotionLocationRecord.getEvent().replaceAll("\\s",""));
+
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributesStr.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+        }
+        LOG.info("Distinct Class Records:" + classAttributesSet.size());
+        LOG.info("Distinct Attributes:" + locationAttributesSet.size());
+        LOG.info("Distinct Networks:" + (locationAttributesSet.size()/4));
+
+        classAttributes     = new ArrayList<String>(classAttributesSet);
+        motionAttributes    = new ArrayList<String>(WekaMotionUtils.getAttributes());
+        locationAttributes  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(locationAttributes);
+
+        // Once you know all existing location attributes, build the location features
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String motionFeatures = deviceMotionLocationRecord.getMotionFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+            String locationFeaturesStr = lines[1];
+
+            String attributes[] = locationAttributesStr.split(",");
+            String values[]     = locationFeaturesStr.split(",");
+
+            HashMap<String,String> recordFeatures = new HashMap<String, String>();
+            for (int i = 0; i < attributes.length; i++){
+                recordFeatures.put(attributes[i], values[i]);
+            }
+
+            String locationFeatures = "";
+            for (String locationAttribute : locationAttributes){
+                if (recordFeatures.containsKey(locationAttribute)){
+                    locationFeatures += recordFeatures.get(locationAttribute) + ",";
+                } else {
+                    locationFeatures += "?,";
+                }
+            }
+            //remove the last comma
+            locationFeatures = locationFeatures.substring(0, locationFeatures.length()-1);
+            String classAttribute = deviceMotionLocationRecord.getEvent().replaceAll("\\s", "");
+            //features.add(locationFeatures + "," + motionFeatures);
+            features.add(locationFeatures + "," + motionFeatures + "," + classAttribute);
+        }
+
+        Instances wekaInstances = WekaMethods.CreateInstanceSet(relation,
+                                                                motionAttributes,
+                                                                locationAttributes,
+                                                                classAttributes,
+                                                                features);
+
+        
+
+
+
+    }
 
 
 }
