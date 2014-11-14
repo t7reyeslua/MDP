@@ -72,10 +72,10 @@ public class WekaMethods {
 				  
 				if(numtest==true)  
 					ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),InstanceValue);
-				
-				
+								
 			   }
-
+		
+			
 			ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(parts.length-1),parts[parts.length-1]); 
 			
 			dataset.add(ft1Instance);
