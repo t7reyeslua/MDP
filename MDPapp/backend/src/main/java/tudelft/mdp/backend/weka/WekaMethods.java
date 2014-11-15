@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -174,18 +175,72 @@ public class WekaMethods {
     }
 
     /**
-     * Create .arff file
-     * @param dataset, a complete dataset (intances)
-     * @param namepath, as "/data/test.arff"
-     * @throws IOException
+     *
+     * @param OriginalSet:original intances of dataset
+     * @param eval: Single String having headers \n values
+     * HashMap<String, Integer> attributesHashMap = createAttributesHashMap(wekaInstances);
+     * @return Instace to eval to use with GetPredictionDistributionOnline
+     * @throws Exception
      */
-    public static void Intances2Arff(Instances dataset,String namepath) throws IOException{
+    public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval) throws Exception{
+        HashMap<String, Integer> attributesHashMap = createAttributesHashMap(OriginalSet);
 
-        ArffSaver saver = new ArffSaver();
-        saver.setInstances(dataset);
-        saver.setFile(new File(namepath));
-        saver.writeBatch();
+        Instances datasettoEval= OriginalSet;
+        datasettoEval.delete();
 
+        if (datasettoEval.classIndex() == -1)
+            datasettoEval.setClassIndex(datasettoEval.numAttributes() - 1);
+
+        int numofAttributes = OriginalSet.numAttributes();
+
+        //Inserting the One only instance
+        Instance ft1Instance = new Instance(numofAttributes);
+        String[] parts = eval.split("\\n");
+        String allAttributesFromEval = parts[0];
+
+
+        String allvaluesFromEval = parts[1];
+
+
+        String[] attributesFromEval = allAttributesFromEval.split(",");
+        String[] valuesFromEval = allvaluesFromEval.split(",");
+
+        for (int i=0;i<attributesFromEval.length;i++){
+            Integer index = getAttributeIndex(attributesHashMap, attributesFromEval[i]);
+
+            if (index > -1) {
+//            	 System.out.println(valuesFromEval[i]);
+                ft1Instance.setValue(datasettoEval.attribute(index),Double.parseDouble(valuesFromEval[i]));
+            }
+        }
+
+//        System.out.println(valuesFromEval[valuesFromEval.length-1]);
+        ft1Instance.setValue(datasettoEval.attribute(datasettoEval.numAttributes()-1),valuesFromEval[valuesFromEval.length-1]);
+
+        //Checking compatibility
+        if(OriginalSet.checkInstance(ft1Instance)==false)
+            System.out.println("Err:Instances Not compatible");
+
+        datasettoEval.add(ft1Instance);
+
+        return datasettoEval;
+    }
+
+
+    public static HashMap<String, Integer> createAttributesHashMap(Instances wekaInstances){
+        HashMap<String, Integer> attributesHashMap = new HashMap<String, Integer>();
+        for (int i = 0; i < wekaInstances.numAttributes(); i++){
+            attributesHashMap.put(wekaInstances.attribute(i).name(), i);
+        }
+        return attributesHashMap;
+    }
+
+    public static Integer getAttributeIndex(HashMap<String, Integer> attributesHashMap, String attribute){
+        Integer index = -1;
+        if (attributesHashMap.containsKey(attribute)){
+            index = attributesHashMap.get(attribute);
+        }
+        return index;
     }
 
 
@@ -214,143 +269,6 @@ public class WekaMethods {
 
         return attributeobj;
     }
-
-
-    /**
-     * Serialization Method for J48
-     * @param modelpathnname, Ful lpath including the name to save ("Name.model")
-     * @param arffpathnname, Full path including the name of the .arff (NAME.arff)
-     *
-     **/
-    public static void CreateModelJ48(String modelpathnname,String arffpathnname)throws Exception{
-
-        // create J48
-        Classifier cls = new J48();
-
-        // train
-        Instances inst = new Instances(new BufferedReader(new FileReader(arffpathnname)));
-        inst.setClassIndex(inst.numAttributes() - 1);
-        cls.buildClassifier(inst);
-        weka.core.SerializationHelper.write(modelpathnname, cls);
-    }
-
-    /**
-     * Serialization Method for J48
-     * @param modelpathnname, Full path including the name to save ("C:\\some\\where\\to\\write\\test.model")
-     * @param arffpathnname, Full path including the name of the .arff ("C:\\some\\where\\to\\read\\test.arff")
-     * @param folds, number of folds (typically 10)
-     *
-     * @return Prints the summary, of correct classifiers
-     **/
-    public static String FoldEvaluation(String modelpathnname,String arffpathnname, int folds)throws Exception{
-        Instances data = new Instances(new BufferedReader(new FileReader(arffpathnname)));
-
-        Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpathnname);
-        if (data.classIndex() == -1)
-            data.setClassIndex(data.numAttributes() - 1);
-        Evaluation eval = new Evaluation(data);
-        Random rand = new Random(1);  // using seed = 1
-        eval.crossValidateModel(cls, data, folds, rand);
-
-        return eval.toSummaryString();
-    }
-
-
-    /**
-     * This methods takes an .arff file and returns the Prediction of the instance num value.
-     * 		If not present it uses the 1st one.
-     * 		The test file shall have the same attributes than the one used to create the model
-     *
-     * @param modelpath, Full path including the name to save ("C:\\some\\where\\to\\write\\test.model")
-     * @param testArff, Full path including the name of the .arff ("C:\\some\\where\\to\\read\\test.arff")
-     *
-     * @return array with the Prediction distribution array in probabilities
-
-     * "predictionDistribution"
-     * 		http://stackoverflow.com/questions/11960580/weka-classification-likelihood-of-the-classes
-     * */
-    public static double[] GetPredictionDistribution(String modelpath,String testArff)throws Exception{
-
-        Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpath);
-        DataSource source = new DataSource(testArff);//get instances from test file
-        Instances instances = source.getDataSet();
-        if (instances.classIndex() == -1)
-            instances.setClassIndex(instances.numAttributes() - 1);
-        double[] predictionDistribution = cls.distributionForInstance(instances.instance(0));
-
-
-        return  predictionDistribution;
-    }
-
-    public static double[] GetPredictionDistribution(String modelpath,String testArff,int instancenum)throws Exception{
-
-        Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpath);
-        DataSource source = new DataSource(testArff);//get instances from test file
-        Instances instances = source.getDataSet();
-        if (instances.classIndex() == -1)
-            instances.setClassIndex(instances.numAttributes() - 1);
-        double[] predictionDistribution = cls.distributionForInstance(instances.instance(instancenum));
-
-        return  predictionDistribution;
-    }
-
-    /**
-     * Similar to GetPredictionDistribution prints such distribution.
-     *
-     * @param modelpath complete path including model name "C:\\some\\where\\tree.model"
-     * @param testArff complete path including arff name to test "C:\\some\\where\\toTest.arff"
-     * @param instanceNum if needed a the distribution of a specific instance in a large arff file
-     *
-     * @return array with the Prediction distribution array in probabilities
-     * */
-    public static void PrintPredictedDistribution(String modelpath,String testArff,int instanceNum)throws Exception{
-
-        Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpath);
-
-        DataSource source = new DataSource(testArff);//get instances from test file
-
-        Instances instances = source.getDataSet();
-        if (instances.classIndex() == -1)
-            instances.setClassIndex(instances.numAttributes() - 1);
-
-        //perform your prediction
-        double value=cls.classifyInstance(instances.instance(instanceNum));
-
-        double[] predictionDistribution = cls.distributionForInstance(instances.instance(instanceNum));
-
-        //get the name of the class value
-        String prediction=instances.classAttribute().value((int)value);
-
-        int predictionPosition=-1;
-        for(int i=0;i<instances.numClasses();i++){
-            if(prediction.equals(instances.classAttribute().value(i)))
-                predictionPosition=i;
-        }
-
-        System.out.printf("Prediction of instance %d is %10s with  %6.3f%% \t",
-                instanceNum,prediction,predictionDistribution[predictionPosition]);
-
-        for (int predictionDistributionIndex = 0;
-                predictionDistributionIndex < predictionDistribution.length;
-                predictionDistributionIndex++)
-        {
-            // Get this distribution index's class label.
-            String predictionDistributionIndexAsClassLabel =
-                    instances.classAttribute().value(
-                            predictionDistributionIndex);
-
-            // Get the probability.
-            double predictionProbability =
-                    predictionDistribution[predictionDistributionIndex];
-
-            System.out.printf("[%s : %6.3f]",
-                    predictionDistributionIndexAsClassLabel,
-                    predictionProbability );
-        }
-        System.out.printf("\n");
-    }
-
-
 
 
 
