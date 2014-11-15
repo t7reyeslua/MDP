@@ -13,7 +13,8 @@
                 tudelft.mdp.backend.endpoints.LocationLogRecordEndpoint,
                 tudelft.mdp.backend.endpoints.RadioMapFingerprintEndpoint,
                 tudelft.mdp.backend.endpoints.EnergyConsumptionRecordEndpoint,
-                tudelft.mdp.backend.endpoints.DeviceMotionLocationRecordEndpoint
+                tudelft.mdp.backend.endpoints.DeviceMotionLocationRecordEndpoint,
+                tudelft.mdp.backend.endpoints.WekaObjectRecordEndpoint
             </param-value>
         </init-param>
     </servlet>

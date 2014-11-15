@@ -17,6 +17,7 @@ import tudelft.mdp.backend.records.NfcRecord;
 import tudelft.mdp.backend.records.RegistrationRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecordWrapper;
+import tudelft.mdp.backend.records.WekaObjectRecord;
 
 /**
  * Objectify service wrapper so we can statically register our persistence classes
@@ -36,6 +37,7 @@ public class OfyService {
         ObjectifyService.register(DeviceMotionLocationRecord.class);
         ObjectifyService.register(EnergyConsumptionRecord.class);
         ObjectifyService.register(DeviceUsageRecord.class);
+        ObjectifyService.register(WekaObjectRecord.class);
     }
 
     public static Objectify ofy() {

@@ -10,6 +10,8 @@ public class Devices {
     public static final String WASHING_MACHINE = "Washing machine";
     public static final String VIDEO_GAME_CONSOLE = "Video Game console";
     public static final String HOTPLATES = "Hotplates";
+    public static final String OVEN = "Oven";
+    public static final String BOILER = "Boiler";
     public static final String MICROWAVE = "Microwave";
     public static final String LIGHTS = "Lights";
     public static final String STEREO = "Stereo";

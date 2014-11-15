@@ -4,6 +4,11 @@ package tudelft.mdp.utils;
 import android.hardware.Sensor;
 import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -265,6 +270,10 @@ public class Utils {
             energy = time * Energy.KWH_VACUUMCLEANER;
         }else if (deviceType.equals(Devices.COFFEE_MACHINE)){
             energy = time * Energy.KWH_COFFEEMACHINE;
+        }else if (deviceType.equals(Devices.OVEN)){
+            energy = time * Energy.KWH_OVEN;
+        } else if (deviceType.equals(Devices.BOILER)){
+            energy = time * Energy.KWH_BOILER;
         }
         return energy;
     }
@@ -295,6 +304,10 @@ public class Utils {
             time = energy / Energy.KWH_GRILL;
         } else if (deviceType.equals(Devices.VACUUM_CLEANER)){
             time = energy / Energy.KWH_VACUUMCLEANER;
+        }else if (deviceType.equals(Devices.OVEN)){
+            time = energy / Energy.KWH_OVEN;
+        } else if (deviceType.equals(Devices.BOILER)){
+            time = energy / Energy.KWH_BOILER;
         }
         return time;
     }
@@ -363,6 +376,19 @@ public class Utils {
             return sum / list.size();
         }
         return sum;
+    }
+
+    public static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream os = new ObjectOutputStream(out);
+        os.writeObject(obj);
+        return out.toByteArray();
+    }
+
+    public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        ObjectInputStream is = new ObjectInputStream(in);
+        return is.readObject();
     }
 
 }

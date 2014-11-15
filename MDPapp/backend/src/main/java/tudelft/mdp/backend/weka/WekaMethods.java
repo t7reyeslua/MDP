@@ -60,8 +60,23 @@ public class WekaMethods {
             Instance ft1Instance = new Instance(numofAttributes);
             for(int j=0;j<parts.length-1;j++){
 
-                ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),Double.parseDouble(parts[j]));
+                boolean numtest=true;
+                double InstanceValue=0;
+                try
+                {
+                    InstanceValue = Double.parseDouble(parts[j]);
+                }
+                catch(NumberFormatException nfe)
+                {
+                    numtest= false;
+                }
+
+                if(numtest==true)
+                    ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),InstanceValue);
+
+
             }
+            System.out.println(parts[parts.length-1]);
 
             ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(parts.length-1),parts[parts.length-1]);
 
