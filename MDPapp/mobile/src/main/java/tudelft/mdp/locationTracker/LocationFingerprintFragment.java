@@ -28,21 +28,21 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.R;
+import tudelft.mdp.backend.endpoints.locationFeaturesRecordApi.model.LocationFeaturesRecord;
+import tudelft.mdp.backend.endpoints.locationFeaturesRecordApi.model.Text;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApHistogramRecord;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.LocationFingerprintRecord;
-import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.LocationFingerprintRecordWrapper;
-import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.ui.FingerprintControlCard;
 import tudelft.mdp.ui.FingerprintZoneCard;
 import tudelft.mdp.utils.Utils;
+import tudelft.mdp.weka.WekaNetworkScansObject;
 
 
 public class LocationFingerprintFragment extends Fragment implements ServiceConnection {
@@ -70,10 +70,15 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
     private static final String LOGTAG = "MDP-LocationFingerprintFragment";
     private int currentSamples = 0;
 
+
+    private ArrayList<WekaNetworkScansObject> mWekaNetworkScansObjects = new ArrayList<WekaNetworkScansObject>();
+    private ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans = new ArrayList<ArrayList<NetworkInfoObject>>();
+    private ArrayList<LocationFeaturesRecord> mLocationFeaturesRecords = new ArrayList<LocationFeaturesRecord>();
     private ArrayList<ApHistogramRecord> localHistogram = new ArrayList<ApHistogramRecord>();
     private ArrayList<LocationFingerprintRecord> rawScans = new ArrayList<LocationFingerprintRecord>();
 
 
+    private int fingerprintSamples;
     private boolean mCalibrated;
     private float calibrationM;
     private float calibrationB;
@@ -227,7 +232,10 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
 
             localHistogram.clear();
             rawScans.clear();
+            mWekaNetworkScansObjects.clear();
+            mLocationFeaturesRecords.clear();
 
+            fingerprintSamples = PreferenceManager.getDefaultSharedPreferences(rootView.getContext()).getInt(UserPreferences.SCANSAMPLES, 4);
             automaticBinding();
             mPlaceAutoComplete.setEnabled(false);
             mZoneAutoComplete.setEnabled(false);
@@ -265,13 +273,59 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         mProgressBar.setProgress(0);
 
 
+        buildLocationFeaturesRecordArray(place, zone, Utils.getCurrentTimestamp());
         uploadScanDataToCloud(place, zone);
 
     }
 
+    private void buildLocationFeaturesRecordArray(String place, String zone, String timestamp){
+        int chunkSize = fingerprintSamples;
+        ArrayList<ArrayList<ArrayList<NetworkInfoObject>>> wrapperChunks = new ArrayList<ArrayList<ArrayList<NetworkInfoObject>>>();
+
+        for (int i = 0; i < mNetworkScans.size(); i += chunkSize){
+            ArrayList<ArrayList<NetworkInfoObject>> subList = new ArrayList<ArrayList<NetworkInfoObject>>(
+                    mNetworkScans.subList(i, i + (Math.min(chunkSize, mNetworkScans.size() - i))));
+            wrapperChunks.add(subList);
+        }
+
+        for (ArrayList<ArrayList<NetworkInfoObject>> chunk : wrapperChunks){
+            if (chunk.size() == fingerprintSamples) {
+                WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(chunk);
+                wekaNetworkScansObject.buildNetworkFeatures();
+                mWekaNetworkScansObjects.add(wekaNetworkScansObject);
+            }
+        }
+
+        for (WekaNetworkScansObject wekaNetworkScansObject : mWekaNetworkScansObjects){
+            LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+
+
+            String user = PreferenceManager.getDefaultSharedPreferences(rootView.getContext()).getString(UserPreferences.USERNAME, "Unknown");
+            Text locationFeatures = new Text();
+            locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
+            locationFeaturesRecord.setLocationFeatures(locationFeatures);
+            locationFeaturesRecord.setPlace(place);
+            locationFeaturesRecord.setZone(zone);
+            locationFeaturesRecord.setTimestamp(timestamp);
+            locationFeaturesRecord.setUsername(user);
+
+            mLocationFeaturesRecords.add(locationFeaturesRecord);
+        }
+
+        Log.w(LOGTAG, "Samples taken: " + mNetworkScans.size()
+                + "| Groups formed: " +  wrapperChunks.size()
+                + "| Discarded scans: " +  (wrapperChunks.size() - mLocationFeaturesRecords.size()));
+
+
+    }
+
+
     private void uploadScanDataToCloud(String place, String zone){
 
         Toast.makeText(rootView.getContext(), "Updating data...", Toast.LENGTH_SHORT).show();
+
+        Log.w(LOGTAG, "uploadScanDataToCloud: Weka Features Data");
+        new UploadLocationFeaturesAsyncTask().execute(rootView.getContext(), mLocationFeaturesRecords);
         Log.w(LOGTAG, "uploadScanDataToCloud: Histograms");
         new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
         Log.w(LOGTAG, "uploadScanDataToCloud: Raw Data");
@@ -390,6 +444,8 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         replaceFingerprintCard(currentSamples);
 
         applyCalibrationParams(recentScanResult);
+
+        mNetworkScans.add(recentScanResult);
         addScanToAggregatedResults(recentScanResult);
         addScanToRawResults(recentScanResult);
     }

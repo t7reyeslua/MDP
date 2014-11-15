@@ -5,8 +5,7 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>
-                tudelft.mdp.backend.endpoints.RegistrationEndpoint,
+            <param-value>tudelft.mdp.backend.endpoints.RegistrationEndpoint,
                 tudelft.mdp.backend.endpoints.MessagingEndpoint,
                 tudelft.mdp.backend.endpoints.NfcRecordEndpoint,
                 tudelft.mdp.backend.endpoints.NfcLogRecordEndpoint,
@@ -14,8 +13,8 @@
                 tudelft.mdp.backend.endpoints.RadioMapFingerprintEndpoint,
                 tudelft.mdp.backend.endpoints.EnergyConsumptionRecordEndpoint,
                 tudelft.mdp.backend.endpoints.DeviceMotionLocationRecordEndpoint,
-                tudelft.mdp.backend.endpoints.WekaObjectRecordEndpoint
-            </param-value>
+                tudelft.mdp.backend.endpoints.WekaObjectRecordEndpoint,
+                tudelft.mdp.backend.endpoints.LocationFeaturesRecordEndpoint</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

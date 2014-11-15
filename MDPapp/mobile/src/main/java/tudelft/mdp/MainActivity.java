@@ -349,7 +349,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         child = new ArrayList<String>();
         //child.add("Sensors recorder");
         child.add("Messenger");
-        child.add("DB manager");
+        //child.add("DB manager");
         childItem.add(child);
     }
 
@@ -780,8 +780,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
             NdefRecord[] records = ndefMessage.getRecords();
             for (NdefRecord ndefRecord : records) {
-                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays
-                        .equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
+                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN) {
                     try {
                         return readText(ndefRecord);
                     } catch (UnsupportedEncodingException e) {

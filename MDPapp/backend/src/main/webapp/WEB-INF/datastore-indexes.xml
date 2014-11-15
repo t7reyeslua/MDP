@@ -31,6 +31,16 @@
     </datastore-index>
 
 
+    <datastore-index kind="LocationFeaturesRecord" ancestor="false" source="manual">
+        <property name="place" direction="asc"/>
+        <property name="zone" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="LocationFeaturesRecord" ancestor="false" source="manual">
+        <property name="place" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+
     <datastore-index kind="LocationLogRecord" ancestor="false" source="manual">
         <property name="place" direction="asc"/>
         <property name="zone" direction="asc"/>
