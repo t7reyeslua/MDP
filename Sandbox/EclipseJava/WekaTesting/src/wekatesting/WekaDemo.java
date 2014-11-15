@@ -21,9 +21,10 @@ public class WekaDemo {
 		
 		
 		
-		
+//		EvalLocationModel();
+		DatasetQuickLocationWekatest();
 //		DatasetQuickWekatest();
-		GetLocARFFExp("C:\\Users\\LG\\Desktop\\LocationN5","C:\\Users\\LG\\Desktop\\LocationN5\\Location336",false);
+//		GetLocARFFExp("C:\\Users\\LG\\Desktop\\LocationN5","C:\\Users\\LG\\Desktop\\LocationN5\\Location336_II",false);
 //		DatasetQuickLocationWekatest();
 //		EvalSensorWindowSize();
 //		String pathmodel="C:\\Users\\LG\\Desktop\\watchSession";
@@ -70,7 +71,7 @@ public class WekaDemo {
 		ArrayList<String> ClassNames = new ArrayList<String> ();
 
 		
-		//TODO work with one folder
+
 		//Files need to be in separate folders "Location" & "Motion"
 		
 		getftofLocationlogExp(folderpath,LocationNames,LocationValues,LocationAttributes);
@@ -83,7 +84,6 @@ public class WekaDemo {
 		if(nametimestamp==true)
 			ResultsFileName=ResultsFileName+"_"+String.valueOf(System.currentTimeMillis());
 		ResultsFileName=ResultsFileName+".arff";
-//		ResultsFileName=ResultsFileName+".arff";
     	
     	Writer writer = null;
 
@@ -105,7 +105,7 @@ public class WekaDemo {
             	writer.write("A"+NameDecomposition(ClassNames.get(a))+",");
             }
         	//TODO Change names to start with a letter
-        	writer.write("A"+NameDecomposition(LocationNames.get(LocationNames.size()-1))+"}");
+        	writer.write("A"+NameDecomposition(ClassNames.get(ClassNames.size()-1))+"}");
             writer.write("\n\n");
             writer.write("@data\n");
             
@@ -151,7 +151,7 @@ public class WekaDemo {
 	/**
 	 * @brief Use to build the arff having he Location files with the format:
 	 * log_LOCATION_Microwave-LivingRoom-04E85AC22D3580_20141113151155
-	 * @param folderpath
+	 * @param folderpath should be in a folder named "\Location"
 	 * @param ResultsFileName
 	 */
 	private static void GetLocARFFExp(String folderpath,String ResultsFileName,boolean timetag) {
@@ -166,15 +166,29 @@ public class WekaDemo {
 				
 		getftofLocationlogExp(folderpath,LocationNames,LocationValues,LocationAttributes);
 		
+
 		
 		ClassNames=GetNameClass(LocationNames);
+		
+		System.out.println("\n\nGettingNames\n\n");
+		//change name of locations
+		for(int i=0;i<ClassNames.size();i++){
+			String[] splitname = ClassNames.get(i).split("-");
+			
+			ClassNames.set(i, splitname[1]);
+		}
+		ClassNames=RemoveDuplicates(ClassNames);
+		for(int i=0;i<ClassNames.size();i++){
+			
+			System.out.println(ClassNames.get(i));
+		}	
 		
 		System.out.println("\n\n Begin Merging \n");
 		//**Writting part**//
 		if(timetag==true)
 			ResultsFileName=ResultsFileName+"_Location_"+String.valueOf(System.currentTimeMillis())+".arff";
 		else
-			ResultsFileName=ResultsFileName+"_Location_"+".arff";
+			ResultsFileName=ResultsFileName+"_Location"+".arff";
 		
     	Writer writer = null;
 
@@ -187,13 +201,12 @@ public class WekaDemo {
             for(int i=0; i<LocationAttributes.size(); i++)
             	writer.write(LocationAttributes.get(i)+"\n");
 
-            writer.write("@attribute activity {");
+            writer.write("@attribute location {");
             for(int a=0; a<(ClassNames.size()-1); a++){
-            	//TODO Change names to start with a letter
-            	writer.write(NameDecomposition(ClassNames.get(a))+",");
+            	writer.write(ClassNames.get(a)+",");
             }
-        	//TODO Change names to start with a letter
-        	writer.write(NameDecomposition(LocationNames.get(LocationNames.size()-1))+"}");
+
+        	writer.write(ClassNames.get(ClassNames.size()-1)+"}");
             writer.write("\n\n");
             writer.write("@data\n");
             
@@ -207,7 +220,7 @@ public class WekaDemo {
 
                 //Writting Class
             	//TODO Change names to start with a letter
-        		writer.write(NameDecomposition(LocationNames.get(m))+"\n");
+        		writer.write(NameDecompositionLocation(LocationNames.get(m))+"\n");
             }
     	    
     	} catch (IOException ex) {
@@ -217,7 +230,30 @@ public class WekaDemo {
     	}
     	
     }
-	
+	/**
+	 * @author Luis Gonzalez
+	 * @throws Exception 
+	 * @brief prints the evaluation (Correctly Classified Instances) Location test. 
+	 * 	 */
+	private static void EvalLocationModel() throws Exception {
+		
+		String tempArff="C:\\Users\\LG\\Desktop\\Arff_20141115002306.arff";
+		String tempmodel="C:\\Users\\LG\\Desktop\\Classifier_J48_20141115024709.model";
+
+		ArrayList<String> Results = new ArrayList<String> ();
+		
+		
+		
+		//create .model
+		WekaMethods.CreateModelJ48(tempmodel,tempArff);
+				
+		//eval
+		String[] parts=WekaMethods.FoldEvaluation(tempmodel, tempArff,10).split("\n");
+		System.out.println(parts[1]);
+		System.out.println(WekaMethods.FoldEvaluation(tempmodel, tempArff,10));
+		
+		
+	}
 	/**
 	 * @author Luis Gonzalez
 	 * @throws Exception 
@@ -855,15 +891,7 @@ public class WekaDemo {
 		
 	}
 		
-	public static void PDistributionTest()throws Exception{
-		
-//		String rootPathmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\J48modelLocationWide.model"; 
-		String rootPathmodel="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\WideJ48_2.model"; 
-		String rootPathtest ="C:\\Users\\LG\\Documents\\GitHub\\MDP\\Sandbox\\EclipseJava\\WekaTesting\\LocationWidetest.arff";
-					
-		for(int i =0;i<10;i++)
-			WekaMethods.PrintPredictedDistribution(rootPathmodel,rootPathtest,i);
-	}
+
 	
 	private static void ButtTest() {
 
@@ -899,7 +927,12 @@ public class WekaDemo {
 		className=fNameparts[0];
 		return className;
 	}
-	
+	public static String NameDecompositionLocation(String fullName){
+		String className;
+		String[] fNameparts=fullName.split("-");
+		className=fNameparts[1];
+		return className;
+	}
 	public static ArrayList<String> RemoveDuplicates(ArrayList<String> ALwduplicates){
 
 		HashSet<String> listToSet = new HashSet<String>(ALwduplicates);
@@ -942,11 +975,17 @@ public class WekaDemo {
 		dataset = WekaMethods.CreateInstanceSet("event", motionAttributes, locationAttributes, classAttributes, features);
 		WekaMethods.Intances2Arff(dataset, "C:\\Users\\LG\\Desktop\\DatasetQuickWekatest.arff");
 	}
-	private static void DatasetQuickLocationWekatest() throws IOException {
+	private static void DatasetQuickLocationWekatest() throws Exception {
 		ArrayList<String> locationAttributes = new ArrayList<String>();
 		ArrayList<String> classAttributes = new ArrayList<String>();
 		ArrayList<String> features = new ArrayList<String>();
 
+		String OriginalArff = "C:\\Users\\LG\\Desktop\\Original.arff";
+		String OriginalModel = "C:\\Users\\LG\\Desktop\\OModelj48.arff";
+		String arfftoEval = "C:\\Users\\LG\\Desktop\\toeval.arff";
+		
+		
+		//Original Dataset
 		locationAttributes.add("Loc1");
 		locationAttributes.add("Loc2");
 		locationAttributes.add("Loc3");
@@ -960,10 +999,22 @@ public class WekaDemo {
 					
 		Instances dataset;
 		dataset = WekaMethods.CreateLocationInstanceSet("event",locationAttributes, classAttributes, features);
-		WekaMethods.Intances2Arff(dataset, "C:\\Users\\LG\\Desktop\\DatasetQuickLocationWekatest.arff");
+		WekaMethods.Intances2Arff(dataset, OriginalArff);
+		
+		HashMap<String, Integer> attributesHashMap = WekaMethods.createAttributesHashMap(dataset);
+		
+		//Instance to Eval
+		String toeval="Loc1,Loc3,Loc5\n3,5,0,A";
+		WekaMethods.CreateLocationInstanceToEval(dataset,toeval,attributesHashMap);
+		WekaMethods.Intances2Arff(dataset, arfftoEval);
+
+		WekaMethods.CreateModelJ48(OriginalModel,OriginalArff );
+		WekaMethods.PrintPredictedDistributionFile(OriginalModel, arfftoEval,0);
+		
+
+
+		
 	}
 	
 	
 }
-
-

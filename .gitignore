@@ -13,6 +13,7 @@ hs_err_pid*
 
 #Folders to ommit
 energypa-master/
+MDPapp/
 
 #Other files
 *.csv
