@@ -151,27 +151,30 @@ public class WekaMethods {
      * @param InstancetoEval
      * @param cls: Clasifier WITH model
      * @return String with predicted distribution and ist classes: A,0.5|B,0.5
-     * @throws Exception
      */
-    public static String GetPredictionDistributionOnline(Instances InstancetoEval,Classifier cls) throws Exception{
+    public static String GetPredictionDistributionOnline(Instances InstancetoEval,Classifier cls){
         String predictedDistribution="";
-        if (InstancetoEval.classIndex() == -1)
-            InstancetoEval.setClassIndex(InstancetoEval.numAttributes() - 1);
+        try {
+            if (InstancetoEval.classIndex() == -1)
+                InstancetoEval.setClassIndex(InstancetoEval.numAttributes() - 1);
 
+            double[] DistributionVector = cls.distributionForInstance(InstancetoEval.instance(0));
 
+            for (int i = 0; i < InstancetoEval.numClasses() - 1; i++) {
+                String nameClass = InstancetoEval.classAttribute().value(i);
+                predictedDistribution = predictedDistribution + nameClass + ","
+                        + DistributionVector[i] + "|";
 
-        double[] DistributionVector = cls.distributionForInstance(InstancetoEval.instance(0));
+            }
 
-        for(int i=0;i<InstancetoEval.numClasses()-1;i++){
-            String nameClass = InstancetoEval.classAttribute().value(i);
-            predictedDistribution=predictedDistribution+nameClass+ ","+DistributionVector[i]+"|";
+            predictedDistribution = predictedDistribution + InstancetoEval.classAttribute()
+                    .value(InstancetoEval.numClasses() - 1) + "," + DistributionVector[
+                    InstancetoEval.numClasses() - 1];
 
+            return  predictedDistribution;
+        } catch (Exception e){
+            return "Some-Problem,1.00";
         }
-
-        predictedDistribution=predictedDistribution+InstancetoEval.classAttribute().value(InstancetoEval.numClasses()-1)+ ","+DistributionVector[InstancetoEval.numClasses()-1];
-
-
-        return  predictedDistribution;
     }
 
     /**
@@ -180,50 +183,53 @@ public class WekaMethods {
      * @param eval: Single String having headers \n values
      * HashMap<String, Integer> attributesHashMap = createAttributesHashMap(wekaInstances);
      * @return Instace to eval to use with GetPredictionDistributionOnline
-     * @throws Exception
      */
-    public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval) throws Exception{
-        HashMap<String, Integer> attributesHashMap = createAttributesHashMap(OriginalSet);
+    public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval){
+        try {
+            HashMap<String, Integer> attributesHashMap = createAttributesHashMap(OriginalSet);
 
-        Instances datasettoEval= OriginalSet;
-        datasettoEval.delete();
+            Instances datasettoEval = OriginalSet;
+            datasettoEval.delete();
 
-        if (datasettoEval.classIndex() == -1)
-            datasettoEval.setClassIndex(datasettoEval.numAttributes() - 1);
+            if (datasettoEval.classIndex() == -1)
+                datasettoEval.setClassIndex(datasettoEval.numAttributes() - 1);
 
-        int numofAttributes = OriginalSet.numAttributes();
+            int numofAttributes = OriginalSet.numAttributes();
 
-        //Inserting the One only instance
-        Instance ft1Instance = new Instance(numofAttributes);
-        String[] parts = eval.split("\\n");
-        String allAttributesFromEval = parts[0];
+            //Inserting the One only instance
+            Instance ft1Instance = new Instance(numofAttributes);
+            String[] parts = eval.split("\\n");
+            String allAttributesFromEval = parts[0];
 
+            String allvaluesFromEval = parts[1];
 
-        String allvaluesFromEval = parts[1];
+            String[] attributesFromEval = allAttributesFromEval.split(",");
+            String[] valuesFromEval = allvaluesFromEval.split(",");
 
+            for (int i = 0; i < attributesFromEval.length; i++) {
+                Integer index = getAttributeIndex(attributesHashMap, attributesFromEval[i]);
 
-        String[] attributesFromEval = allAttributesFromEval.split(",");
-        String[] valuesFromEval = allvaluesFromEval.split(",");
-
-        for (int i=0;i<attributesFromEval.length;i++){
-            Integer index = getAttributeIndex(attributesHashMap, attributesFromEval[i]);
-
-            if (index > -1) {
+                if (index > -1) {
 //            	 System.out.println(valuesFromEval[i]);
-                ft1Instance.setValue(datasettoEval.attribute(index),Double.parseDouble(valuesFromEval[i]));
+                    ft1Instance.setValue(datasettoEval.attribute(index),
+                            Double.parseDouble(valuesFromEval[i]));
+                }
             }
-        }
 
 //        System.out.println(valuesFromEval[valuesFromEval.length-1]);
-        ft1Instance.setValue(datasettoEval.attribute(datasettoEval.numAttributes()-1),valuesFromEval[valuesFromEval.length-1]);
+            ft1Instance.setValue(datasettoEval.attribute(datasettoEval.numAttributes() - 1),
+                    valuesFromEval[valuesFromEval.length - 1]);
 
-        //Checking compatibility
-        if(OriginalSet.checkInstance(ft1Instance)==false)
-            System.out.println("Err:Instances Not compatible");
+            //Checking compatibility
+            if (OriginalSet.checkInstance(ft1Instance) == false)
+                System.out.println("Err:Instances Not compatible");
 
-        datasettoEval.add(ft1Instance);
+            datasettoEval.add(ft1Instance);
 
-        return datasettoEval;
+            return datasettoEval;
+        } catch (Exception e){
+            return null;
+        }
     }
 
 

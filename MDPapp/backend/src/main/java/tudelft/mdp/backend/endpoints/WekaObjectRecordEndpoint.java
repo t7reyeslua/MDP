@@ -4,6 +4,7 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
+import com.google.appengine.api.datastore.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,9 @@ import javax.inject.Named;
 
 import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.gcs.GcsHelper;
+import tudelft.mdp.backend.records.LocationFeaturesRecord;
 import tudelft.mdp.backend.records.WekaObjectRecord;
+import tudelft.mdp.backend.weka.WekaMethods;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -118,6 +121,27 @@ public class WekaObjectRecordEndpoint {
         wekaObjectRecord.setDescription(cls.toString());
         return wekaObjectRecord;
 
+    }
+
+    @ApiMethod(name = "evaluateLocation", path = "evaluate_location")
+    public LocationFeaturesRecord evaluateLocation(
+            @Named("instanceFilename") String instanceFilename,
+            @Named("clsFilename") String clsFilename,
+            LocationFeaturesRecord eval) {
+
+        LOG.info("Calling evaluateLocation method using: " + instanceFilename + "|" + clsFilename);
+        GcsHelper gcsHelper = new GcsHelper();
+        Classifier cls = gcsHelper.readClsFromGCS(clsFilename);
+        Instances instances = gcsHelper.readInstancesFromGCS(instanceFilename);
+        Instances instanceToEval = WekaMethods.CreateLocationInstanceToEval(instances,
+                eval.getLocationFeatures().getValue());
+
+        String prediction = WekaMethods.GetPredictionDistributionOnline(instanceToEval, cls);
+        Text result = new Text(prediction);
+
+        LOG.info("Result: " + prediction);
+        eval.setLocationFeatures(result);
+        return eval;
     }
 
 
