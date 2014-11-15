@@ -9,6 +9,7 @@ import tudelft.mdp.backend.records.ApHistogramRecord;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.records.DeviceUsageRecord;
 import tudelft.mdp.backend.records.EnergyConsumptionRecord;
+import tudelft.mdp.backend.records.LocationFeaturesRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecordWrapper;
 import tudelft.mdp.backend.records.LocationLogRecord;
@@ -17,6 +18,7 @@ import tudelft.mdp.backend.records.NfcRecord;
 import tudelft.mdp.backend.records.RegistrationRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecordWrapper;
+import tudelft.mdp.backend.records.WekaObjectRecord;
 
 /**
  * Objectify service wrapper so we can statically register our persistence classes
@@ -36,6 +38,8 @@ public class OfyService {
         ObjectifyService.register(DeviceMotionLocationRecord.class);
         ObjectifyService.register(EnergyConsumptionRecord.class);
         ObjectifyService.register(DeviceUsageRecord.class);
+        ObjectifyService.register(WekaObjectRecord.class);
+        ObjectifyService.register(LocationFeaturesRecord.class);
     }
 
     public static Objectify ofy() {

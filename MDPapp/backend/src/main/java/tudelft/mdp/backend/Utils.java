@@ -1,5 +1,10 @@
 package tudelft.mdp.backend;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -120,6 +125,10 @@ public class Utils {
             energy = time * Energy.KWH_VACUUMCLEANER;
         } else if (deviceType.equals(Devices.COFFEE_MACHINE)){
             energy = time * Energy.KWH_COFFEEMACHINE;
+        } else if (deviceType.equals(Devices.OVEN)){
+            energy = time * Energy.KWH_OVEN;
+        } else if (deviceType.equals(Devices.BOILER)){
+            energy = time * Energy.KWH_BOILER;
         }
         return energy;
     }
@@ -207,5 +216,26 @@ public class Utils {
         return sum;
     }
 
+
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    public static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream os = new ObjectOutputStream(out);
+        os.writeObject(obj);
+        return out.toByteArray();
+    }
+
+    public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        ObjectInputStream is = new ObjectInputStream(in);
+        return is.readObject();
+    }
 
 }

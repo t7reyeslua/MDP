@@ -44,6 +44,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import tudelft.mdp.Utilities.DatabaseManagerFragment;
 import tudelft.mdp.Utilities.MessengerFragment;
 import tudelft.mdp.dashboard.DashboardFragment;
 import tudelft.mdp.deviceManager.DeviceDetectionAsyncTask;
@@ -466,6 +467,10 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                         .commit();
                 break;
             case NavigationDrawer.DBMANAGER:
+                fragment =  new DatabaseManagerFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_database_manager")
+                        .commit();
                 break;
             case NavigationDrawer.MESSENGER:
                 fragment =  new MessengerFragment();
@@ -775,8 +780,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
 
             NdefRecord[] records = ndefMessage.getRecords();
             for (NdefRecord ndefRecord : records) {
-                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays
-                        .equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
+                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN) {
                     try {
                         return readText(ndefRecord);
                     } catch (UnsupportedEncodingException e) {

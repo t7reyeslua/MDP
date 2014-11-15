@@ -14,6 +14,8 @@ public class Energy {
     public static final Double KWH_FRIDGE = 1.0;
     public static final Double KWH_COOKER = 1.0;
     public static final Double KWH_GRILL = 1.0;
+    public static final Double KWH_OVEN = 1.0;
+    public static final Double KWH_BOILER = 1.0;
     public static final Double KWH_VACUUMCLEANER = 1.0;
 
     public static final Double KWH_EURO= 1.0;
