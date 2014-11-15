@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -184,7 +185,7 @@ public class WekaMethods {
 		 
 		 // train
 		 Instances inst = new Instances(new BufferedReader(new FileReader(arffpathnname)));
-		 inst.setClassIndex(inst.numAttributes() - 1);
+		 inst.setClassIndex(inst.numAttributes() - 1);//Important
 		 cls.buildClassifier(inst);
 		 weka.core.SerializationHelper.write(modelpathnname, cls);		
 	}
@@ -209,7 +210,57 @@ public class WekaMethods {
 		 
 		return eval.toSummaryString();		
 	}
+	
+	/**
+	 * 
+	 * @param OriginalSet:original intances of dataset
+	 * @param eval: Single String having headers \n values
+	 * @param attributesHashMap: in the form :
+	 * HashMap<String, Integer> attributesHashMap = createAttributesHashMap(wekaInstances);
+	 * @return Instace to eval to use with GetPredictionDistributionOnline
+	 */
+	public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval,HashMap<String, Integer> attributesHashMap){
+
+		Instances datasettoEval= OriginalSet;
+		datasettoEval.delete();
 		
+		 if (datasettoEval.classIndex() == -1)
+			 datasettoEval.setClassIndex(datasettoEval.numAttributes() - 1);
+		
+		 int numofAttributes = OriginalSet.numAttributes();
+
+		//Inserting the One only instance
+		Instance ft1Instance = new Instance(numofAttributes);
+		String[] parts = eval.split("\\n");
+        String allAttributesFromEval = parts[0];
+       
+
+        String allvaluesFromEval = parts[1];
+   
+      
+        String[] attributesFromEval = allAttributesFromEval.split(",");
+        String[] valuesFromEval = allvaluesFromEval.split(",");
+
+        for (int i=0;i<attributesFromEval.length;i++){
+            Integer index = getAttributeIndex(attributesHashMap, attributesFromEval[i]);
+           
+            if (index > -1) {
+//            	 System.out.println(valuesFromEval[i]);
+                ft1Instance.setValue(datasettoEval.attribute(index),Double.parseDouble(valuesFromEval[i]));
+            }
+        }
+
+//        System.out.println(valuesFromEval[valuesFromEval.length-1]);
+			ft1Instance.setValue(datasettoEval.attribute(datasettoEval.numAttributes()-1),valuesFromEval[valuesFromEval.length-1]); 
+			
+		//Checking compatibility
+		if(OriginalSet.checkInstance(ft1Instance)==false)
+			System.out.println("Err:Instances Not compatible");
+
+		datasettoEval.add(ft1Instance);
+		
+		return datasettoEval;
+	}
 	
 	/**
 	  * @brief 	This methods takes an .arff file and returns the Prediction of the instance num value.
@@ -224,10 +275,10 @@ public class WekaMethods {
 	  * 
 	  * @ref	http://stackoverflow.com/questions/20017957/how-to-reuse-saved-classifier-created-from-explorerin-weka-in-eclipse-java/20019031#20019031
 	  * 		
-	  * "predictionDistribution"
+	  * "predictionDistribution" 
 	  * 		http://stackoverflow.com/questions/11960580/weka-classification-likelihood-of-the-classes
 	  * */
-		public static double[] GetPredictionDistribution(String modelpath,String testArff)throws Exception{
+		public static double[] GetPredictionDistributionFile(String modelpath,String testArff)throws Exception{
 			
 			Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpath);
 			DataSource source = new DataSource(testArff);//get instances from test file
@@ -239,7 +290,9 @@ public class WekaMethods {
 
 			return  predictionDistribution;
 		}
-		public static double[] GetPredictionDistribution(String modelpath,String testArff,int instancenum)throws Exception{
+		
+
+		public static double[] GetPredictionDistributionFile(String modelpath,String testArff,int instancenum)throws Exception{
 			
 			Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpath);
 			DataSource source = new DataSource(testArff);//get instances from test file
@@ -250,7 +303,25 @@ public class WekaMethods {
 			
 			return  predictionDistribution;
 		}
-		
+
+		/**
+		 * @param InstancetoEval: Intances with 1 instance to evaluate
+		 * @param modelpath: path to .model?
+		 * @return Vector of probabilities in the same order of the Classnames
+		 * @throws Exception
+		 */		
+		public static double[] GetPredictionDistributionOnline(Instances InstancetoEval,Classifier cls) throws Exception{
+			
+			if (InstancetoEval.classIndex() == -1)
+				 InstancetoEval.setClassIndex(InstancetoEval.numAttributes() - 1);
+			
+			
+
+			double[] predictionDistribution = cls.distributionForInstance(InstancetoEval.instance(0)); 
+			
+			return  predictionDistribution;
+		}
+
 		/**
 		  * @brief 	Similar to GetPredictionDistribution prints such distribution.
 		  * 
@@ -260,7 +331,7 @@ public class WekaMethods {
 		  * 
 		  * @return array with the Prediction distribution array in probabilities 
 		  * */
-		public static void PrintPredictedDistribution(String modelpath,String testArff,int instanceNum)throws Exception{
+		public static void PrintPredictedDistributionFile(String modelpath,String testArff,int instanceNum)throws Exception{
 
 			Classifier cls = (Classifier) weka.core.SerializationHelper.read(modelpath);
 
@@ -307,7 +378,22 @@ public class WekaMethods {
 		    System.out.printf("\n");
 		}
 		
-		
+		public static HashMap<String, Integer> createAttributesHashMap(Instances wekaInstances){
+	        HashMap<String, Integer> attributesHashMap = new HashMap<String, Integer>();
+	        for (int i = 0; i < wekaInstances.numAttributes(); i++){
+	            attributesHashMap.put(wekaInstances.attribute(i).name(), i);
+	        }
+	        return attributesHashMap;
+	    }
+
+	    public static Integer getAttributeIndex(HashMap<String, Integer> attributesHashMap, String attribute){
+	        Integer index = -1;
+	        if (attributesHashMap.containsKey(attribute)){
+	            index = attributesHashMap.get(attribute);
+	        }
+	        return index;
+	    }
+
 
 		
 }
