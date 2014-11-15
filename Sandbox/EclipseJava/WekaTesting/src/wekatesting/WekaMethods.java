@@ -217,8 +217,9 @@ public class WekaMethods {
 	 * @param attributesHashMap: in the form :
 	 * HashMap<String, Integer> attributesHashMap = createAttributesHashMap(wekaInstances);
 	 * @return Instace to eval to use with GetPredictionDistributionOnline
+	 * @throws Exception 
 	 */
-	public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval,HashMap<String, Integer> attributesHashMap){
+	public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval,HashMap<String, Integer> attributesHashMap) throws Exception{
 
 		Instances datasettoEval= OriginalSet;
 		datasettoEval.delete();
@@ -304,21 +305,30 @@ public class WekaMethods {
 		}
 
 		/**
-		 * @param InstancetoEval: Intances with 1 instance to evaluate
-		 * @param modelpath: path to .model?
-		 * @return Vector of probabilities in the same order of the Classnames
+		 * @param InstancetoEval
+		 * @param cls: Clasifier WITH model
+		 * @return String with predicted distribution and ist classes: A,0.5|B,0.5
 		 * @throws Exception
-		 */		
-		public static double[] GetPredictionDistributionOnline(Instances InstancetoEval,Classifier cls) throws Exception{
-			
+		 */
+		public static String GetPredictionDistributionOnline(Instances InstancetoEval,Classifier cls) throws Exception{
+			String predictedDistribution="";
 			if (InstancetoEval.classIndex() == -1)
 				 InstancetoEval.setClassIndex(InstancetoEval.numAttributes() - 1);
 			
 			
 
-			double[] predictionDistribution = cls.distributionForInstance(InstancetoEval.instance(0)); 
+			double[] DistributionVector = cls.distributionForInstance(InstancetoEval.instance(0)); 
 			
-			return  predictionDistribution;
+			for(int i=0;i<InstancetoEval.numClasses()-1;i++){
+				String nameClass = InstancetoEval.classAttribute().value(i);
+				predictedDistribution=predictedDistribution+nameClass+ ","+DistributionVector[i]+"|";
+				
+			}
+			
+			predictedDistribution=predictedDistribution+InstancetoEval.classAttribute().value(InstancetoEval.numClasses()-1)+ ","+DistributionVector[InstancetoEval.numClasses()-1];				
+	
+			
+			return  predictedDistribution;
 		}
 
 		/**
