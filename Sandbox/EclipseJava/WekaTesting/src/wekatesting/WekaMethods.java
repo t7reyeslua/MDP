@@ -219,7 +219,8 @@ public class WekaMethods {
 	 * @return Instace to eval to use with GetPredictionDistributionOnline
 	 * @throws Exception 
 	 */
-	public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval,HashMap<String, Integer> attributesHashMap) throws Exception{
+	public static Instances CreateLocationInstanceToEval(Instances OriginalSet,String eval) throws Exception{
+		HashMap<String, Integer> attributesHashMap = createAttributesHashMap(OriginalSet);
 
 		Instances datasettoEval= OriginalSet;
 		datasettoEval.delete();
