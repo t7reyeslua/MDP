@@ -251,6 +251,56 @@ public class WekaSensorsRawDataObject {
     
 	/**
 	 * @author Luis Gonzalez
+	 * @version 1, 14/11/14 
+	 * @brief it returns a Arraylist of strings (line) with all attributes for using in Instances
+	 **/
+    public ArrayList<String> getAttributesOnline(){
+    	ArrayList<String> AttributesList = new ArrayList<String>();
+    	
+
+        
+    	for(int i=2;i<(18)+2;i=i+3){
+//    		for(int i=2;i<18;i++){
+    		
+    		String[] sensornameX = getSensorName(i).split("_");
+    		String[] sensornameY = getSensorName(i+1).split("_");
+    		String[] sensornameZ = getSensorName(i+2).split("_");
+    		
+    		AttributesList.add("mean_"+sensornameX[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("mean_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("mean_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+    		AttributesList.add("meanMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
+    		
+    		AttributesList.add("std_"+sensornameX[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("std_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("std_"+sensornameZ[1]+sensornameZ[2]+" numeric");   		
+    		AttributesList.add("stdMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
+    		
+    		AttributesList.add("var_"+sensornameX[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("var_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("var_"+sensornameZ[1]+sensornameZ[2]+" numeric");   		
+    		AttributesList.add("varMag_"+sensornameX[1]+sensornameX[2]+sensornameY[2]+sensornameZ[2]+" numeric");
+    		
+    		AttributesList.add("FundF_"+sensornameX[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("FundF_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("FundF_"+sensornameZ[1]+sensornameZ[2]+" numeric");   		
+
+    		AttributesList.add("ZXing_"+sensornameX[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("ZXing_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("ZXing_"+sensornameZ[1]+sensornameZ[2]+" numeric");  
+    		
+    		AttributesList.add("SCount_"+sensornameX[1]+sensornameX[2]+" numeric");
+    		AttributesList.add("SCount_"+sensornameY[1]+sensornameY[2]+" numeric");
+    		AttributesList.add("SCount_"+sensornameZ[1]+sensornameZ[2]+" numeric");
+    		
+    	}
+    	
+    	
+    	return AttributesList;
+    }
+  
+	/**
+	 * @author Luis Gonzalez
 	 * @version 1, 30/10/14
 	 * 
 	 * @brief it returns a Arraylist of strings (line) with all attributes for printing

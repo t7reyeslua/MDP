@@ -59,9 +59,23 @@ public class WekaMethods {
 			Instance ft1Instance = new Instance(numofAttributes);
 			for(int j=0;j<parts.length-1;j++){
 
-				ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),Double.parseDouble(parts[j])); 
+				boolean numtest=true;
+				double InstanceValue=0;
+				  try  
+				  {  
+					  InstanceValue = Double.parseDouble(parts[j]);  
+				  }  
+				  catch(NumberFormatException nfe)  
+				  {  
+					  numtest= false;  
+				  }		
+				  
+				if(numtest==true)  
+					ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),InstanceValue);
+								
 			   }
-
+		
+			
 			ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(parts.length-1),parts[parts.length-1]); 
 			
 			dataset.add(ft1Instance);
@@ -71,7 +85,6 @@ public class WekaMethods {
 	}
 	/**
 	  * @brief 	Create a dataset as readed from an .arff file, only for Location.
-	  * 		
 	  * @param relation, name relation of the .arff , e.g. "Events"
 	  * @param locationAttributes, Wifi networks attributes, watch that networks start with an alphabetic character
 	  * @param classAttributes, name of appliances
@@ -293,6 +306,7 @@ public class WekaMethods {
 		       }
 		    System.out.printf("\n");
 		}
+		
 		
 
 		
