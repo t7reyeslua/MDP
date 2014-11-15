@@ -21,6 +21,7 @@ import javax.inject.Named;
 import tudelft.mdp.backend.OfyService;
 import tudelft.mdp.backend.records.LocationFeaturesRecord;
 import tudelft.mdp.backend.records.LocationFeaturesRecordWrapper;
+import tudelft.mdp.backend.weka.WekaUtils;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -232,7 +233,8 @@ public class LocationFeaturesRecordEndpoint {
 
         List<LocationFeaturesRecord> records = new ArrayList<LocationFeaturesRecord>();
         for (String zone : filteredZones) {
-            List<LocationFeaturesRecord> zoneRecords = OfyService.ofy().load().type(LocationFeaturesRecord.class)
+            List<LocationFeaturesRecord> zoneRecords = OfyService.ofy().load().type(
+                    LocationFeaturesRecord.class)
                     .filter("place", place)
                     .filter("zone", zone)
                     .filter("timestamp >=", minDate)
@@ -248,6 +250,36 @@ public class LocationFeaturesRecordEndpoint {
 
 
         return CollectionResponse.<LocationFeaturesRecord>builder().setItems(records).build();
+    }
+
+    @ApiMethod(name = "createWekaObjects", path = "create_weka_objects")
+    public LocationFeaturesRecord createWekaObjects(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate,
+            @Named("place") String place) {
+
+        logger.info("Calling createWekaObjects method from: " + minDate + " to " + maxDate + " of " + place);
+
+        List<LocationFeaturesRecord> records= OfyService.ofy().load().type(
+                LocationFeaturesRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .filter("place", place)
+                .order("timestamp")
+                .list();
+
+        logger.info("Records:" + records.size());
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSetLocation(records, minDate, maxDate, place);
+        LocationFeaturesRecord response = new LocationFeaturesRecord();
+
+        String files = "";
+        for (String file : filesCreated){
+            files += file + "|";
+        }
+        response.setPlace(files);
+        return response;
     }
 
 

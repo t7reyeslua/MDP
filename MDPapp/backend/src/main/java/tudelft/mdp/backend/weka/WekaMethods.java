@@ -36,7 +36,7 @@ public class WekaMethods {
         int numofAttributes = motionAttributes.size()+locationAttributes.size()+1;
         FastVector fvWekaAttributes = new FastVector(numofAttributes);
 
-        //Creating/adding the motion attributes
+        //Creating/adding the location attributes
         for(int i=0;i<locationAttributes.size();i++){
             fvWekaAttributes.addElement(StringtoNumericAttribute(locationAttributes.get(i)));
         }
@@ -99,7 +99,7 @@ public class WekaMethods {
         int numofAttributes = locationAttributes.size()+1;
         FastVector fvWekaAttributes = new FastVector(numofAttributes);
 
-        //Creating/adding the motion attributes
+        //Creating/adding the location attributes
         for(int i=0;i<locationAttributes.size();i++){
             fvWekaAttributes.addElement(StringtoNumericAttribute(locationAttributes.get(i)));
         }
@@ -119,15 +119,58 @@ public class WekaMethods {
             Instance ft1Instance = new Instance(numofAttributes);
             for(int j=0;j<parts.length-1;j++){
 
-                ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),Double.parseDouble(parts[j]));
+                boolean numtest=true;
+                double InstanceValue=0;
+                try
+                {
+                    InstanceValue = Double.parseDouble(parts[j]);
+                }
+                catch(NumberFormatException nfe)
+                {
+                    numtest= false;
+                }
+
+                if(numtest==true)
+                    ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(j),InstanceValue);
+
+
             }
+            System.out.println(parts[parts.length-1]);
 
             ft1Instance.setValue((Attribute)fvWekaAttributes.elementAt(parts.length-1),parts[parts.length-1]);
 
             dataset.add(ft1Instance);
         }
 
+
         return dataset;
+    }
+
+    /**
+     * @param InstancetoEval
+     * @param cls: Clasifier WITH model
+     * @return String with predicted distribution and ist classes: A,0.5|B,0.5
+     * @throws Exception
+     */
+    public static String GetPredictionDistributionOnline(Instances InstancetoEval,Classifier cls) throws Exception{
+        String predictedDistribution="";
+        if (InstancetoEval.classIndex() == -1)
+            InstancetoEval.setClassIndex(InstancetoEval.numAttributes() - 1);
+
+
+
+        double[] DistributionVector = cls.distributionForInstance(InstancetoEval.instance(0));
+
+        for(int i=0;i<InstancetoEval.numClasses()-1;i++){
+            String nameClass = InstancetoEval.classAttribute().value(i);
+            predictedDistribution=predictedDistribution+nameClass+ ","+DistributionVector[i]+"|";
+
+        }
+
+        predictedDistribution=predictedDistribution+InstancetoEval.classAttribute().value(InstancetoEval.numClasses()-1)+ ","+DistributionVector[InstancetoEval.numClasses()-1];
+
+
+        return  predictedDistribution;
     }
 
     /**

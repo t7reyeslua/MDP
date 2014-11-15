@@ -381,7 +381,7 @@ public class DeviceMotionLocationRecordEndpoint {
         LOG.info("Records:" + records.size());
 
         WekaUtils wekaUtils = new WekaUtils();
-        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(records, minDate, maxDate);
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(records, minDate, maxDate, "ALL");
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
 
         String files = "";
@@ -420,7 +420,7 @@ public class DeviceMotionLocationRecordEndpoint {
         LOG.info("Records:" + records.size());
 
         WekaUtils wekaUtils = new WekaUtils();
-        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(records, minDate, maxDate);
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(records, minDate, maxDate, usersList);
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
 
         String files = "";

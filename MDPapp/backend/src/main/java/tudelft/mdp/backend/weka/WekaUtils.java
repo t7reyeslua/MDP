@@ -14,6 +14,7 @@ import tudelft.mdp.backend.enums.Constants;
 import tudelft.mdp.backend.enums.WekaClassifierTypes;
 import tudelft.mdp.backend.gcs.GcsHelper;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
+import tudelft.mdp.backend.records.LocationFeaturesRecord;
 import tudelft.mdp.backend.records.WekaObjectRecord;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
@@ -154,7 +155,88 @@ public class WekaUtils {
         return AttributesList;
     }
 
-    public ArrayList<String> createInstanceSet(List<DeviceMotionLocationRecord> records, String minDate, String maxDate){
+    public ArrayList<String> createInstanceSetLocation(List<LocationFeaturesRecord> records, String minDate, String maxDate, String filteredPlaces){
+        String relation  = "Events";
+        ArrayList<String> classAttributes;
+        ArrayList<String> locationAttributes;
+        ArrayList<String> features = new ArrayList<String>();
+
+
+        HashSet<String> classAttributesSet = new HashSet<String>();
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (LocationFeaturesRecord locationFeaturesRecord : records){
+            String classAttr = locationFeaturesRecord.getPlace().replaceAll("\\s", "") + "-"
+                             + locationFeaturesRecord.getPlace().replaceAll("\\s", "");
+            classAttributesSet.add(classAttr);
+
+            String locationData = locationFeaturesRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributesStr.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+        }
+
+        classAttributes     = new ArrayList<String>(classAttributesSet);
+        locationAttributes  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(locationAttributes);
+
+
+        LOG.info("Distinct Class Records:" + classAttributes.size());
+        LOG.info("Distinct Networks:" + (locationAttributes.size()/4));
+        LOG.info("Distinct Location Attributes:" + locationAttributes.size());
+
+        for (String attr : classAttributes){
+            LOG.info("Class: " + attr);
+        }
+        for (String attr : locationAttributes){
+            LOG.info("Location: " + attr);
+        }
+
+        // Once you know all existing location attributes, build the location features
+        for (LocationFeaturesRecord locationFeaturesRecord : records){
+            String locationData = locationFeaturesRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+            String locationFeaturesStr = lines[1];
+
+            String attributes[] = locationAttributesStr.split(",");
+            String values[]     = locationFeaturesStr.split(",");
+
+            HashMap<String,String> recordFeatures = new HashMap<String, String>();
+            for (int i = 0; i < attributes.length; i++){
+                recordFeatures.put(attributes[i], values[i]);
+            }
+
+            String locationFeatures = "";
+            for (String locationAttribute : locationAttributes){
+                if (recordFeatures.containsKey(locationAttribute)){
+                    locationFeatures += recordFeatures.get(locationAttribute) + ",";
+                } else {
+                    locationFeatures += "?,";
+                }
+            }
+            //remove the last comma
+            locationFeatures = locationFeatures.substring(0, locationFeatures.length()-1);
+            String classAttr = locationFeaturesRecord.getPlace().replaceAll("\\s", "") + "-"
+                    + locationFeaturesRecord.getPlace().replaceAll("\\s", "");
+            //features.add(locationFeatures + "," + motionFeatures);
+
+            features.add(locationFeatures + "," + classAttr);
+        }
+
+        Instances wekaInstances = WekaMethods.CreateLocationInstanceSet(relation,
+                locationAttributes,
+                classAttributes,
+                features);
+
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate, "Location-only", filteredPlaces);
+        return filesCreated;
+    }
+
+    public ArrayList<String> createInstanceSet(List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
         String relation  = "Events";
         ArrayList<String> classAttributes;
         ArrayList<String> locationAttributes;
@@ -245,7 +327,7 @@ public class WekaUtils {
                 classAttributes,
                 features);
 
-        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate);
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate, "Motion-Location", filteredUsers);
         return filesCreated;
     }
 
@@ -272,24 +354,24 @@ public class WekaUtils {
         return cls;
     }
 
-    private ArrayList<String> storeWekaObjects(Instances wekaInstances, String minDate, String maxDate){
+    private ArrayList<String> storeWekaObjects(Instances wekaInstances, String minDate, String maxDate, String origin, String filter){
         try {
             byte[] serializedWekaObject = Utils.serialize(wekaInstances);
             LOG.info(Utils.humanReadableByteCount(serializedWekaObject.length, true));
 
-            String description = "Motion-Location records from: " + minDate + " to " + maxDate;
+            String description = origin + "|" + minDate + "-" + maxDate + "|" + filter;
             String timestamp = Utils.getCurrentTimestamp();
 
 
             LOG.info(wekaInstances.toSummaryString());
 
             ArrayList<String> filesCreated = new ArrayList<String>();
-            String fileArff = saveArffToGcs(wekaInstances, "Arff", description, timestamp);
-            String fileInst = saveInstancesToGcs(serializedWekaObject, "Instance", description, timestamp);
+            String fileArff = saveArffToGcs(wekaInstances, "Arff", description, timestamp, origin);
+            String fileInst = saveInstancesToGcs(serializedWekaObject, "Instance", description, timestamp, origin);
             String fileClsJ48 = saveClsToGcs(createClassifier(wekaInstances,
                             WekaClassifierTypes.J48), "Classifier",
-                    description + " | " + getModelType(WekaClassifierTypes.J48), timestamp,
-                    WekaClassifierTypes.J48);
+                    description + "|" + getModelType(WekaClassifierTypes.J48), timestamp,
+                    WekaClassifierTypes.J48, origin);
 
             filesCreated.add(fileArff);
             filesCreated.add(fileInst);
@@ -302,12 +384,12 @@ public class WekaUtils {
         }
     }
 
-    private String saveClsToGcs(Classifier object, String objectType, String description, String timestamp, int clsType){
+    private String saveClsToGcs(Classifier object, String objectType, String description, String timestamp, int clsType, String origin){
         try {
 
             LOG.info(object.toString());
 
-            String filename = objectType + "_" + getModelType(WekaClassifierTypes.J48) + "_" +timestamp + ".model";
+            String filename = origin + "_" + objectType + "_" + getModelType(clsType) + "_" +timestamp + ".model";
             GcsHelper gcsHelper = new GcsHelper();
             gcsHelper.writeWekaClsToGCS(filename, object);
             saveGcsFileDescriptionToDatastore(filename, objectType, description, timestamp);
@@ -319,9 +401,9 @@ public class WekaUtils {
         }
     }
 
-    private String saveArffToGcs(Instances object, String objectType, String description, String timestamp){
+    private String saveArffToGcs(Instances object, String objectType, String description, String timestamp, String origin){
         try {
-            String filename = objectType + "_" + timestamp + ".arff";
+            String filename = origin + "_" + objectType + "_" + timestamp + ".arff";
             GcsHelper gcsHelper = new GcsHelper();
             gcsHelper.writeWekaArffToGCS(filename, object);
             saveGcsFileDescriptionToDatastore(filename, objectType, description, timestamp);
@@ -333,9 +415,9 @@ public class WekaUtils {
         }
     }
 
-    private String saveInstancesToGcs(byte[] object, String objectType, String description, String timestamp){
+    private String saveInstancesToGcs(byte[] object, String objectType, String description, String timestamp, String origin){
         try {
-            String filename = objectType + "_" + timestamp + ".instances";
+            String filename = origin + "_" + objectType + "_" + timestamp + ".instances";
             GcsHelper gcsHelper = new GcsHelper();
             gcsHelper.writeWekaInstanceToGCS(filename, object);
             saveGcsFileDescriptionToDatastore(filename, objectType, description, timestamp);

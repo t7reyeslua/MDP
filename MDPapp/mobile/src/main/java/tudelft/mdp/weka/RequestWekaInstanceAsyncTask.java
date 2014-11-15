@@ -40,7 +40,7 @@ public class RequestWekaInstanceAsyncTask extends AsyncTask<Object, Void, Boolea
 
         try {
             Log.e(TAG, "Requesting instances");
-            WekaObjectRecord wekaObjectRecord = mWekaObjectRecordEndpoint.getLatestWekaObjectRecord().execute();
+            WekaObjectRecord wekaObjectRecord = mWekaObjectRecordEndpoint.getLatestWekaObjectRecord("Instance", "Home").execute();
 
             if (wekaObjectRecord != null) {
                 /*byte[] instancesByteArray = wekaObjectRecord.decodeBlob();

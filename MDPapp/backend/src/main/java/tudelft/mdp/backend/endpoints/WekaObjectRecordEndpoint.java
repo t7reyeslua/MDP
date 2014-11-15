@@ -38,22 +38,30 @@ public class WekaObjectRecordEndpoint {
     }
 
     @ApiMethod(name = "getLatestWekaObjectRecord", path = "get_latest_weka_object")
-    public WekaObjectRecord getLatestWekaObjectRecord() {
+    public WekaObjectRecord getLatestWekaObjectRecord(@Named("type") String objectType, @Named("filter") String filter) {
 
         LOG.info("Calling getLatestWekaObjectRecord method");
 
         List<WekaObjectRecord> records= ofy().load().type(WekaObjectRecord.class)
+                .filter("objectType", objectType)
                 .order("timestamp")
                 .list();
 
         //records = sortByTimestamp(records);
         LOG.info("Records:" + records.size());
 
-        if (records.size()>0){
-            return records.get(0);
-        } else {
-            return null;
+        WekaObjectRecord result = new WekaObjectRecord();
+        result.setFilename("");
+        result.setObjectType(objectType);
+        result.setDescription("No match found");
+        for (WekaObjectRecord record : records){
+            if (record.getDescription().contains(filter)){
+                result = record;
+                break;
+            }
         }
+
+        return result;
     }
 
     @ApiMethod(name = "insertWekaObjectRecord", path = "insert_weka_object")
