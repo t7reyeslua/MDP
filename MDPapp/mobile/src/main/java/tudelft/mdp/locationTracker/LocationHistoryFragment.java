@@ -1,5 +1,7 @@
 package tudelft.mdp.locationTracker;
 
+import com.devspark.robototextview.widget.RobotoTextView;
+
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -46,6 +48,7 @@ public class LocationHistoryFragment extends Fragment implements
     private Boolean requestInProcess = false;
 
     private View rootView;
+    private RobotoTextView twNoDataUsers;
 
     private ArrayList<Card> mCardsArrayList;
     private CardArrayAdapter mCardArrayAdapter;
@@ -94,6 +97,7 @@ public class LocationHistoryFragment extends Fragment implements
 
         rootView = inflater.inflate(R.layout.fragment_location_history, container, false);
 
+        twNoDataUsers = (RobotoTextView) rootView.findViewById(R.id.empty);
         setHasOptionsMenu(true);
         mUsername = PreferenceManager.getDefaultSharedPreferences(rootView.getContext())
                 .getString(UserPreferences.USERNAME, null);
@@ -166,8 +170,15 @@ public class LocationHistoryFragment extends Fragment implements
             if (mCardListView != null) {
                 mCardListView.setAdapter(mCardArrayAdapter);
             }
+            twNoDataUsers.setVisibility(View.GONE);
         } else {
 
+            twNoDataUsers.setVisibility(View.VISIBLE);
+            mCardArrayAdapter = new CardArrayAdapter(rootView.getContext(), mCardsArrayList);
+            mCardListView = (CardListView) rootView.findViewById(R.id.myList);
+            if (mCardListView != null) {
+                mCardListView.setAdapter(mCardArrayAdapter);
+            }
             Toast.makeText(rootView.getContext(), "Oops! There aren't any location history records.",
                     Toast.LENGTH_SHORT).show();
         }

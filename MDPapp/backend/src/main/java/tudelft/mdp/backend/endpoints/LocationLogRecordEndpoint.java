@@ -132,8 +132,8 @@ public class LocationLogRecordEndpoint {
             @Named("user") String user,
             @Named("place") String place,
             @Named("zone") String zone,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByUserDateZone method");
 
@@ -159,8 +159,8 @@ public class LocationLogRecordEndpoint {
             @Named("place") String place,
             @Named("zone") String zone,
             @Named("probability") Double probability,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByUserDateZoneProb method");
 
@@ -185,8 +185,8 @@ public class LocationLogRecordEndpoint {
             @Named("place") String place,
             @Named("zone") String zone,
             @Named("probability") Double probability,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByDateZoneProb method");
 
@@ -208,8 +208,8 @@ public class LocationLogRecordEndpoint {
     public CollectionResponse<LocationLogRecord> listLocationLogByDateZone(
             @Named("place") String place,
             @Named("zone") String zone,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByDateZone method");
 
@@ -288,10 +288,10 @@ public class LocationLogRecordEndpoint {
     public CollectionResponse<LocationLogRecord> listLocationLogByUserDateMode(
             @Named("user") String user,
             @Named("mode") String mode,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
-        LOG.info("Calling listLocationLogByUserDateMode method");
+        LOG.info("Calling listLocationLogByUserDateMode method:" + user + "|" + mode  + "|" + minDate  + "-" + maxDate);
 
         List<LocationLogRecord> records= ofy().load().type(LocationLogRecord.class)
                 .filter("user", user)
@@ -314,8 +314,8 @@ public class LocationLogRecordEndpoint {
             @Named("mode") String mode,
             @Named("place") String place,
             @Named("zone") String zone,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByUserDateZoneMode method");
 
@@ -341,8 +341,8 @@ public class LocationLogRecordEndpoint {
             @Named("mode") String mode,
             @Named("place") String place,
             @Named("zone") String zone,
-            @Named("minDate") Double minDate,
-            @Named("maxDate") Double maxDate) {
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate) {
 
         LOG.info("Calling listLocationLogByDateZoneMode method");
 

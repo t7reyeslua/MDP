@@ -12,8 +12,8 @@
         <item>Weka</item>
     </string-array>
     <string-array name="pref_location_technique_values">
-        <item>Bayessian</item>
-        <item>Weka</item>
+        <item>LOC_BAYESSIAN</item>
+        <item>LOC_WEKA</item>
     </string-array>
 
     <string name="pref_title_alpha_trimmer_coeff">Alpha Trimmer Filter Coefficient</string>

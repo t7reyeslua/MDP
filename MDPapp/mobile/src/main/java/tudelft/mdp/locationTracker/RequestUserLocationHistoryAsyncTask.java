@@ -33,7 +33,7 @@ public class RequestUserLocationHistoryAsyncTask extends AsyncTask<Object, Void,
         mContext = (Context) params[0];
 
         mode  = PreferenceManager.getDefaultSharedPreferences(mContext)
-                .getString(UserPreferences.LOCATIONMODE, Constants.LOC_BAYESSIAN);
+                .getString(UserPreferences.LOCATION_TECHNIQUE, Constants.LOC_BAYESSIAN);
         username = PreferenceManager.getDefaultSharedPreferences(mContext)
                 .getString(UserPreferences.USERNAME, null);
 
@@ -51,8 +51,15 @@ public class RequestUserLocationHistoryAsyncTask extends AsyncTask<Object, Void,
 
 
         try {
-            Log.e(TAG, "Requesting location history of user " + username);
-            mUserLocationHistory  = mLocationLogEndpointService.listLocationLogByUserDate(maxDate, minDate, username).execute().getItems();
+            Log.e(TAG, "Requesting location history of user " + username + "|" + mode +"|" + minDate + "-" + maxDate);
+            mUserLocationHistory  = mLocationLogEndpointService.listLocationLogByUserDateMode(maxDate, minDate, mode, username).execute().getItems();
+
+            if (mUserLocationHistory != null) {
+                Log.w(TAG, "Records:" + mUserLocationHistory.size());
+            } else {
+
+                Log.w(TAG, "Records:" + 0);
+            }
 
 
             return true;
