@@ -154,7 +154,7 @@ public class WekaUtils {
         return AttributesList;
     }
 
-    public void createInstanceSet(List<DeviceMotionLocationRecord> records, String minDate, String maxDate){
+    public ArrayList<String> createInstanceSet(List<DeviceMotionLocationRecord> records, String minDate, String maxDate){
         String relation  = "Events";
         ArrayList<String> classAttributes;
         ArrayList<String> locationAttributes;
@@ -245,7 +245,8 @@ public class WekaUtils {
                 classAttributes,
                 features);
 
-        storeWekaObjects(wekaInstances, minDate, maxDate);
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate);
+        return filesCreated;
     }
 
     private Classifier createClassifier(Instances wekaInstances, Integer clsType){
@@ -271,7 +272,7 @@ public class WekaUtils {
         return cls;
     }
 
-    private void storeWekaObjects(Instances wekaInstances, String minDate, String maxDate){
+    private ArrayList<String> storeWekaObjects(Instances wekaInstances, String minDate, String maxDate){
         try {
             byte[] serializedWekaObject = Utils.serialize(wekaInstances);
             LOG.info(Utils.humanReadableByteCount(serializedWekaObject.length, true));
@@ -282,19 +283,26 @@ public class WekaUtils {
 
             LOG.info(wekaInstances.toSummaryString());
 
-            saveArffToGcs(wekaInstances, "Arff", description, timestamp);
-            saveInstancesToGcs(serializedWekaObject, "Instance", description, timestamp);
-            saveClsToGcs(createClassifier(wekaInstances,
+            ArrayList<String> filesCreated = new ArrayList<String>();
+            String fileArff = saveArffToGcs(wekaInstances, "Arff", description, timestamp);
+            String fileInst = saveInstancesToGcs(serializedWekaObject, "Instance", description, timestamp);
+            String fileClsJ48 = saveClsToGcs(createClassifier(wekaInstances,
                             WekaClassifierTypes.J48), "Classifier",
                     description + " | " + getModelType(WekaClassifierTypes.J48), timestamp,
                     WekaClassifierTypes.J48);
 
+            filesCreated.add(fileArff);
+            filesCreated.add(fileInst);
+            filesCreated.add(fileClsJ48);
+            return filesCreated;
+
         } catch (Exception e){
             LOG.severe(e.getMessage());
+            return null;
         }
     }
 
-    private void saveClsToGcs(Classifier object, String objectType, String description, String timestamp, int clsType){
+    private String saveClsToGcs(Classifier object, String objectType, String description, String timestamp, int clsType){
         try {
 
             LOG.info(object.toString());
@@ -303,30 +311,39 @@ public class WekaUtils {
             GcsHelper gcsHelper = new GcsHelper();
             gcsHelper.writeWekaClsToGCS(filename, object);
             saveGcsFileDescriptionToDatastore(filename, objectType, description, timestamp);
+
+            return filename;
         } catch (Exception e){
             LOG.severe(e.getMessage());
+            return "";
         }
     }
 
-    private void saveArffToGcs(Instances object, String objectType, String description, String timestamp){
+    private String saveArffToGcs(Instances object, String objectType, String description, String timestamp){
         try {
             String filename = objectType + "_" + timestamp + ".arff";
             GcsHelper gcsHelper = new GcsHelper();
             gcsHelper.writeWekaArffToGCS(filename, object);
             saveGcsFileDescriptionToDatastore(filename, objectType, description, timestamp);
+
+            return filename;
         } catch (Exception e){
             LOG.severe(e.getMessage());
+            return "";
         }
     }
 
-    private void saveInstancesToGcs(byte[] object, String objectType, String description, String timestamp){
+    private String saveInstancesToGcs(byte[] object, String objectType, String description, String timestamp){
         try {
             String filename = objectType + "_" + timestamp + ".instances";
             GcsHelper gcsHelper = new GcsHelper();
             gcsHelper.writeWekaInstanceToGCS(filename, object);
             saveGcsFileDescriptionToDatastore(filename, objectType, description, timestamp);
+
+            return filename;
         } catch (Exception e){
             LOG.severe(e.getMessage());
+            return "";
         }
     }
 
