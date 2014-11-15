@@ -1001,11 +1001,10 @@ public class WekaDemo {
 		dataset = WekaMethods.CreateLocationInstanceSet("event",locationAttributes, classAttributes, features);
 		WekaMethods.Intances2Arff(dataset, OriginalArff);
 		
-		HashMap<String, Integer> attributesHashMap = WekaMethods.createAttributesHashMap(dataset);
-		
+				
 		//Instance to Eval
 		String toeval="Loc1,Loc3,Loc5\n3,5,0,A";
-		WekaMethods.CreateLocationInstanceToEval(dataset,toeval,attributesHashMap);
+		WekaMethods.CreateLocationInstanceToEval(dataset,toeval);
 		WekaMethods.Intances2Arff(dataset, arfftoEval);
 
 		WekaMethods.CreateModelJ48(OriginalModel,OriginalArff );
