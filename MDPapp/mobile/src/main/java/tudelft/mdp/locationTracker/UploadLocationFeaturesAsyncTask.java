@@ -46,7 +46,7 @@ public class UploadLocationFeaturesAsyncTask extends AsyncTask<Object, Void, Boo
 
     private boolean sendByChunks(ArrayList<LocationFeaturesRecord> rawScans){
         int chunkSize = 50;
-        Log.e(TAG, "Uploading location features records " + rawScans.size());
+        Log.e(TAG, "Uploading location features records ALL" + rawScans.size());
 
         ArrayList<ArrayList<LocationFeaturesRecord>> wrapperChunks = new ArrayList<ArrayList<LocationFeaturesRecord>>();
 

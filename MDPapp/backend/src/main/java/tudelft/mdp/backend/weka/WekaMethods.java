@@ -190,10 +190,11 @@ public class WekaMethods {
         try {
             HashMap<String, Integer> attributesHashMap = createAttributesHashMap(OriginalSet);
 
+            /*
             LOG.info("AttributesHashMap created");
             for (String attr : attributesHashMap.keySet()){
                 LOG.info(attr + " " + attributesHashMap.get(attr));
-            }
+            }*/
 
             Instances datasettoEval = OriginalSet;
             datasettoEval.delete();
@@ -219,7 +220,7 @@ public class WekaMethods {
 
             for (int i = 0; i < attributesFromEval.length; i++) {
                 Integer index = getAttributeIndex(attributesHashMap, attributesFromEval[i]);
-                LOG.info(attributesFromEval[i] + " index " + index + " |i:" + i);
+               // LOG.info(attributesFromEval[i] + " index " + index + " |i:" + i);
                 if (index > -1) {
 //            	 System.out.println(valuesFromEval[i]);
                     ft1Instance.setValue(datasettoEval.attribute(index),

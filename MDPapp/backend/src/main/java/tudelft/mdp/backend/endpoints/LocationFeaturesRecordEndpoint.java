@@ -99,7 +99,7 @@ public class LocationFeaturesRecordEndpoint {
             path = "locationFeaturesRecordBulk",
             httpMethod = ApiMethod.HttpMethod.POST)
     public void insertBulk(LocationFeaturesRecordWrapper locationFeaturesRecords) {
-        logger.info("Created LocationFeaturesRecord BULK.");
+        logger.info("Created LocationFeaturesRecord BULK." + locationFeaturesRecords.getLocationFeaturesRecords().size());
         for (LocationFeaturesRecord locationFeaturesRecord : locationFeaturesRecords.getLocationFeaturesRecords()) {
             ofy().save().entity(locationFeaturesRecord).now();
         }

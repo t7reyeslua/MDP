@@ -236,6 +236,96 @@ public class WekaUtils {
         return filesCreated;
     }
 
+    public ArrayList<String> createInstanceSetLocationFromMotLoc(List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
+        String relation  = "Events";
+        ArrayList<String> classAttributes;
+        ArrayList<String> locationAttributes;
+        ArrayList<String> features = new ArrayList<String>();
+
+
+        HashSet<String> classAttributesSet = new HashSet<String>();
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String[] parts = deviceMotionLocationRecord.getEvent().split("-");
+            if (parts[0].equals("Microwave")){
+                parts[1] = "Kitchen";
+            }
+            String classAttr = "Home-"+parts[1];
+            classAttributesSet.add(classAttr.replaceAll("\\s",""));
+
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributesStr.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+        }
+
+        classAttributes     = new ArrayList<String>(classAttributesSet);
+        locationAttributes  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(locationAttributes);
+
+
+        LOG.info("Distinct Class Records:" + classAttributes.size());
+        LOG.info("Distinct Networks:" + (locationAttributes.size()/4));
+        LOG.info("Distinct Location Attributes:" + locationAttributes.size());
+
+        for (String attr : classAttributes){
+            LOG.info("Class: " + attr);
+        }
+        for (String attr : locationAttributes){
+            LOG.info("Location: " + attr);
+        }
+
+        // Once you know all existing location attributes, build the location features
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+            String locationFeaturesStr = lines[1];
+
+            String attributes[] = locationAttributesStr.split(",");
+            String values[]     = locationFeaturesStr.split(",");
+
+            HashMap<String,String> recordFeatures = new HashMap<String, String>();
+            for (int i = 0; i < attributes.length; i++){
+                recordFeatures.put(attributes[i], values[i]);
+            }
+
+            String locationFeatures = "";
+            for (String locationAttribute : locationAttributes){
+                if (recordFeatures.containsKey(locationAttribute)){
+                    locationFeatures += recordFeatures.get(locationAttribute) + ",";
+                } else {
+                    locationFeatures += "?,";
+                }
+            }
+            //remove the last comma
+            locationFeatures = locationFeatures.substring(0, locationFeatures.length()-1);
+
+
+            String[] parts = deviceMotionLocationRecord.getEvent().split("-");
+            if (parts[0].equals("Microwave")){
+                parts[1] = "Kitchen";
+            }
+            String classAttr = "Home-"+parts[1];
+            String classAttribute = classAttr.replaceAll("\\s","");
+            //features.add(locationFeatures + "," + motionFeatures);
+
+            features.add(locationFeatures + "," + classAttribute);
+        }
+
+        Instances wekaInstances = WekaMethods.CreateLocationInstanceSet(relation,
+                locationAttributes,
+                classAttributes,
+                features);
+
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate, "Location-only", filteredUsers + " (from Motion and Loc data)");
+        return filesCreated;
+    }
+
     public ArrayList<String> createInstanceSet(List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
         String relation  = "Events";
         ArrayList<String> classAttributes;

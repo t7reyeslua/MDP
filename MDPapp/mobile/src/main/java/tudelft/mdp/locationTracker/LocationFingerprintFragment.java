@@ -279,13 +279,15 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
 
 
         buildLocationFeaturesRecordArray(place, zone, Utils.getCurrentTimestamp());
-        uploadScanDataToCloud(place, zone);
 
     }
 
     private void buildLocationFeaturesRecordArray(String place, String zone, String timestamp){
         int chunkSize = fingerprintSamples;
         ArrayList<ArrayList<ArrayList<NetworkInfoObject>>> wrapperChunks = new ArrayList<ArrayList<ArrayList<NetworkInfoObject>>>();
+        Log.w(LOGTAG, "1.WTF-WrapperChunks:" + wrapperChunks.size());
+        Log.w(LOGTAG, "1.WTF-mNetworkScans:" + mNetworkScans.size());
+        Log.w(LOGTAG, "1.WTF-mWekaNetworkScansObjects:" + mWekaNetworkScansObjects.size());
 
         for (int i = 0; i < mNetworkScans.size(); i += chunkSize){
             ArrayList<ArrayList<NetworkInfoObject>> subList = new ArrayList<ArrayList<NetworkInfoObject>>(
@@ -293,6 +295,7 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
             wrapperChunks.add(subList);
         }
 
+        Log.w(LOGTAG, "2.WTF-WrapperChunks:" + wrapperChunks.size());
         for (ArrayList<ArrayList<NetworkInfoObject>> chunk : wrapperChunks){
             if (chunk.size() == fingerprintSamples) {
                 WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(chunk);
@@ -300,7 +303,10 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
                 mWekaNetworkScansObjects.add(wekaNetworkScansObject);
             }
         }
+        Log.w(LOGTAG, "2.WTF-mWekaNetworkScansObjects:" + mWekaNetworkScansObjects.size());
 
+        ArrayList<LocationFeaturesRecord> tempLocationFeaturesRecords = new ArrayList<LocationFeaturesRecord>();
+        Log.w(LOGTAG, "1.WTF-tempLocationFeaturesRecords:" + tempLocationFeaturesRecords.size());
         for (WekaNetworkScansObject wekaNetworkScansObject : mWekaNetworkScansObjects){
             LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
 
@@ -315,25 +321,33 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
             locationFeaturesRecord.setTimestamp(timestamp);
             locationFeaturesRecord.setUsername(user);
 
-            mLocationFeaturesRecords.add(locationFeaturesRecord);
+            tempLocationFeaturesRecords.add(locationFeaturesRecord);
         }
+
+        Log.w(LOGTAG, "2.WTF-tempLocationFeaturesRecords:" + tempLocationFeaturesRecords.size());
 
         Log.w(LOGTAG, "Samples taken: " + mNetworkScans.size()
                 + "| Groups formed: " +  wrapperChunks.size()
-                + "| Discarded scans: " +  (wrapperChunks.size() - mLocationFeaturesRecords.size()));
+                + "| Discarded scans: " +  (wrapperChunks.size() - tempLocationFeaturesRecords.size()));
 
+
+        uploadScanDataToCloud(place, zone, tempLocationFeaturesRecords);
+
+        mWekaNetworkScansObjects.clear();
+        mNetworkScans.clear();
+        wrapperChunks.clear();
 
     }
 
 
-    private void uploadScanDataToCloud(String place, String zone){
+    private void uploadScanDataToCloud(String place, String zone, ArrayList<LocationFeaturesRecord> tempLocationFeaturesRecords){
 
         Toast.makeText(rootView.getContext(), "Updating data...", Toast.LENGTH_SHORT).show();
 
         Log.w(LOGTAG, "uploadScanDataToCloud: Weka Features Data");
-        new UploadLocationFeaturesAsyncTask().execute(rootView.getContext(), mLocationFeaturesRecords);
+        new UploadLocationFeaturesAsyncTask().execute(rootView.getContext(), tempLocationFeaturesRecords);
         Log.w(LOGTAG, "uploadScanDataToCloud: Histograms");
-        new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
+        //new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
         //Log.w(LOGTAG, "uploadScanDataToCloud: Raw Data");
         //new UploadLocationRawDataAsyncTask().execute(rootView.getContext(), rawScans);
     }

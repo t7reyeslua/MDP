@@ -432,5 +432,43 @@ public class DeviceMotionLocationRecordEndpoint {
     }
 
 
+    @ApiMethod(name = "createWekaObjectsFilteredByUsersLoc", path = "create_weka_objects_users_loc")
+    public DeviceMotionLocationRecord createWekaObjectsFilteredByUsersLoc(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate,
+            @Named("usersList") String usersList) {
+
+
+        LOG.info("Calling createWekaObjectsFilteredByUsersLoc method from: " + minDate + " to " + maxDate + " of " + usersList);
+
+        String[] filteredUsers = usersList.split(",");
+
+        List<DeviceMotionLocationRecord> records = new ArrayList<DeviceMotionLocationRecord>();
+        for (String user : filteredUsers) {
+            List<DeviceMotionLocationRecord> userRecords = ofy().load()
+                    .type(DeviceMotionLocationRecord.class)
+                    .filter("username", user)
+                    .filter("timestamp >=", minDate)
+                    .filter("timestamp <=", maxDate)
+                    .order("timestamp")
+                    .list();
+
+            records.addAll(userRecords);
+            LOG.info("Records of " + user + ":" + userRecords.size());
+        }
+
+        LOG.info("Records:" + records.size());
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSetLocationFromMotLoc(records, minDate, maxDate, usersList);
+        DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
+
+        String files = "";
+        for (String file : filesCreated){
+            files += file + "|";
+        }
+        deviceMotionLocationRecord.setEvent(files);
+        return deviceMotionLocationRecord;
+    }
 
 }
