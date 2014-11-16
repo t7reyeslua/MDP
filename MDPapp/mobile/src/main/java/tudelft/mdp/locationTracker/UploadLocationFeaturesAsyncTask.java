@@ -6,6 +6,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,8 +81,10 @@ public class UploadLocationFeaturesAsyncTask extends AsyncTask<Object, Void, Boo
     protected void onPostExecute(Boolean tagRegistered) {
         if (tagRegistered) {
             Log.e(TAG, "Successful logging weka location features.");
+            Toast.makeText(context, "Weka Scans uploaded successfully", Toast.LENGTH_SHORT).show();
         } else {
             Log.e(TAG, "Error while inserting in DB.");
+            Toast.makeText(context, "Ooops! Some problem occurred while uploading the weka scans.", Toast.LENGTH_SHORT).show();
         }
     }
 }

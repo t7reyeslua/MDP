@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -22,6 +23,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class WekaMethods {
 
+    private static final Logger LOG = Logger.getLogger(WekaMethods.class.getName());
     /**
      * Create a dataset as read from an .arff file.
      *
@@ -188,6 +190,11 @@ public class WekaMethods {
         try {
             HashMap<String, Integer> attributesHashMap = createAttributesHashMap(OriginalSet);
 
+            LOG.info("AttributesHashMap created");
+            for (String attr : attributesHashMap.keySet()){
+                LOG.info(attr + " " + attributesHashMap.get(attr));
+            }
+
             Instances datasettoEval = OriginalSet;
             datasettoEval.delete();
 
@@ -195,20 +202,24 @@ public class WekaMethods {
                 datasettoEval.setClassIndex(datasettoEval.numAttributes() - 1);
 
             int numofAttributes = OriginalSet.numAttributes();
+            LOG.info("Original set no. attr: " + numofAttributes);
 
             //Inserting the One only instance
             Instance ft1Instance = new Instance(numofAttributes);
             String[] parts = eval.split("\\n");
             String allAttributesFromEval = parts[0];
+            LOG.info("Attr from ToEval: " + allAttributesFromEval);
 
             String allvaluesFromEval = parts[1];
+            LOG.info("Values from ToEval: " + allvaluesFromEval);
+
 
             String[] attributesFromEval = allAttributesFromEval.split(",");
             String[] valuesFromEval = allvaluesFromEval.split(",");
 
             for (int i = 0; i < attributesFromEval.length; i++) {
                 Integer index = getAttributeIndex(attributesHashMap, attributesFromEval[i]);
-
+                LOG.info(attributesFromEval[i] + " index " + index + " |i:" + i);
                 if (index > -1) {
 //            	 System.out.println(valuesFromEval[i]);
                     ft1Instance.setValue(datasettoEval.attribute(index),
@@ -216,15 +227,16 @@ public class WekaMethods {
                 }
             }
 
-//        System.out.println(valuesFromEval[valuesFromEval.length-1]);
-            ft1Instance.setValue(datasettoEval.attribute(datasettoEval.numAttributes() - 1),
-                    valuesFromEval[valuesFromEval.length - 1]);
+            //LOG.info(valuesFromEval[valuesFromEval.length-1]);
+            //ft1Instance.setValue(datasettoEval.attribute(datasettoEval.numAttributes() - 1),valuesFromEval[valuesFromEval.length - 1]);
 
             //Checking compatibility
-            if (OriginalSet.checkInstance(ft1Instance) == false)
-                System.out.println("Err:Instances Not compatible");
+            if (OriginalSet.checkInstance(ft1Instance) == false) {
+                LOG.info("Err:Instances Not compatible");
+            }
 
             datasettoEval.add(ft1Instance);
+            LOG.info("Add ft1instnce to datasetToEval");
 
             return datasettoEval;
         } catch (Exception e){

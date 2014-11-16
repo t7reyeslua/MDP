@@ -7,6 +7,7 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -44,6 +45,7 @@ import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.De
 import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.Text;
 import tudelft.mdp.backend.endpoints.locationLogEndpoint.model.LocationLogRecord;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
+import tudelft.mdp.backend.endpoints.wekaObjectRecordEndpoint.model.LocationFeaturesRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
 import tudelft.mdp.deviceManager.RequestUserActiveDevicesAsyncTask;
@@ -54,6 +56,7 @@ import tudelft.mdp.locationTracker.LocationEstimator;
 import tudelft.mdp.locationTracker.NetworkInfoObject;
 import tudelft.mdp.locationTracker.NetworkScanService;
 import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
+import tudelft.mdp.locationTracker.RequestLocationEvaluationWekaAsyncTask;
 import tudelft.mdp.locationTracker.UploadCurrentLocationAsyncTask;
 import tudelft.mdp.utils.Utils;
 import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
@@ -65,7 +68,8 @@ public class MdpWorkerService extends Service implements
         RequestGaussiansAsyncTask.RequestGaussiansAsyncResponse,
         RequestUserActiveDevicesAsyncTask.RequestUserActiveDevicesAsyncResponse,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        RequestLocationEvaluationWekaAsyncTask.RequestLocationEvaluationWekaAsyncResponse {
 
     private static final String LOGTAG = "MdpWorkerService";
     private static boolean isRunning = false;
@@ -94,10 +98,12 @@ public class MdpWorkerService extends Service implements
     public static final String ARG_LOCATION_GAUSSIANS = "LOCATION GAUSSIANS";
 
     private String logData = "";
-    private String placeOfLocation = "";
-    private String locationCalculated = "";
-    private String lastLocation = "";
-    private String lastLocationTimestamp = "";
+    private String placeOfLocationBayessian = "";
+    private String locationCalculatedBayessian = "";
+    private String lastLocationBayessian = "";
+    private String placeOfLocationWeka = "";
+    private String locationCalculatedWeka = "";
+    private String lastLocationWeka = "";
     private boolean mLocationRequestedByTimeTick = false;
     private boolean mLocationRequestedByBroadcast = false;
     private boolean mLocationRequestedByLocatorStepByStep = false;
@@ -533,19 +539,92 @@ public class MdpWorkerService extends Service implements
      * @param mNetworkScans input
      */
     private void estimateLocation(ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans){
-        LocationEstimator locationEstimator = new LocationEstimator(mNetworkScans, mGaussianRecords);
+        //Estimate Weka
+        //initWekaLocation(mNetworkScans);
+        //Estimate Bayessian
+        initBayessianLocation(mNetworkScans);
+    }
+
+    private void initBayessianLocation(ArrayList<ArrayList<NetworkInfoObject>> networkScans){
+        String mode  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString(UserPreferences.LOCATION_TECHNIQUE, Constants.LOC_BAYESSIAN);
+
+        LocationEstimator locationEstimator = new LocationEstimator(networkScans, mGaussianRecords);
+
         HashMap<String, Double> pmf = locationEstimator.calculateLocationBayessian();
+        Double bayessianProbability = getProbabilityOfEstimatedLocation(pmf);
 
-        placeOfLocation = locationEstimator.determineCurrentPlace();
-        Double locationProbability = getProbabilityOfEstimatedLocation(pmf);
-        saveEstimatedLocationToDB(placeOfLocation, locationProbability);
+        placeOfLocationBayessian = locationEstimator.determineCurrentPlace();
+        locationCalculatedBayessian = getEstimatedLocation(pmf);
+        saveEstimatedLocationToDB(locationEstimator.determineCurrentPlace(), locationCalculatedBayessian, bayessianProbability, Constants.LOC_BAYESSIAN);
 
-        sendMessageToUI(MSG_LOCATION_ACQUIRED);
+        if (mode.equals(Constants.LOC_BAYESSIAN)) {
+            sendMessageToUI(MSG_LOCATION_ACQUIRED);
 
-        RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
-        requestUserActiveDevicesAsyncTask.delegate = this;
-        requestUserActiveDevicesAsyncTask.execute(
-                sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+            RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
+            requestUserActiveDevicesAsyncTask.delegate = this;
+            requestUserActiveDevicesAsyncTask.execute(
+                    sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+        }
+
+    }
+
+
+    private void initWekaLocation(ArrayList<ArrayList<NetworkInfoObject>> networkScans){
+        WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(networkScans);
+        String features = wekaNetworkScansObject.getFeatures();
+        tudelft.mdp.backend.endpoints.wekaObjectRecordEndpoint.model.Text
+                ft = new tudelft.mdp.backend.endpoints.wekaObjectRecordEndpoint.model.Text();
+        ft.setValue(features);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(ft);
+        locationFeaturesRecord.setTimestamp(Utils.getCurrentTimestamp());
+        locationFeaturesRecord.setUsername(PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext())
+                .getString(UserPreferences.USERNAME, "TBD"));
+
+        RequestLocationEvaluationWekaAsyncTask LocationEvaluationWekaAsyncTask = new RequestLocationEvaluationWekaAsyncTask();
+        LocationEvaluationWekaAsyncTask.delegate = this;
+        LocationEvaluationWekaAsyncTask.execute(locationFeaturesRecord);
+    }
+
+
+    public void processFinishRequestLocationEvaluationWeka(LocationFeaturesRecord result){
+
+        String mode  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString(UserPreferences.LOCATION_TECHNIQUE, Constants.LOC_BAYESSIAN);
+
+        String predictionResult = result.getLocationFeatures().getValue();
+        String[] probabilities = predictionResult.split("\\|");
+
+        String placeWeka = "";
+        String zoneWeka = "";
+        Double maxProbWeka = 0.0;
+        for (String placeZoneProb : probabilities){
+            String[] parts = placeZoneProb.split(",");
+            Double prob = Double.valueOf(parts[1]);
+            if (prob > maxProbWeka){
+                String[] locationInfo = parts[0].split("-");
+                placeWeka = locationInfo[0];
+                zoneWeka = locationInfo[1];
+                maxProbWeka = prob;
+            }
+        }
+
+
+        placeOfLocationWeka = placeWeka;
+        locationCalculatedWeka = zoneWeka;
+        saveEstimatedLocationToDB(placeWeka, zoneWeka, maxProbWeka, Constants.LOC_WEKA);
+
+        if (mode.equals(Constants.LOC_WEKA)) {
+            sendMessageToUI(MSG_LOCATION_ACQUIRED);
+
+            RequestUserActiveDevicesAsyncTask requestUserActiveDevicesAsyncTask = new RequestUserActiveDevicesAsyncTask();
+            requestUserActiveDevicesAsyncTask.delegate = this;
+            requestUserActiveDevicesAsyncTask.execute(
+                    sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+        }
 
     }
 
@@ -556,7 +635,7 @@ public class MdpWorkerService extends Service implements
      */
     private Double getProbabilityOfEstimatedLocation(HashMap<String, Double> pmf){
         int i  = 0;
-        locationCalculated = "";
+        String locationCalculated = "";
         Double locationProbability = 0.0;
         if (pmf != null) {
             for (String zone : pmf.keySet()) {
@@ -576,33 +655,68 @@ public class MdpWorkerService extends Service implements
     }
 
     /**
+     * getEstimatedLocation
+     * @param pmf with estimated probability of each zone
+     * @return estimated location
+     */
+    private String getEstimatedLocation(HashMap<String, Double> pmf){
+        int i  = 0;
+        String locationCalculated = "";
+        if (pmf != null) {
+            for (String zone : pmf.keySet()) {
+                if (i < pmf.size() && i < 3) {
+                    if (locationCalculated.length() == 0) {
+                        locationCalculated = zone;
+                    }
+                    Log.w(LOGTAG, "Zone:" + zone + " Prob:" + pmf.get(zone));
+                    i++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return locationCalculated;
+    }
+
+
+    /**
      * Saves the estimated location to DB if it is different from the last estimated one.
      * @param placeOfLocation Home/Office, etc.
      * @param locationProbability 0..1
      */
-    private void saveEstimatedLocationToDB(String placeOfLocation, Double locationProbability){
-        if (placeOfLocation == null){
+    private void saveEstimatedLocationToDB(String placeOfLocation, String locationCalculated, Double locationProbability, String mode){
+        if (placeOfLocation == null || locationProbability == 0.0){
             placeOfLocation = "Unknown";
             locationCalculated = "Unknown";
         }
 
-        if (!locationCalculated.equals(lastLocation)) {
-            String timestamp = Utils.getCurrentTimestamp();
-            LocationLogRecord locationLogRecord = new LocationLogRecord();
-
-            locationLogRecord.setTimestamp(timestamp);
-            locationLogRecord.setZone(locationCalculated);
-            locationLogRecord.setPlace(placeOfLocation);
-            locationLogRecord.setProbability(locationProbability);
-            locationLogRecord.setMode(Constants.LOC_BAYESSIAN);
-            locationLogRecord.setUser(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
-
-            Log.w(LOGTAG, "Uploading current location to DB:" + locationCalculated + "|" + locationProbability);
-            new UploadCurrentLocationAsyncTask().execute(locationLogRecord);
-
-            lastLocation = locationCalculated;
-            lastLocationTimestamp = timestamp;
+        if (mode.equals(Constants.LOC_BAYESSIAN)) {
+            if (!locationCalculatedBayessian.equals(lastLocationBayessian)) {
+                uploadLocationToDB(placeOfLocation, locationCalculated, locationProbability, mode);
+                lastLocationBayessian = locationCalculatedBayessian;
+            }
+        } else if (mode.equals(Constants.LOC_WEKA)){
+            if (!locationCalculatedWeka.equals(lastLocationWeka)) {
+                uploadLocationToDB(placeOfLocation, locationCalculated, locationProbability, mode);
+                lastLocationWeka = locationCalculatedWeka;
+            }
         }
+    }
+
+    private void uploadLocationToDB(String placeOfLocation, String locationCalculated, Double locationProbability, String mode){
+        String timestamp = Utils.getCurrentTimestamp();
+        LocationLogRecord locationLogRecord = new LocationLogRecord();
+
+        locationLogRecord.setTimestamp(timestamp);
+        locationLogRecord.setZone(locationCalculated);
+        locationLogRecord.setPlace(placeOfLocation);
+        locationLogRecord.setProbability(locationProbability);
+        locationLogRecord.setMode(mode);
+        locationLogRecord.setUser(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+
+        Log.w(LOGTAG, "Uploading current location to DB:" + locationCalculated + "|"
+                + locationProbability);
+        new UploadCurrentLocationAsyncTask().execute(locationLogRecord);
     }
 
     /**
@@ -613,6 +727,17 @@ public class MdpWorkerService extends Service implements
         ArrayList<String> guiltyDevices = new ArrayList<String>();
         String message = "You have turned on devices in other locations.";
         guiltyDevices.add(message);
+
+
+        String mode  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getString(UserPreferences.LOCATION_TECHNIQUE, Constants.LOC_BAYESSIAN);
+
+        String locationCalculated = "";
+        if (mode.equals(Constants.LOC_BAYESSIAN)) {
+            locationCalculated = locationCalculatedBayessian;
+        } else if (mode.equals(Constants.LOC_WEKA)){
+            locationCalculated = locationCalculatedWeka;
+        }
 
         for (NfcRecord device : outputList){
             if (!device.getLocation().toLowerCase().equals(locationCalculated.toLowerCase())){
@@ -634,8 +759,7 @@ public class MdpWorkerService extends Service implements
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, 0);
 
-        NotificationCompat.Builder  mBuilder =
-                new NotificationCompat.Builder(this);
+        NotificationCompat.Builder  mBuilder =  new NotificationCompat.Builder(this);
 
         mBuilder.setContentTitle("MDP")
                 .setContentText(mesage)
@@ -659,7 +783,8 @@ public class MdpWorkerService extends Service implements
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mNotificationManager.notify(id, mBuilder.build());
+        Notification notification = mBuilder.build();
+        mNotificationManager.notify(id, notification);
     }
 
 
@@ -997,7 +1122,19 @@ public class MdpWorkerService extends Service implements
                         messenger.send(msg);
                         break;
                     case MSG_LOCATION_ACQUIRED:
-                        bundle.putString(ARG_LOCATION_ACQUIRED, placeOfLocation + "|" + locationCalculated);
+                        String mode  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                                .getString(UserPreferences.LOCATION_TECHNIQUE, Constants.LOC_BAYESSIAN);
+
+                        String locationCalculated = "";
+                        String placeCalculated = "";
+                        if (mode.equals(Constants.LOC_BAYESSIAN)) {
+                            placeCalculated = placeOfLocationBayessian;
+                            locationCalculated = locationCalculatedBayessian;
+                        } else if (mode.equals(Constants.LOC_WEKA)){
+                            placeCalculated = placeOfLocationWeka;
+                            locationCalculated = locationCalculatedWeka;
+                        }
+                        bundle.putString(ARG_LOCATION_ACQUIRED, placeCalculated + "|" + locationCalculated);
                         msg = Message.obtain(null, MSG_LOCATION_ACQUIRED);
                         msg.setData(bundle);
                         messenger.send(msg);

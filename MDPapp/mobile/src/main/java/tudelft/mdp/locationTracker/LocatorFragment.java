@@ -10,6 +10,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,18 +28,23 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.view.CardView;
 import tudelft.mdp.MdpWorkerService;
 import tudelft.mdp.R;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
-import tudelft.mdp.ui.CalibrationControlCard;
+import tudelft.mdp.backend.endpoints.wekaObjectRecordEndpoint.model.LocationFeaturesRecord;
+import tudelft.mdp.backend.endpoints.wekaObjectRecordEndpoint.model.Text;
+import tudelft.mdp.enums.UserPreferences;
 import tudelft.mdp.ui.ExpandableListAdapterRSSI;
 import tudelft.mdp.ui.LocatorBayessianCard;
 import tudelft.mdp.ui.LocatorNewScanCard;
 import tudelft.mdp.ui.LocatorScanResultCard;
+import tudelft.mdp.ui.LocatorWekaCard;
+import tudelft.mdp.utils.Utils;
+import tudelft.mdp.weka.WekaNetworkScansObject;
 
-public class LocatorFragment extends Fragment implements ServiceConnection {
+public class LocatorFragment extends Fragment implements ServiceConnection,
+RequestLocationEvaluationWekaAsyncTask.RequestLocationEvaluationWekaAsyncResponse{
 
     private Messenger mServiceMessenger = null;
     private boolean mIsBound;
@@ -48,10 +55,12 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
     private CardView mCardViewNewScan;
     private CardView mCardViewBayessian;
+    private CardView mCardViewWeka;
     private CardView mCardViewScanResult;
     private LocatorScanResultCard mCardScanResult;
     private LocatorNewScanCard mCardNewScan;
     private LocatorBayessianCard mCardBayessian;
+    private LocatorWekaCard mCardWeka;
 
     private Button mButtonRequestNewNetworkScan;
     private ProgressBar mProgressBar;
@@ -59,12 +68,16 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     // Bayessian Card
     private Button mButtonCalculateLocationUsingNextNetwork_Bayessian;
     private Button mButtonCalculateLocation_Bayessian;
+    private Button mButtonCalculateLocation_Weka;
 
-    private TextView mTextViewCurrentPlace;
-    private TextView mTextViewZone;
-    private TextView mTextViewProbability;
-    private TextView mTextViewNetwork;
-    private TextView mTextViewNetworkId;
+    private TextView mTextViewCurrentPlace_Weka;
+    private TextView mTextViewZone_Weka;
+    private TextView mTextViewProbability_Weka;
+    private TextView mTextViewCurrentPlace_Bayessian;
+    private TextView mTextViewZone_Bayessian;
+    private TextView mTextViewProbability_Bayessian;
+    private TextView mTextViewNetwork_Bayessian;
+    private TextView mTextViewNetworkId_Bayessian;
     private LinearLayout mLinearLayoutBayessian;
 
 
@@ -74,9 +87,12 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
 
     private HashMap<String,Double> pmfFinalBayessian = new HashMap<String, Double>();
+    private HashMap<String,Double> pmfFinalWeka = new HashMap<String, Double>();
     private ArrayList<HashMap<String,Double>> pmfIntermediateResultsBayessian = new ArrayList<HashMap<String, Double>>();
     private int networkIdCount;
-    private String currentPlace = "TBD";
+    private String currentPlaceBayessian = "TBD";
+    private String currentPlaceWeka = "TBD";
+
 
 
     private ExpandableListView mExpandableListAP;
@@ -127,6 +143,7 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     private void configureCardsInit(){
         configureNewScanCard();
         configureBayessianCard();
+        configureWekaCard();
         configureScanResultsCard();
     }
 
@@ -146,6 +163,13 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
                 Toast.makeText(rootView.getContext(), "Requesting new scan...", Toast.LENGTH_SHORT).show();
                 sendMessageToService(MdpWorkerService.MSG_LOCATION_STEP_BY_STEP);
                 mProgressBar.setIndeterminate(true);
+
+
+                refreshWekaCard(new HashMap<String, Double>(), "TBD");
+                mCardViewWeka.setVisibility(View.INVISIBLE);
+                refreshBayessianCard(new HashMap<String, Double>(), "TBD", 0);
+                mCardViewBayessian.setVisibility(View.INVISIBLE);
+                mCardViewScanResult.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -164,6 +188,34 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         mCardViewScanResult.setVisibility(View.INVISIBLE);
     }
 
+    private void configureWekaCard(){
+        mCardWeka = new LocatorWekaCard(rootView.getContext());
+        mCardWeka.init();
+        mCardWeka.setShadow(true);
+
+        mCardViewWeka = (CardView) rootView.findViewById(R.id.cardWeka);
+        mCardViewWeka.setCard(mCardWeka);
+
+        mButtonCalculateLocation_Weka = (Button) mCardViewWeka.findViewById(R.id.btnFinalResultWeka);
+        mButtonCalculateLocation_Weka.setEnabled(false);
+
+        mTextViewCurrentPlace_Weka = (TextView) mCardViewWeka.findViewById(R.id.twPlace);
+        mTextViewZone_Weka = (TextView) mCardViewWeka.findViewById(R.id.twZone);
+        mTextViewProbability_Weka = (TextView) mCardViewWeka.findViewById(R.id.twProb);
+
+
+        mButtonCalculateLocation_Weka.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //  Toast.makeText(rootView.getContext(), "Calculating final location...", Toast.LENGTH_SHORT).show();
+                calculateFinalLocationWeka();
+            }
+        });
+
+        refreshWekaCard(new HashMap<String, Double>(), "TBD");
+
+        mCardViewWeka.setVisibility(View.INVISIBLE);
+
+    }
 
     private void configureBayessianCard(){
         mCardBayessian = new LocatorBayessianCard(rootView.getContext());
@@ -180,11 +232,11 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         mButtonCalculateLocationUsingNextNetwork_Bayessian.setEnabled(false);
         mButtonCalculateLocation_Bayessian.setEnabled(false);
 
-        mTextViewCurrentPlace = (TextView) mCardViewBayessian.findViewById(R.id.twPlace);
-        mTextViewZone = (TextView) mCardViewBayessian.findViewById(R.id.twZone);
-        mTextViewProbability = (TextView) mCardViewBayessian.findViewById(R.id.twProb);
-        mTextViewNetwork = (TextView) mCardViewBayessian.findViewById(R.id.twNetworkName);
-        mTextViewNetworkId = (TextView) mCardViewBayessian.findViewById(R.id.twNetworkNumber);
+        mTextViewCurrentPlace_Bayessian = (TextView) mCardViewBayessian.findViewById(R.id.twPlace);
+        mTextViewZone_Bayessian = (TextView) mCardViewBayessian.findViewById(R.id.twZone);
+        mTextViewProbability_Bayessian = (TextView) mCardViewBayessian.findViewById(R.id.twProb);
+        mTextViewNetwork_Bayessian = (TextView) mCardViewBayessian.findViewById(R.id.twNetworkName);
+        mTextViewNetworkId_Bayessian = (TextView) mCardViewBayessian.findViewById(R.id.twNetworkNumber);
         mLinearLayoutBayessian = (LinearLayout) mCardViewBayessian.findViewById(R.id.resultBayessian);
 
 
@@ -208,8 +260,30 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
     }
 
-    private void refreshBayessianCard( HashMap<String, Double> updatedResults, String currentPlace, int index){
+    private void refreshWekaCard( HashMap<String, Double> updatedResults, String currentPlace){
+        String zone = "Unknown";
+        Double max = 0.0;
+        HashMap<String, Double> sortedPMF = new HashMap<String, Double>();
+        if (updatedResults != null){
+            if (updatedResults.size() > 0) {
+                //mLinearLayoutBayessian.setVisibility(View.VISIBLE);
+                sortedPMF = LocationEstimator.sortByProbability(updatedResults);
+                zone = (String) sortedPMF.keySet().toArray()[0];
+                max = sortedPMF.get(zone);
+            } else {
+                //mLinearLayoutBayessian.setVisibility(View.INVISIBLE);
+            }
+        }
 
+        mTextViewCurrentPlace_Weka.setText(currentPlace);
+        mTextViewZone_Weka.setText(zone);
+        mTextViewProbability_Weka.setText(String.format("%.2f",max * 100) + "%");
+
+        mCardWeka.setCurrentPlace(currentPlace);
+        mCardWeka.updateItems(sortedPMF);
+    }
+
+    private void refreshBayessianCard( HashMap<String, Double> updatedResults, String currentPlace, int index){
         String networkId;
         String networkName;
         if ( index < mLocationEstimator.getNetworkScans().size() && index >= 0){
@@ -234,11 +308,11 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
             }
         }
 
-        mTextViewCurrentPlace.setText(currentPlace);
-        mTextViewZone.setText(zone);
-        mTextViewProbability.setText(String.format("%.2f",max * 100) + "%");
-        mTextViewNetworkId.setText(networkId);
-        mTextViewNetwork.setText(networkName);
+        mTextViewCurrentPlace_Bayessian.setText(currentPlace);
+        mTextViewZone_Bayessian.setText(zone);
+        mTextViewProbability_Bayessian.setText(String.format("%.2f",max * 100) + "%");
+        mTextViewNetworkId_Bayessian.setText(networkId);
+        mTextViewNetwork_Bayessian.setText(networkName);
 
         mCardBayessian.setCurrentPlace(currentPlace);
         mCardBayessian.updateItems(sortedPMF);
@@ -344,12 +418,14 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
     private void handleGaussianResult(ArrayList<ApGaussianRecord> gaussianRecords){
         mGaussianRecords = new ArrayList<ApGaussianRecord>(gaussianRecords);
-        Toast.makeText(rootView.getContext(), "Gaussians received.", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(rootView.getContext(), "Gaussians received.", Toast.LENGTH_SHORT).show();
     }
 
     private void handleScanResult(ArrayList<ArrayList<NetworkInfoObject>> networkScans) {
         Toast.makeText(rootView.getContext(),"Scan Results ready",Toast.LENGTH_SHORT).show();
+
         initBayessianLocation(networkScans);
+        initWekaLocation(networkScans);
 
         updateScanResultsList(mLocationEstimator);
         mCardViewScanResult.setVisibility(View.VISIBLE);
@@ -357,10 +433,24 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
 
 
     private void updateScanResultsList(LocationEstimator locationEstimator){
+        ViewGroup.LayoutParams layoutParams = mExpandableListAP.getLayoutParams();
+        int nNetworks = mLocationEstimator.getNetworkScans().size();
+        int nParents = nNetworks * dpToPx(19);
+        layoutParams.height = nParents;
+        //mCardViewScanResult.setLayoutParams(layoutParams);
+        mExpandableListAP.setLayoutParams(layoutParams);
         setExpListScanResultData(locationEstimator);
+
+
 
         mExpandableListAP.setAdapter(new ExpandableListAdapterRSSI(rootView.getContext(), groupItem, childItem));
         mExpandableListAP.setOnGroupClickListener(new ExpDrawerGroupClickListener());
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = rootView.getContext().getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
     }
 
     private class ExpDrawerGroupClickListener implements ExpandableListView.OnGroupClickListener {
@@ -368,12 +458,38 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         public boolean onGroupClick(ExpandableListView parent, View v,
                 int groupPosition, long id) {
 
+            /*
             if (parent.isGroupExpanded(groupPosition)){
                 parent.collapseGroup(groupPosition);
             }else {
                 parent.expandGroup(groupPosition, true);
             }
             return true;
+            */
+
+            ViewGroup.LayoutParams layoutParams = parent.getLayoutParams();
+            int nNetworks = mLocationEstimator.getNetworkScans().size();
+            int nParents = nNetworks * dpToPx(19);
+
+            NetworkInfoObject parentNetwork = mLocationEstimator.getNetworkScans().get(groupPosition);
+            int nNetworkChildren = mLocationEstimator.getGaussianRecordsOfNetwork(parentNetwork).size();
+            int nChildren = nNetworkChildren * dpToPx(19);
+
+            if (parent.isGroupExpanded(groupPosition)){
+                parent.collapseGroup(groupPosition);
+                if ((layoutParams.height - nChildren) < nParents){
+                    layoutParams.height = nParents;
+                } else {
+                    layoutParams.height = layoutParams.height - nChildren;
+                }
+            }else {
+                parent.expandGroup(groupPosition, true);
+                layoutParams.height = layoutParams.height + nChildren;
+            }
+            parent.setLayoutParams(layoutParams);
+            return true;
+
+
         }
     }
 
@@ -409,7 +525,7 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
         //mLocationEstimator = mockLocationEstimator();
         pmfFinalBayessian = mLocationEstimator.calculateLocationBayessian();
         pmfIntermediateResultsBayessian = mLocationEstimator.calculateLocationBayessian_IntermediatePMFs();
-        currentPlace = mLocationEstimator.determineCurrentPlace();
+        currentPlaceBayessian = mLocationEstimator.determineCurrentPlace();
         networkIdCount = 0;
 
         mProgressBar.setIndeterminate(false);
@@ -420,10 +536,11 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     }
 
     private void calculateNextAPBayessian(){
-        if (currentPlace == null){
+        if (currentPlaceBayessian == null){
             refreshBayessianCard(pmfFinalBayessian, "Unknown" , -1);
         } else {
-            refreshBayessianCard(pmfIntermediateResultsBayessian.get(networkIdCount), currentPlace, networkIdCount);
+            refreshBayessianCard(pmfIntermediateResultsBayessian.get(networkIdCount),
+                    currentPlaceBayessian, networkIdCount);
             if (networkIdCount < (mLocationEstimator.getNetworkScans().size()-1)){
                 networkIdCount++;
             } else {
@@ -434,14 +551,14 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     }
 
     private void calculateFinalLocationBayessian(){
-        if (currentPlace == null){
+        if (currentPlaceBayessian == null){
             refreshBayessianCard(pmfFinalBayessian, "Unknown" , -1);
         } else {
             int index  = -1;
             if (pmfFinalBayessian != null) {
                 index = findNetworkWithBestResult();
             }
-            refreshBayessianCard(pmfFinalBayessian, currentPlace, index);
+            refreshBayessianCard(pmfFinalBayessian, currentPlaceBayessian, index);
         }
     }
 
@@ -464,10 +581,55 @@ public class LocatorFragment extends Fragment implements ServiceConnection {
     }
 
 
+    // Weka Calculations ***************************************************************************
+
+    private void initWekaLocation(ArrayList<ArrayList<NetworkInfoObject>> networkScans){
+        WekaNetworkScansObject wekaNetworkScansObject = new WekaNetworkScansObject(networkScans);
+        String features = wekaNetworkScansObject.getFeatures();
+        Text ft = new Text();
+        ft.setValue(features);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(ft);
+        locationFeaturesRecord.setTimestamp(Utils.getCurrentTimestamp());
+        locationFeaturesRecord.setUsername(PreferenceManager
+                .getDefaultSharedPreferences(rootView.getContext())
+                .getString(UserPreferences.USERNAME, "TBD"));
+
+        RequestLocationEvaluationWekaAsyncTask LocationEvaluationWekaAsyncTask = new RequestLocationEvaluationWekaAsyncTask();
+        LocationEvaluationWekaAsyncTask.delegate = this;
+        LocationEvaluationWekaAsyncTask.execute(locationFeaturesRecord);
+
+    }
 
 
+    public void processFinishRequestLocationEvaluationWeka(LocationFeaturesRecord result){
+        String predictionResult = result.getLocationFeatures().getValue();
+        String[] probabilities = predictionResult.split("\\|");
 
+        pmfFinalWeka = new HashMap<String, Double>();
 
+        for (String placeZoneProb : probabilities){
+            String[] parts = placeZoneProb.split(",");
+            String[] locationInfo = parts[0].split("-");
+            currentPlaceWeka = locationInfo[0];
+            String zoneWeka = locationInfo[1];
+            Double prob = Double.valueOf(parts[1]);
+
+            pmfFinalWeka.put(zoneWeka, prob);
+        }
+
+        mCardViewWeka.setVisibility(View.VISIBLE);
+        mButtonCalculateLocation_Weka.setEnabled(true);
+    }
+
+    private void calculateFinalLocationWeka(){
+        if (currentPlaceBayessian == null){
+            refreshWekaCard(pmfFinalWeka, "Unknown");
+        } else {
+            refreshWekaCard(pmfFinalWeka, currentPlaceWeka);
+        }
+    }
 
 
 

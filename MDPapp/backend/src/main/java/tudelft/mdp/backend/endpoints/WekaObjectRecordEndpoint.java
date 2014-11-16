@@ -57,9 +57,9 @@ public class WekaObjectRecordEndpoint {
         result.setFilename("");
         result.setObjectType(objectType);
         result.setDescription("No match found");
-        for (WekaObjectRecord record : records){
-            if (record.getDescription().contains(filter)){
-                result = record;
+        for (int i = records.size()-1; i >= 0; i --){
+            if (records.get(i).getDescription().contains(filter)){
+                result = records.get(i);
                 break;
             }
         }
@@ -130,11 +130,25 @@ public class WekaObjectRecordEndpoint {
             LocationFeaturesRecord eval) {
 
         LOG.info("Calling evaluateLocation method using: " + instanceFilename + "|" + clsFilename);
+        LOG.info("Eval: " + eval.getLocationFeatures().getValue());
         GcsHelper gcsHelper = new GcsHelper();
         Classifier cls = gcsHelper.readClsFromGCS(clsFilename);
         Instances instances = gcsHelper.readInstancesFromGCS(instanceFilename);
         Instances instanceToEval = WekaMethods.CreateLocationInstanceToEval(instances,
                 eval.getLocationFeatures().getValue());
+
+
+        LOG.info("Original: No. Attributes: " + instances.numAttributes()
+                + "|No. Instances: " + instances.numInstances()
+                + "|No. Classes: " + instances.numClasses());
+
+
+        LOG.info("To Eval: No. Attributes: " + instanceToEval.numAttributes()
+                + "|No. Instances: " + instanceToEval.numInstances()
+                + "|No. Classes: " + instanceToEval.numClasses());
+
+        LOG.info(cls.toString());
+
 
         String prediction = WekaMethods.GetPredictionDistributionOnline(instanceToEval, cls);
         Text result = new Text(prediction);

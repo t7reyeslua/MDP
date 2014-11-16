@@ -26,6 +26,8 @@ public class NetworkScanService extends Service {
     public static final int MSG_REGISTER_CLIENT = 6;
     public static final int MSG_UNREGISTER_CLIENT = 7;
     public static final int MSG_SCANRESULT_READY = 8;
+    public static final int MSG_PAUSE_SCANS_FINGERPRINT = 8787;
+    public static final int MSG_UNPAUSE_SCANS_FINGERPRINT = 9797;
     public static final int MSG_PAUSE_SCANS_TICK = 88;
     public static final int MSG_UNPAUSE_SCANS_TICK = 99;
     public static final int MSG_PAUSE_SCANS_CALIBRATION = 888;
@@ -47,6 +49,7 @@ public class NetworkScanService extends Service {
     private boolean pauseScansTick = true;
     private boolean pauseScansBroadcast = true;
     private boolean pauseScansCalibration = true;
+    private boolean pauseScansFingerprint = true;
     private boolean pauseScansStepByStep = true;
 
     private static final String LOGTAG = "MDP-NetworkScanService";
@@ -125,12 +128,13 @@ public class NetworkScanService extends Service {
     }
 
     private void getNewScanResults(){
-        if (!pauseScansBroadcast || !pauseScansCalibration || !pauseScansTick || !pauseScansStepByStep) {
+        if (!pauseScansBroadcast || !pauseScansCalibration || !pauseScansTick || !pauseScansStepByStep || !pauseScansFingerprint) {
             String requester = "";
             if (!pauseScansTick) requester += "TICK|";
             if (!pauseScansBroadcast) requester += "BROADCAST|";
             if (!pauseScansCalibration) requester += "CALIBRATION|";
             if (!pauseScansStepByStep) requester += "STEPBYSTEP|";
+            if (!pauseScansFingerprint) requester += "FINGERPRINT|";
             Log.i(LOGTAG, "Request for new Scan Results. Starting scan... : " + requester);
             myWifiManager.startScan();
         }
@@ -183,6 +187,15 @@ public class NetworkScanService extends Service {
                 case MSG_UNPAUSE_SCANS_CALIBRATION:
                     Log.d(LOGTAG, "handleMessage: " + "UNPAUSE_CALIBRATION");
                     pauseScansCalibration = false;
+                    getNewScanResults();
+                    break;
+                case MSG_PAUSE_SCANS_FINGERPRINT:
+                    Log.d(LOGTAG, "handleMessage: " + "PAUSE_FINGERPRINT");
+                    pauseScansFingerprint = true;
+                    break;
+                case MSG_UNPAUSE_SCANS_FINGERPRINT:
+                    Log.d(LOGTAG, "handleMessage: " + "UNPAUSE_FINGERPRINT");
+                    pauseScansFingerprint = false;
                     getNewScanResults();
                     break;
                 case MSG_PAUSE_SCANS_TICK:

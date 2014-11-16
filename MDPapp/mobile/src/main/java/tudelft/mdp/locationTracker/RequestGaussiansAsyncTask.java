@@ -33,8 +33,11 @@ public class RequestGaussiansAsyncTask extends AsyncTask<Object, Void, Boolean> 
             Log.e(TAG, "Requesting gaussians");
             mGaussianRecords  = mRadioMapFingerprintEndpointService.listGaussiansAll().execute().getItems();
 
-
-            return true;
+            if (mGaussianRecords != null) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (IOException e) {
             Log.e(TAG, "Some error while requesting gaussians");
             return false;

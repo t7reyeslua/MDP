@@ -7,6 +7,7 @@ import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.NotFoundException;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,11 +17,13 @@ import java.util.logging.Logger;
 
 import javax.inject.Named;
 
+import tudelft.mdp.backend.OfyService;
 import tudelft.mdp.backend.enums.Constants;
 import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;
 import tudelft.mdp.backend.records.ApHistogramRecordWrapper;
+import tudelft.mdp.backend.records.LocationFeaturesRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecordWrapper;
 
@@ -423,6 +426,65 @@ public class RadioMapFingerprintEndpoint {
         LOG.info("Record keys:" + records.size());
         ofy().delete().keys(records).now();
 
+    }
+    /*
+
+    private void checkExistsApGaussian(Long id) throws NotFoundException {
+        try {
+            ObjectifyService.ofy().load().type(ApGaussianRecord.class).id(id).safe();
+        } catch (com.googlecode.objectify.NotFoundException e) {
+            throw new NotFoundException("Could not find ApGaussianRecord with ID: " + id);
+        }
+    }
+
+    @ApiMethod(
+            name = "removeApGaussian",
+            path = "apGaussianRecord/{id}",
+            httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeApGaussian(@Named("id") Long id) throws NotFoundException {
+        checkExistsApGaussian(id);
+        ObjectifyService.ofy().delete().type(ApGaussianRecord.class).id(id).now();
+        LOG.info("Deleted ApGaussianRecord with ID: " + id);
+    }
+
+    @ApiMethod(
+            name = "removeAllGaussians",
+            path = "remove_all_gaussians}")
+    public void removeAllGaussians() throws NotFoundException {
+        List<ApGaussianRecord> records= OfyService.ofy().load().type(ApGaussianRecord.class)
+                .list();
+        for (ApGaussianRecord record : records){
+            removeApGaussian(record.getId());
+        }
+    }
+*/
+    private void checkExistsApHistogram(Long id) throws NotFoundException {
+        try {
+            ObjectifyService.ofy().load().type(ApHistogramRecord.class).id(id).safe();
+        } catch (com.googlecode.objectify.NotFoundException e) {
+            throw new NotFoundException("Could not find ApHistogramRecord with ID: " + id);
+        }
+    }
+
+    @ApiMethod(
+            name = "removeHistogram",
+            path = "apHistogramRecord/{id}",
+            httpMethod = ApiMethod.HttpMethod.DELETE)
+    public void removeApHistogram(@Named("id") Long id) throws NotFoundException {
+        checkExistsApHistogram(id);
+        ObjectifyService.ofy().delete().type(ApHistogramRecord.class).id(id).now();
+        LOG.info("Deleted ApHistogramRecord with ID: " + id);
+    }
+
+    @ApiMethod(
+            name = "removeAllHistograms",
+            path = "remove_all_histograms}")
+    public void removeAllHistograms() throws NotFoundException {
+        List<ApHistogramRecord> records= OfyService.ofy().load().type(ApHistogramRecord.class)
+                .list();
+        for (ApHistogramRecord record : records){
+            removeApHistogram(record.getId());
+        }
     }
 
 

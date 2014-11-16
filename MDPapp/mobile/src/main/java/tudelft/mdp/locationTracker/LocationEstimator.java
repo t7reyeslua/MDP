@@ -246,7 +246,7 @@ public class LocationEstimator {
 
         //Log.i(LOGTAG, "determineCurrentPlace: " + "UNKNOWN");
         //You are in an unknown place
-        return null;
+        return "Unknown";
     }
 
 

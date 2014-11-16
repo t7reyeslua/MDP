@@ -120,6 +120,7 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         v = (Vibrator) this.getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
 
+        //Toast.makeText(rootView.getContext(), "Getting prev calibration values", Toast.LENGTH_SHORT).show();
         getPreviousCalibrationValues();
 
         configureControlCard();
@@ -222,12 +223,14 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
 
     private void startFingerprint(){
 
+
         if (!mCalibrated){
             Toast.makeText(rootView.getContext(), "Please calibrate your phone before starting to fingerprint", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if ((mPlaceAutoComplete.getText().length() > 0) && (mZoneAutoComplete.getText().length() > 0)) {
+            Toast.makeText(rootView.getContext(), "Starting fingerprint session", Toast.LENGTH_SHORT).show();
             currentSamples = 0;
 
             localHistogram.clear();
@@ -259,6 +262,8 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         String place = mPlaceAutoComplete.getText().toString();
         String zone  = mZoneAutoComplete.getText().toString();
 
+
+        sendMessageToService(NetworkScanService.MSG_PAUSE_SCANS_FINGERPRINT);
         automaticUnbinding();
         mPlaceAutoComplete.setEnabled(true);
         mZoneAutoComplete.setEnabled(true);
@@ -300,7 +305,8 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
             LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
 
 
-            String user = PreferenceManager.getDefaultSharedPreferences(rootView.getContext()).getString(UserPreferences.USERNAME, "Unknown");
+            String user = PreferenceManager.getDefaultSharedPreferences(rootView.getContext()).getString(
+                    UserPreferences.USERNAME, "Unknown");
             Text locationFeatures = new Text();
             locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
             locationFeaturesRecord.setLocationFeatures(locationFeatures);
@@ -328,8 +334,8 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         new UploadLocationFeaturesAsyncTask().execute(rootView.getContext(), mLocationFeaturesRecords);
         Log.w(LOGTAG, "uploadScanDataToCloud: Histograms");
         new UploadLocationHistogramsAsyncTask().execute(rootView.getContext(), localHistogram, place, zone);
-        Log.w(LOGTAG, "uploadScanDataToCloud: Raw Data");
-        new UploadLocationRawDataAsyncTask().execute(rootView.getContext(), rawScans);
+        //Log.w(LOGTAG, "uploadScanDataToCloud: Raw Data");
+        //new UploadLocationRawDataAsyncTask().execute(rootView.getContext(), rawScans);
     }
 
 
@@ -443,9 +449,12 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         currentSamples ++;
         replaceFingerprintCard(currentSamples);
 
+        //Toast.makeText(rootView.getContext(), "Samples:" + currentSamples, Toast.LENGTH_SHORT).show();
+
         applyCalibrationParams(recentScanResult);
 
-        mNetworkScans.add(recentScanResult);
+        ArrayList<NetworkInfoObject> newScan = new ArrayList<NetworkInfoObject>(recentScanResult);
+        mNetworkScans.add(newScan);
         addScanToAggregatedResults(recentScanResult);
         addScanToRawResults(recentScanResult);
     }
@@ -484,6 +493,9 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         catch (RemoteException e) {
             // In this case the service has crashed before we could even do anything with it
         }
+
+
+        sendMessageToService(NetworkScanService.MSG_UNPAUSE_SCANS_FINGERPRINT);
     }
 
     /**
@@ -492,9 +504,11 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
     private void automaticBinding() {
         if (NetworkScanService.isRunning()){
             doBindService();
+            //Toast.makeText(rootView.getContext(), "Binding to service", Toast.LENGTH_SHORT).show();
         } else{
             startServiceNetworkScan();
             doBindService();
+           // Toast.makeText(rootView.getContext(), "Starting service", Toast.LENGTH_SHORT).show();
         }
         if (v != null) {
             v.vibrate(500);
@@ -505,6 +519,8 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
      * Automatically unbinds from the service
      */
     private void automaticUnbinding() {
+
+       // Toast.makeText(rootView.getContext(), "Unbinding from service", Toast.LENGTH_SHORT).show();
         stopServiceNetworkScan();
     }
 
@@ -557,6 +573,21 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
         }
     }
 
+    private void sendMessageToService(int command) {
+        if (mIsBound) {
+            if (mServiceMessenger != null) {
+                try {
+                    Message msg = Message
+                            .obtain(null, command);
+                    msg.replyTo = mMessenger;
+                    mServiceMessenger.send(msg);
+                } catch (RemoteException e) {
+                    Log.e(LOGTAG, e.getMessage());
+                }
+            }
+        }
+    }
+
     /**
      * Private class that handles all incoming messages from the service
      */
@@ -566,6 +597,7 @@ public class LocationFingerprintFragment extends Fragment implements ServiceConn
             Log.d(LOGTAG, "handleMessage: " + msg.what);
             switch (msg.what) {
                 case NetworkScanService.MSG_SCANRESULT_READY:
+
                     @SuppressWarnings("unchecked")
                     ArrayList<NetworkInfoObject> scanResult =
                             (ArrayList<NetworkInfoObject>) msg.getData()

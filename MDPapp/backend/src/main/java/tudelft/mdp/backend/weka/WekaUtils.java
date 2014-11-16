@@ -168,7 +168,7 @@ public class WekaUtils {
         // Build the class and location attributes. (Motion Attributes are always fixed)
         for (LocationFeaturesRecord locationFeaturesRecord : records){
             String classAttr = locationFeaturesRecord.getPlace().replaceAll("\\s", "") + "-"
-                             + locationFeaturesRecord.getPlace().replaceAll("\\s", "");
+                             + locationFeaturesRecord.getZone().replaceAll("\\s", "");
             classAttributesSet.add(classAttr);
 
             String locationData = locationFeaturesRecord.getLocationFeatures().getValue();
@@ -221,7 +221,7 @@ public class WekaUtils {
             //remove the last comma
             locationFeatures = locationFeatures.substring(0, locationFeatures.length()-1);
             String classAttr = locationFeaturesRecord.getPlace().replaceAll("\\s", "") + "-"
-                    + locationFeaturesRecord.getPlace().replaceAll("\\s", "");
+                    + locationFeaturesRecord.getZone().replaceAll("\\s", "");
             //features.add(locationFeatures + "," + motionFeatures);
 
             features.add(locationFeatures + "," + classAttr);

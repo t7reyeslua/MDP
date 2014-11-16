@@ -32,7 +32,7 @@ public class LocatorBayessianCard extends CardWithList {
 
     private String currentPlace = "";
 
-    private static final String TAG = "MDP-CalibrationNetworksCard";
+    private static final String TAG = "MDP-LocatorBayessianCard";
 
     public LocatorBayessianCard(Context context){
         super(context, R.layout.card_locator_bayessian);

@@ -12,6 +12,8 @@ import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.cmd.Query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -141,6 +143,18 @@ public class LocationFeaturesRecordEndpoint {
         ofy().delete().type(LocationFeaturesRecord.class).id(id).now();
         logger.info("Deleted LocationFeaturesRecord with ID: " + id);
     }
+
+    @ApiMethod(
+            name = "removeAll",
+            path = "remove_all_location_feature_records")
+    public void removeAll() throws NotFoundException {
+        List<LocationFeaturesRecord> records= OfyService.ofy().load().type(LocationFeaturesRecord.class)
+                .list();
+        for (LocationFeaturesRecord record : records){
+            remove(record.getId());
+        }
+    }
+
 
     /**
      * List all entities.
@@ -280,6 +294,95 @@ public class LocationFeaturesRecordEndpoint {
         }
         response.setPlace(files);
         return response;
+    }
+
+    @ApiMethod(name = "createWekaObjectsFilterZones", path = "create_weka_objects_filter")
+    public LocationFeaturesRecord createWekaObjectsFilterZones(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate,
+            @Named("place") String place,
+            @Named("blacklist") String blacklistZones) {
+
+        logger.info("Calling createWekaObjectsFilterZones method from: " + minDate + " to " + maxDate + " of " + place + " without " + blacklistZones);
+
+        List<LocationFeaturesRecord> records= OfyService.ofy().load().type(
+                LocationFeaturesRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .filter("place", place)
+                .order("timestamp")
+                .list();
+
+        logger.info("Records:" + records.size());
+
+        String[] filteredZones = blacklistZones.split(",");
+        ArrayList<String> filter = new ArrayList<String>(Arrays.asList(filteredZones));
+
+        List<LocationFeaturesRecord> recordsFiltered= new ArrayList<LocationFeaturesRecord>();
+        for (LocationFeaturesRecord locationFeaturesRecord : records){
+            if (!filter.contains(locationFeaturesRecord.getZone())){
+                recordsFiltered.add(locationFeaturesRecord);
+            }
+        }
+        logger.info("Records filtered:" + recordsFiltered.size());
+
+
+
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSetLocation(recordsFiltered, minDate, maxDate, place + " without " + blacklistZones);
+        LocationFeaturesRecord response = new LocationFeaturesRecord();
+
+        String files = "";
+        for (String file : filesCreated){
+            files += file + "|";
+        }
+        response.setPlace(files);
+        return response;
+    }
+
+    private ArrayList<String> getClassAttributesSTR(
+            String minDate,
+            String maxDate, String place){
+
+        List<LocationFeaturesRecord> records= OfyService.ofy().load().type(
+                LocationFeaturesRecord.class)
+                .filter("timestamp >=", minDate)
+                .filter("timestamp <=", maxDate)
+                .filter("place", place)
+                .order("timestamp")
+                .list();
+
+        logger.info("Records:" + records.size());
+        HashSet<String> hashSet = new HashSet<String>();
+        for (LocationFeaturesRecord locationFeaturesRecord : records){
+            hashSet.add(locationFeaturesRecord.getPlace().replaceAll("\\s", "") +"-" +locationFeaturesRecord.getZone().replaceAll(
+                    "\\s", ""));
+        }
+        logger.info("Distinct Records:" + hashSet.size());
+
+        return new ArrayList<String>(hashSet);
+
+    }
+
+    @ApiMethod(name = "getClassAttributes", path = "get_class_attributes")
+    public CollectionResponse<LocationFeaturesRecord> getClassAttributes(
+            @Named("minDate") String minDate,
+            @Named("maxDate") String maxDate,
+            @Named("place") String place) {
+
+        logger.info("Calling getClassAttributes method from: " + minDate + " to " + maxDate);
+
+        ArrayList<String> classAttributes    = new ArrayList<String>(getClassAttributesSTR(minDate,maxDate,place));
+        ArrayList<LocationFeaturesRecord> records = new ArrayList<LocationFeaturesRecord>();
+
+        for (String s : classAttributes){
+            LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+            locationFeaturesRecord.setPlace(s);
+            records.add(locationFeaturesRecord);
+        }
+
+        return CollectionResponse.<LocationFeaturesRecord>builder().setItems(records).build();
     }
 
 
