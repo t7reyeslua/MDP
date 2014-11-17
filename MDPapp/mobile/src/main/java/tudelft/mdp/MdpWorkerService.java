@@ -540,7 +540,7 @@ public class MdpWorkerService extends Service implements
      */
     private void estimateLocation(ArrayList<ArrayList<NetworkInfoObject>> mNetworkScans){
         //Estimate Weka
-        //initWekaLocation(mNetworkScans);
+        initWekaLocation(mNetworkScans);
         //Estimate Bayessian
         initBayessianLocation(mNetworkScans);
     }
@@ -740,7 +740,7 @@ public class MdpWorkerService extends Service implements
         }
 
         for (NfcRecord device : outputList){
-            if (!device.getLocation().toLowerCase().equals(locationCalculated.toLowerCase())){
+            if (!device.getLocation().toLowerCase().replaceAll("\\s","").equals(locationCalculated.toLowerCase().replaceAll("\\s",""))){
                 Log.i(LOGTAG, "Guilty:" + device.getType() + " at " + device.getLocation());
                 guiltyDevices.add(device.getType() + " at " + device.getLocation());
             } else {
@@ -749,7 +749,7 @@ public class MdpWorkerService extends Service implements
         }
 
         if (guiltyDevices.size() > 1) {
-            startNotification(7777, message, guiltyDevices);
+            startNotification(7774, message, guiltyDevices);
         }
     }
 

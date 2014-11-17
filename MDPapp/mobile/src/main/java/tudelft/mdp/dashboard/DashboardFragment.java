@@ -799,17 +799,17 @@ public class DashboardFragment extends Fragment implements
                     + " USER: " + userEnergy  + "|" + userDailyLimit );
 
         if (groupEnergy > groupDailyLimit){
-            startNotification("Oops! Energy consumption in the house is over the target!");
+            startNotification(7775, "Oops! Energy consumption in the house is over the target!");
         }
         if (userEnergy > userDailyLimit){
-            startNotification("Oops! Your personal energy consumption is over the target!");
+            startNotification(7776,"Oops! Your personal energy consumption is over the target!");
         }
 
         // TODO save overconsumption in DB
 
     }
 
-    private void startNotification(String message){
+    private void startNotification(int id, String message){
         Intent notificationIntent = new Intent(rootView.getContext(), MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(rootView.getContext(), 0,
                 notificationIntent, 0);
@@ -823,7 +823,7 @@ public class DashboardFragment extends Fragment implements
         NotificationManager mNotificationManager =
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mNotificationManager.notify(7777, notification);
+        mNotificationManager.notify(id, notification);
     }
 
 
