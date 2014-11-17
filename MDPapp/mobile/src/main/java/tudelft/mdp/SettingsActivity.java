@@ -108,10 +108,11 @@ public class SettingsActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_dashboard);
 
 
+        /*
         fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle("Activity Monitor");
         getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_activity_monitor);
+        addPreferencesFromResource(R.xml.pref_activity_monitor);*/
 
 
         fakeHeader = new PreferenceCategory(this);
@@ -137,7 +138,7 @@ public class SettingsActivity extends PreferenceActivity {
         bindPreferenceSummaryToValue(findPreference(UserPreferences.LOCATION_TECHNIQUE));
         bindPreferenceSummaryToValue(findPreference(UserPreferences.TIME_BETWEEN_LOCATION_DETECTIONS));
         bindPreferenceSummaryToValue(findPreference(UserPreferences.SCANSAMPLES));
-        bindPreferenceSummaryToValue(findPreference(UserPreferences.MOTION_SAMPLE_SECONDS));
+        //bindPreferenceSummaryToValue(findPreference(UserPreferences.MOTION_SAMPLE_SECONDS));
         bindPreferenceSummaryToValue(findPreference(UserPreferences.TARGET_KWH_GROUP));
         bindPreferenceSummaryToValue(findPreference(UserPreferences.TARGET_KWH_INDIVIDUAL));
     }
