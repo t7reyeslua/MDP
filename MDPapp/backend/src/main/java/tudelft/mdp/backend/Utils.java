@@ -97,7 +97,9 @@ public class Utils {
         return minDate;
     }
 
-    public static Double getEnergyFromTime(String deviceType, Double time){
+
+    public static Double getEnergyFromTime(String deviceType, Double timeSec){
+        Double time = timeSec/3600;
         Double energy = 0.0;
         if (deviceType.equals(Devices.COMPUTER)){
             energy = time * Energy.KWH_COMPUTER;
@@ -123,15 +125,16 @@ public class Utils {
             energy = time * Energy.KWH_GRILL;
         } else if (deviceType.equals(Devices.VACUUM_CLEANER)){
             energy = time * Energy.KWH_VACUUMCLEANER;
-        } else if (deviceType.equals(Devices.COFFEE_MACHINE)){
+        }else if (deviceType.equals(Devices.COFFEE_MACHINE)){
             energy = time * Energy.KWH_COFFEEMACHINE;
-        } else if (deviceType.equals(Devices.OVEN)){
+        }else if (deviceType.equals(Devices.OVEN)){
             energy = time * Energy.KWH_OVEN;
         } else if (deviceType.equals(Devices.BOILER)){
             energy = time * Energy.KWH_BOILER;
         }
         return energy;
     }
+
 
     public static Double getTimeFromEnergy(String deviceType, Double energy){
         Double time = 0.0;

@@ -97,7 +97,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
                 //Ask for motion location data if the user is turning on the device
                 if (newLogRecord.getState()) {
                     Log.w(TAG, "User is turning ON device. Ask for motion-location data");
-                    askForMotionLocation(mDeviceInfo);
+                    //askForMotionLocation(mDeviceInfo);
                 }
 
             }

@@ -242,7 +242,8 @@ public class Utils {
         return minDate;
     }
 
-    public static Double getEnergyFromTime(String deviceType, Double time){
+    public static Double getEnergyFromTime(String deviceType, Double timeSec){
+        Double time = timeSec/3600;
         Double energy = 0.0;
         if (deviceType.equals(Devices.COMPUTER)){
             energy = time * Energy.KWH_COMPUTER;

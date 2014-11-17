@@ -154,8 +154,8 @@ public class DeviceCardBuilder {
                 mContext,
                 formatTime(mTotalTime),
                 formatTime(mUserTime),
-                mTotalPower.toString() + " kw",
-                mUserPower.toString()  + " kw ",
+                String.format("%.2f",mTotalPower) + " kw",
+                String.format("%.2f",mUserPower)   + " kw ",
                 df.format(mPercentage) + "%");
 
         mDeviceCard.addCardExpand(mDeviceCardExpand);

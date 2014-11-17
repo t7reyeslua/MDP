@@ -37,7 +37,7 @@ public class NfcRecordEndpoint {
         LOG.info("Calling getNFC method");
         NfcRecord record = findRecord(id);
         if(record == null) {
-            throw new NotFoundException("NFC Record does not exist");
+            throw new NotFoundException("NFC Record does not exist. ");
         }
 
         ofy().clear();

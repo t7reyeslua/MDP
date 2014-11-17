@@ -450,7 +450,7 @@ public class DashboardFragment extends Fragment implements
             selectionWidget.setText(NO_SELECTION_TXT);
         } else {
             selectionWidget.setText("Selected: " + selection.second.getTitle() +
-                    " | " + selection.second.getY(selection.first) + " kWh");
+                    " | " + String.format("%.2f",selection.second.getY(selection.first).doubleValue()) + " kWh");
         }
         plot.redraw();
     }
@@ -815,7 +815,7 @@ public class DashboardFragment extends Fragment implements
                 notificationIntent, 0);
 
         Notification notification = new NotificationCompat.Builder(rootView.getContext())
-                .setContentTitle("MDP")
+                .setContentTitle("IoT")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.plug128)
                 .setContentIntent(pendingIntent).build();
