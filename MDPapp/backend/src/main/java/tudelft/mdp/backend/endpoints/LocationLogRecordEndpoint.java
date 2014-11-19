@@ -284,6 +284,27 @@ public class LocationLogRecordEndpoint {
         return CollectionResponse.<LocationLogRecord>builder().setItems(records).build();
     }
 
+    @ApiMethod(name = "getLastUserLocationLog", path = "get_lastUser_location_log")
+    public LocationLogRecord getLastUserLocationLog(
+            @Named("user") String user,
+            @Named("mode") String mode) {
+
+        LOG.info("Calling getLastUserLogOfDevice method");
+
+        List<LocationLogRecord> records = ofy().load().type(LocationLogRecord.class)
+                .filter("user", user)
+                .filter("mode", mode)
+                .order("timestamp")
+                .list();
+
+        if (records.size() > 0) {
+            return records.get(records.size() - 1);
+        } else {
+            return null;
+        }
+    }
+
+
     @ApiMethod(name = "listLocationLogByUserDateMode", path = "list_location_user_date_mode")
     public CollectionResponse<LocationLogRecord> listLocationLogByUserDateMode(
             @Named("user") String user,
