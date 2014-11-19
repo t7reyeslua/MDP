@@ -299,7 +299,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         groupItem.add("Profile Picture");
         groupItem.add("Dashboard");
         groupItem.add("Device Manager");
-        //groupItem.add("Activity Monitor");
+        groupItem.add("Activity Monitor");
         groupItem.add("Location Tracker");
         groupItem.add("Utilities");
     }
@@ -328,13 +328,13 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         /**
          * Add Data For Activity Monitor
          */
-        /*child = new ArrayList<String>();
+        child = new ArrayList<String>();
         //child.add("Activity History");
         child.add("Sensors recorder");
-        child.add("Training");
+        /*child.add("Training");
         child.add("Confusion Matrix");
-        child.add("Timeline");
-        childItem.add(child);*/
+        child.add("Timeline");*/
+        childItem.add(child);
         /**
          * Add Data For Location Tracker
          */

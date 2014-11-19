@@ -761,7 +761,7 @@ public class MdpWorkerService extends Service implements
 
         NotificationCompat.Builder  mBuilder =  new NotificationCompat.Builder(this);
 
-        mBuilder.setContentTitle("IoT")
+        mBuilder.setContentTitle("MDP")
                 .setContentText(mesage)
                 .setSmallIcon(R.drawable.plug128)
                 .setContentIntent(pendingIntent)
@@ -772,7 +772,7 @@ public class MdpWorkerService extends Service implements
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
             // Sets a title for the Inbox style big view
-            inboxStyle.setBigContentTitle("IoT");
+            inboxStyle.setBigContentTitle("MDP");
             // Moves events into the big view
             for (String event : events) {
                 inboxStyle.addLine(event);

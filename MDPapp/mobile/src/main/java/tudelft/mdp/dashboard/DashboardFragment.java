@@ -815,7 +815,7 @@ public class DashboardFragment extends Fragment implements
                 notificationIntent, 0);
 
         Notification notification = new NotificationCompat.Builder(rootView.getContext())
-                .setContentTitle("IoT")
+                .setContentTitle("MDP")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.plug128)
                 .setContentIntent(pendingIntent).build();
