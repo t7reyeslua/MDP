@@ -59,6 +59,7 @@ import tudelft.mdp.locationTracker.RequestGaussiansAsyncTask;
 import tudelft.mdp.locationTracker.RequestLocationEvaluationWekaAsyncTask;
 import tudelft.mdp.locationTracker.UploadCurrentLocationAsyncTask;
 import tudelft.mdp.utils.Utils;
+import tudelft.mdp.weka.RequestEventEvaluationAsyncTask;
 import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
 import tudelft.mdp.weka.WekaNetworkScansObject;
 import tudelft.mdp.weka.WekaSensorsRawDataObject;
@@ -1025,6 +1026,10 @@ public class MdpWorkerService extends Service implements
         deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
 
         new UploadMotionLocationFeaturesAsyncTask().execute(this.getApplicationContext(), deviceMotionLocationRecord);
+        if (!sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, true)) {
+            new RequestEventEvaluationAsyncTask()
+                    .execute(this.getApplicationContext(), deviceMotionLocationRecord);
+        }
     }
 
     /**

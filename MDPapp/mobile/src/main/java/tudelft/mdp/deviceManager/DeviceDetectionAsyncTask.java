@@ -12,6 +12,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +21,8 @@ import tudelft.mdp.backend.endpoints.deviceEndpoint.DeviceEndpoint;
 import tudelft.mdp.backend.endpoints.deviceEndpoint.model.NfcRecord;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.DeviceLogEndpoint;
 import tudelft.mdp.backend.endpoints.deviceLogEndpoint.model.NfcLogRecord;
+import tudelft.mdp.backend.endpoints.deviceLogRecordApi.DeviceLogRecordApi;
+import tudelft.mdp.backend.endpoints.deviceLogRecordApi.model.DeviceLogRecord;
 import tudelft.mdp.enums.Constants;
 import tudelft.mdp.enums.MessagesProtocol;
 import tudelft.mdp.enums.UserPreferences;
@@ -36,6 +40,7 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
     private FragmentManager mFragmentManager;
     private static DeviceEndpoint mDeviceEndpointService = null;
     private static DeviceLogEndpoint mDeviceLogEndpointService = null;
+    private static DeviceLogRecordApi mDeviceLogRecordApi = null;
     private static final String TAG = "MDP-DeviceDetectionAsyncTask";
 
     @Override
@@ -45,6 +50,11 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
         user    = (String)  params[2];
         mFragmentManager   = (FragmentManager)  params[3];
 
+        if (mDeviceLogRecordApi == null) {
+            /* For testing against a deployed backend */
+            DeviceLogRecordApi.Builder builder = new DeviceLogRecordApi.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null);
+            mDeviceLogRecordApi = builder.build();
+        }
 
         if (mDeviceEndpointService == null) {
             /* For testing against a deployed backend */
@@ -97,7 +107,18 @@ public class DeviceDetectionAsyncTask extends AsyncTask<Object, Void, Boolean> {
                 //Ask for motion location data if the user is turning on the device
                 if (newLogRecord.getState()) {
                     Log.w(TAG, "User is turning ON device. Ask for motion-location data");
-                    //askForMotionLocation(mDeviceInfo);
+                    askForMotionLocation(mDeviceInfo);
+                } else {
+                    boolean mTraining = PreferenceManager.getDefaultSharedPreferences(context)
+                            .getBoolean(UserPreferences.TRAINING_PHASE, false);
+
+                    if (!mTraining) {
+                        Log.w(TAG,"User is turning OFF device. Analyze the previously stored motion-location data from ON event.");
+                        String event = mDeviceInfo.getType() + "-" + mDeviceInfo.getLocation();
+                        // TODO
+                        List<DeviceLogRecord> assignedEvents = mDeviceLogRecordApi.assignEventToUser(event).execute().getItems();
+                    }
+
                 }
 
             }

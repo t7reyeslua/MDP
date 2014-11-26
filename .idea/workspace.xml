@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bf5652b1-eb99-4ea9-a010-96efe860f488" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/androidplot_core_0_6_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/appengine_api_1_0_sdk_1_9_8.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/appengine_endpoints_1_9_8.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/appengine_endpoints_deps_1_9_8.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/backend_endpoints_android.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/commons_math3_3_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/gcm_server_1_0_2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/google_api_client_1_18_0_rc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/google_api_client_android_1_18_0_rc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/google_http_client_1_18_0_rc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/google_http_client_android_1_18_0_rc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/google_oauth_client_1_18_0_rc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/guava_17_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/java_cup_0_11a.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/json_simple_1_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/jsr305_1_3_9.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/lib_core_3_1_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/lib_manipulation_3_1_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/library_1_0_5.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/library_1_9_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/library_2_4_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/library_extra_1_9_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/multidex_1_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/objectify_5_0_3.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/play_services_6_1_71.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/play_services_wearable_6_1_71.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/robototextview_2_1_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/servlet_api_2_5.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/support_annotations_20_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/support_annotations_21_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/support_v13_20_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/support_v4_20_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/support_v4_21_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/wearable_1_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/MDPapp/.idea/libraries/weka_stable_3_6_11.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/libs/backend-endpoints-android.jar" afterPath="$PROJECT_DIR$/MDPapp/backend/build/libs/backend-endpoints-android.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/deviceEndpoint-v1-java.zip" afterPath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/deviceEndpoint-v1-java.zip" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/deviceLogEndpoint-v1-java.zip" afterPath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/deviceLogEndpoint-v1-java.zip" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/messaging-v1-java.zip" afterPath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/messaging-v1-java.zip" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/registration-v1-java.zip" afterPath="$PROJECT_DIR$/MDPapp/backend/build/client-libs/registration-v1-java.zip" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/.idea/.name" afterPath="$PROJECT_DIR$/MDPapp/.idea/.name" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseDouble.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseDouble.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseDouble.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseDouble.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseNfcLogRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseNfcLogRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseNfcLogRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/CollectionResponseNfcLogRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/CollectionResponseNfcRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/CollectionResponseNfcRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/CollectionResponseNfcRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/CollectionResponseNfcRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/model/CollectionResponseRegistrationRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/model/CollectionResponseRegistrationRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/model/CollectionResponseRegistrationRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/model/CollectionResponseRegistrationRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpoint.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpoint.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/DeviceEndpointScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpoint.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpoint.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/DeviceLogEndpointScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/endpoints/DeviceMotionLocationRecordEndpoint.java" afterPath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/endpoints/DeviceMotionLocationRecordEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/gcs/GcsHelper.java" afterPath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/gcs/GcsHelper.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/endpoints/LocationFeaturesRecordEndpoint.java" afterPath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/endpoints/LocationFeaturesRecordEndpoint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/Messaging.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/Messaging.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/Messaging.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/Messaging.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/MessagingRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/MessagingScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/messaging/MessagingScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/MessagingScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/messaging-v1-java.zip-unzipped/messaging/src/main/java/tudelft/mdp/backend/endpoints/messaging/MessagingScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/NfcLogRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/NfcLogRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/NfcLogRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceLogEndpoint-v1-java.zip-unzipped/deviceLogEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceLogEndpoint/model/NfcLogRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/NfcRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/NfcRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/NfcRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/deviceEndpoint-v1-java.zip-unzipped/deviceEndpoint/src/main/java/tudelft/mdp/backend/endpoints/deviceEndpoint/model/NfcRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/Registration.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/Registration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/Registration.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/Registration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/model/RegistrationRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/model/RegistrationRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/model/RegistrationRecord.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/model/RegistrationRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequest.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequestInitializer.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/RegistrationRequestInitializer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/RegistrationScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/generated-source/endpoints/java/tudelft/mdp/backend/endpoints/registration/RegistrationScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/RegistrationScopes.java" afterPath="$PROJECT_DIR$/MDPapp/backend/build/tmp/appengineEndpointsExpandClientLibs/registration-v1-java.zip-unzipped/registration/src/main/java/tudelft/mdp/backend/endpoints/registration/RegistrationScopes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/weka/WekaMethods.java" afterPath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/weka/WekaMethods.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/weka/WekaUtils.java" afterPath="$PROJECT_DIR$/MDPapp/backend/src/main/java/tudelft/mdp/backend/weka/WekaUtils.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/.idea/compiler.xml" afterPath="$PROJECT_DIR$/MDPapp/.idea/compiler.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/backend/src/main/webapp/index.html" afterPath="$PROJECT_DIR$/MDPapp/backend/src/main/webapp/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/.idea/misc.xml" afterPath="$PROJECT_DIR$/MDPapp/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MDPapp/.idea/modules.xml" afterPath="$PROJECT_DIR$/MDPapp/.idea/modules.xml" />
+    </list>
+    <ignored path="MDP.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="DaemonCodeAnalyzer">
+    <disable_hints />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="MDP" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="MainActivity.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/java/tudelft/mdp/MainActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="2775" max-vertical-offset="13200">
+              <caret line="185" column="0" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/AndroidManifest.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1140" max-vertical-offset="1980">
+              <caret line="76" column="52" selection-start-line="76" selection-start-column="52" selection-end-line="76" selection-end-column="52" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/MDPapp/mobile/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="660">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindManager">
+    <FindUsagesManager>
+      <setting name="OPEN_NEW_TAB" value="true" />
+    </FindUsagesManager>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-1" />
+    <option name="y" value="-4" />
+    <option name="width" value="1922" />
+    <option name="height" value="1085" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectReloadState">
+    <option name="STATE" value="0" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+    </navigator>
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="AndroidView">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.NonAndroidModuleNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wear" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wear" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tudelft" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mdp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MDPapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="GoToClass.includeLibraries" value="false" />
+    <property name="GoToClass.toSaveIncludeLibraries" value="false" />
+    <property name="GoToFile.includeJavaFiles" value="false" />
+    <property name="MemberChooser.sorted" value="false" />
+    <property name="MemberChooser.showClasses" value="true" />
+    <property name="MemberChooser.copyJavadoc" value="false" />
+    <property name="options.lastSelected" value="editor.preferences.appearance" />
+    <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
+    <property name="recentsLimit" value="5" />
+    <property name="restartRequiresConfirmation" value="true" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="FullScreen" value="false" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Tests">
+      <module name="" />
+      <option name="TESTING_TYPE" value="0" />
+      <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TARGET_SELECTION_MODE" value="EMULATOR" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="USE_COMMAND_LINE" value="true" />
+      <option name="COMMAND_LINE" value="" />
+      <option name="WIPE_USER_DATA" value="false" />
+      <option name="DISABLE_BOOT_ANIMATION" value="false" />
+      <option name="NETWORK_SPEED" value="full" />
+      <option name="NETWORK_LATENCY" value="none" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <option name="FILTER_LOGCAT_AUTOMATICALLY" value="true" />
+      <method />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+      <method />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android Application">
+      <module name="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="DEPLOY" value="true" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="USE_COMMAND_LINE" value="true" />
+      <option name="COMMAND_LINE" value="" />
+      <option name="WIPE_USER_DATA" value="false" />
+      <option name="DISABLE_BOOT_ANIMATION" value="false" />
+      <option name="NETWORK_SPEED" value="full" />
+      <option name="NETWORK_LATENCY" value="none" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <option name="FILTER_LOGCAT_AUTOMATICALLY" value="true" />
+      <method />
+    </configuration>
+    <list size="0" />
+    <configuration name="&lt;template&gt;" type="Applet" default="true" selected="false">
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+    </configuration>
+    <configuration name="&lt;template&gt;" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" default="true" selected="false">
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+    </configuration>
+    <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
+      <Host>localhost</Host>
+      <Port>5050</Port>
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bf5652b1-eb99-4ea9-a010-96efe860f488" name="Default" comment="" />
+      <created>1416791699672</created>
+      <updated>1416791699672</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-1" y="-4" width="1922" height="1085" extended-state="6" />
+    <editor active="false" />
+    <layout>
+      <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32837406" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21831736" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Memory Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="myTodoPanelSettings">
+      <TodoPanelSettings />
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/java/tudelft/mdp/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="13200">
+          <caret line="185" column="0" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1140" max-vertical-offset="1980">
+          <caret line="76" column="52" selection-start-line="76" selection-start-column="52" selection-end-line="76" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="660">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/java/tudelft/mdp/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="13200">
+          <caret line="185" column="0" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1980">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/java/tudelft/mdp/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1800" max-vertical-offset="12195">
+          <caret line="185" column="0" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="855" max-vertical-offset="1980">
+          <caret line="76" column="52" selection-start-line="76" selection-start-column="52" selection-end-line="76" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="604">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MDPapp/mobile/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="660">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>Android</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.7</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>Android|MDP</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
+

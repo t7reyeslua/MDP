@@ -20,6 +20,7 @@ import tudelft.mdp.backend.Utils;
 import tudelft.mdp.backend.gcs.GcsHelper;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.records.LocationFingerprintRecord;
+import tudelft.mdp.backend.records.RegistrationRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecordWrapper;
 import tudelft.mdp.backend.records.WekaObjectRecord;
@@ -370,6 +371,8 @@ public class DeviceMotionLocationRecordEndpoint {
 
         LOG.info("Calling createWekaObjects method from: " + minDate + " to " + maxDate);
 
+        List<RegistrationRecord> users = ofy().load().type(RegistrationRecord.class).list();
+
         // Ask for the corresponding records
         List<DeviceMotionLocationRecord> records= ofy().load().type(
                 DeviceMotionLocationRecord.class)
@@ -378,15 +381,15 @@ public class DeviceMotionLocationRecordEndpoint {
                 .order("timestamp")
                 .list();
 
-        LOG.info("Records:" + records.size());
+        LOG.info("Records: " + records.size());
 
         WekaUtils wekaUtils = new WekaUtils();
-        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(records, minDate, maxDate, "ALL");
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(users, records, minDate, maxDate, "ALL");
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
 
         String files = "";
         for (String file : filesCreated){
-            files += file + "|";
+            files += "http://storage.cloud.google.com/tudelft-mdp.appspot.com/" + file + " | ";
         }
         deviceMotionLocationRecord.setEvent(files);
         return deviceMotionLocationRecord;
@@ -403,6 +406,7 @@ public class DeviceMotionLocationRecordEndpoint {
 
         String[] filteredUsers = usersList.split(",");
 
+        List<RegistrationRecord> users = new ArrayList<RegistrationRecord>();
         List<DeviceMotionLocationRecord> records = new ArrayList<DeviceMotionLocationRecord>();
         for (String user : filteredUsers) {
             List<DeviceMotionLocationRecord> userRecords = ofy().load()
@@ -414,13 +418,16 @@ public class DeviceMotionLocationRecordEndpoint {
                     .list();
 
             records.addAll(userRecords);
+            RegistrationRecord registrationRecord = new RegistrationRecord();
+            registrationRecord.setUsername(user.replaceAll("\\s", ""));
+            users.add(registrationRecord);
             LOG.info("Records of " + user + ":" + userRecords.size());
         }
 
         LOG.info("Records:" + records.size());
 
         WekaUtils wekaUtils = new WekaUtils();
-        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(records, minDate, maxDate, usersList);
+        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(users, records, minDate, maxDate, usersList);
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
 
         String files = "";

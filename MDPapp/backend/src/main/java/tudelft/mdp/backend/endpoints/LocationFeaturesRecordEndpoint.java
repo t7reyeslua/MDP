@@ -7,12 +7,14 @@ import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterator;
+import com.google.appengine.api.datastore.Text;
 
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.cmd.Query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -386,6 +388,129 @@ public class LocationFeaturesRecordEndpoint {
     }
 
 
+    @ApiMethod(name = "testPermutations", path = "testPermutations")
+    public LocationFeaturesRecord testPermutations(
+            @Named("users") Integer users) {
+
+        logger.info("Calling testPermutations method");
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> result  = wekaUtils.createOtherUsersEventInstances(users);
+
+        Collections.sort(result);
+        String temp = "";
+        for (String s : result){
+            temp += s + "\n";
+        }
+        Text text = new Text(temp);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(text);
+
+        return locationFeaturesRecord;
+    }
+
+    @ApiMethod(name = "testPermutationsMotion", path = "testPermutationsMotion")
+    public LocationFeaturesRecord testPermutationsMotion(
+            @Named("users") Integer users) {
+
+        logger.info("Calling testPermutationsMotion method");
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> result  = wekaUtils.createOtherUsersEventInstancesMotion(users);
+
+        //Collections.sort(result);
+        String temp = "";
+        for (String s : result){
+            temp += s + "\n";
+        }
+        Text text = new Text(temp);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(text);
+
+        return locationFeaturesRecord;
+    }
+
+
+    @ApiMethod(name = "createMockArff", path = "createMockArff")
+    public LocationFeaturesRecord createMockArff(
+            @Named("users") Integer users) {
+
+        logger.info("Calling createMockArff method");
+
+        WekaUtils wekaUtils = new WekaUtils();
+        String filename  = "http://storage.cloud.google.com/tudelft-mdp.appspot.com/" +  wekaUtils.createMockArff(users);
+
+        Text text = new Text(filename);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(text);
+
+        return locationFeaturesRecord;
+    }
+
+    @ApiMethod(name = "createMockArffFiltered", path = "createMockArffFiltered")
+    public LocationFeaturesRecord createMockArffFiltered(
+            @Named("users") Integer users,
+            @Named("filter") String filter) {
+
+        logger.info("Calling createMockArffFiltered method");
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> filenames  = wekaUtils.createMockArffFiltered(users, filter);
+        String filename = "";
+        for (String file : filenames){
+            filename += "http://storage.cloud.google.com/tudelft-mdp.appspot.com/" + file + " | ";
+        }
+
+        Text text = new Text(filename);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(text);
+
+        return locationFeaturesRecord;
+    }
+
+    @ApiMethod(name = "createMockArffFilteredTimestamp", path = "createMockArffFilteredTimestamp")
+    public LocationFeaturesRecord createMockArffFilteredTimestamp(
+            @Named("users") Integer users,
+            @Named("filter") String filter) {
+
+        logger.info("Calling createMockArffFilteredTimestamp method");
+
+        WekaUtils wekaUtils = new WekaUtils();
+        ArrayList<String> filenames  = wekaUtils.createMockArffFilteredTimestamp(users, filter);
+        String filename = "";
+        for (String file : filenames){
+            filename += "http://storage.cloud.google.com/tudelft-mdp.appspot.com/" + file + " | ";
+        }
+
+        Text text = new Text(filename);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(text);
+
+        return locationFeaturesRecord;
+    }
+
+
+    @ApiMethod(name = "createMockArffAllIn1", path = "createMockArffAllIn1")
+    public LocationFeaturesRecord createMockArffAllIn1(
+            @Named("users") Integer users) {
+
+        logger.info("Calling createMockArffAllIn1 method");
+
+        WekaUtils wekaUtils = new WekaUtils();
+        String filename  = "http://storage.cloud.google.com/tudelft-mdp.appspot.com/" +  wekaUtils.createMockArffAllIn1(users);
+
+        Text text = new Text(filename);
+
+        LocationFeaturesRecord locationFeaturesRecord = new LocationFeaturesRecord();
+        locationFeaturesRecord.setLocationFeatures(text);
+
+        return locationFeaturesRecord;
+    }
 
 
 }

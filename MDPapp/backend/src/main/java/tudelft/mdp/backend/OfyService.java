@@ -6,6 +6,7 @@ import com.googlecode.objectify.ObjectifyService;
 
 import tudelft.mdp.backend.records.ApGaussianRecord;
 import tudelft.mdp.backend.records.ApHistogramRecord;
+import tudelft.mdp.backend.records.DeviceLogRecord;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.records.DeviceUsageRecord;
 import tudelft.mdp.backend.records.EnergyConsumptionRecord;
@@ -18,6 +19,7 @@ import tudelft.mdp.backend.records.NfcRecord;
 import tudelft.mdp.backend.records.RegistrationRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecord;
 import tudelft.mdp.backend.records.SensorFingerprintRecordWrapper;
+import tudelft.mdp.backend.records.WekaEvaluationRecord;
 import tudelft.mdp.backend.records.WekaObjectRecord;
 
 /**
@@ -40,6 +42,8 @@ public class OfyService {
         ObjectifyService.register(DeviceUsageRecord.class);
         ObjectifyService.register(WekaObjectRecord.class);
         ObjectifyService.register(LocationFeaturesRecord.class);
+        ObjectifyService.register(DeviceLogRecord.class);
+        ObjectifyService.register(WekaEvaluationRecord.class);
     }
 
     public static Objectify ofy() {

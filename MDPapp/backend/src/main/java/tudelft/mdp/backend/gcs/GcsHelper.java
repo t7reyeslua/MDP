@@ -105,12 +105,14 @@ public class GcsHelper {
 
     public void writeToGCS(String filename, ArrayList<String> text){
         try {
+            LOG.info("No. lines in text: " + text.size());
             FileService fileService = FileServiceFactory.getFileService();
             AppEngineFile writableFile = createObject(fileService, filename);
             boolean lockForWrite = true;
             FileWriteChannel writeChannel = fileService.openWriteChannel(writableFile, lockForWrite);
 
-            for (String s : text) {
+            for (int i = 0; i< text.size(); i++) {
+                String s  = text.get(i) + "\n";
                 writeChannel.write(ByteBuffer.wrap(s.getBytes()));
             }
 
@@ -132,7 +134,7 @@ public class GcsHelper {
             Classifier cls = (Classifier) SerializationHelper.read(Channels.newInputStream(readChannel));
             readChannel.close();
 
-            LOG.info(cls.toString());
+            //LOG.info(cls.toString());
 
             return cls;
         } catch (Exception e){
@@ -153,7 +155,7 @@ public class GcsHelper {
             //Instances data1 = new Instances(new BufferedReader(Channels.newReader(readChannel, "UTF8")));
             readChannel.close();
 
-            LOG.info(data.toSummaryString());
+            //LOG.info(data.toSummaryString());
             //LOG.info(data1.toSummaryString());
             return data;
         } catch (Exception e){

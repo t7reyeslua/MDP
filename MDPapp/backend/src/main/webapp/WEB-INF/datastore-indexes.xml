@@ -170,6 +170,27 @@
     </datastore-index>
 
 
+    <datastore-index kind="WekaEvaluationRecord" ancestor="false" source="manual">
+        <property name="evaluated" direction="asc"/>
+        <property name="event" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+
+    <datastore-index kind="DeviceLogRecord" ancestor="false" source="manual">
+        <property name="deviceId" direction="asc"/>
+        <property name="user" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+
+    <datastore-index kind="DeviceLogRecord" ancestor="false" source="manual">
+        <property name="deviceId" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="WekaEvaluationRecord" ancestor="false" source="manual">
+        <property name="deviceId" direction="asc"/>
+        <property name="evaluated" direction="asc"/>
+        <property name="timestamp" direction="asc"/>
+    </datastore-index>
 
 
 

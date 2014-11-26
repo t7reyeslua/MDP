@@ -1,5 +1,7 @@
 package tudelft.mdp.backend.weka;
 
+import java.lang.reflect.Array;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import tudelft.mdp.backend.enums.WekaClassifierTypes;
 import tudelft.mdp.backend.gcs.GcsHelper;
 import tudelft.mdp.backend.records.DeviceMotionLocationRecord;
 import tudelft.mdp.backend.records.LocationFeaturesRecord;
+import tudelft.mdp.backend.records.RegistrationRecord;
 import tudelft.mdp.backend.records.WekaObjectRecord;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
@@ -326,16 +329,21 @@ public class WekaUtils {
         return filesCreated;
     }
 
-    public ArrayList<String> createInstanceSet(List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
+    public ArrayList<String> createInstanceSet(List<RegistrationRecord>users, List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
         String relation  = "Events";
         ArrayList<String> classAttributes;
         ArrayList<String> locationAttributes;
         ArrayList<String> motionAttributes;
         ArrayList<String> features = new ArrayList<String>();
+        ArrayList<String> usernames = new ArrayList<String>();
 
 
         HashSet<String> classAttributesSet = new HashSet<String>();
         HashSet<String> locationAttributesSet = new HashSet<String>();
+
+        for(RegistrationRecord registrationRecord : users){
+            usernames.add(removeAccents(registrationRecord.getUsername().replaceAll("\\s","")));
+        }
 
         // Build the class and location attributes. (Motion Attributes are always fixed)
         for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
@@ -372,6 +380,7 @@ public class WekaUtils {
 
         // Once you know all existing location attributes, build the location features
         for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String user = removeAccents(deviceMotionLocationRecord.getUsername().replaceAll("\\s", ""));
             String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
             String motionFeatures = deviceMotionLocationRecord.getMotionFeatures().getValue();
             String lines[] = locationData.split("\\n");
@@ -408,10 +417,11 @@ public class WekaUtils {
                         + motionFeatures + ","
                         + motionFeatures;
             }
-            features.add(locationFeatures + "," + motionFeatures + "," + classAttribute);
+            features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user);
         }
 
         Instances wekaInstances = WekaMethods.CreateInstanceSet(relation,
+                usernames,
                 motionAttributes,
                 locationAttributes,
                 classAttributes,
@@ -421,6 +431,10 @@ public class WekaUtils {
         return filesCreated;
     }
 
+    public String removeAccents(String text) {
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
     private Classifier createClassifier(Instances wekaInstances, Integer clsType){
         Classifier cls;
         wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
@@ -530,4 +544,747 @@ public class WekaUtils {
         wekaObjectRecordEndpoint.insertWekaObjectRecord(wekaObjectRecord);
     }
 
+    public String createMockArff(int nUsers){
+        int otherUsers = nUsers - 1;
+        String[] classAttributes = {
+                "Kitchen-Boiler", "Kitchen-CoffeeMachine", "Kitchen-Oven", "Kitchen-Hotplates",
+                "Kitchen-Microwave", "Kitchen-Grill", "Kitchen-Lights",
+                "BedroomA-Computer", "BedroomA-Lights", "BedroomA-Fridge",
+                "BedroomB-Computer", "BedroomB-Lights", "BedroomB-Fridge",
+                "LivingRoom-Lights", "LivingRoom-Computer", "LivingRoom-Television",
+                "Shower-Lights", "Toilet-Lights" };
+        String[] locationAttributes = {
+                "BedroomA", "BedroomB", "LivingRoom", "Kitchen", "Shower", "Toilet", "Unknown"};
+        String[] motionAttributesDevices = {
+                "Boiler", "CoffeeMachine", "Oven", "Hotplates", "Microwave", "Grill",
+                "Lights", "Fridge", "Computer", "Television" };
+        String[] motionAttributesOther = {"Idle", "Active", "Random"};
+
+        ArrayList<String> classAttr = new ArrayList<String>(Arrays.asList(classAttributes));
+        ArrayList<String> locAttr = new ArrayList<String>(Arrays.asList(locationAttributes));
+        ArrayList<String> motionAttr = new ArrayList<String>();
+        motionAttr.addAll(Arrays.asList(motionAttributesDevices));
+        motionAttr.addAll(Arrays.asList(motionAttributesOther));
+
+        ArrayList<String> arff =  createMockArffHeaders(classAttributes, locationAttributes, motionAttributesDevices, motionAttributesOther);
+        ArrayList<String> features = new ArrayList<String>();
+
+
+        // Event user has smartwatch
+        int eventsUserWithSmartwatch = 0;
+        int instancesUserWithSmartwatch = 0;
+        for (String event : classAttributes){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String motion   = parts[1];
+            String userSmartwatchDoingEventInstance = motion + "," + location + "," + event;
+
+            List<String[]> permutations = Permutations.get(otherUsers, String.class, locationAttributes);
+            eventsUserWithSmartwatch = permutations.size();
+
+            ArrayList<String> permSort = new ArrayList<String>();
+            for (String[] perm : permutations){
+                String temp = "";
+                for (String s : perm){
+                    temp += s + ",";
+                }
+                temp = temp.substring(0, temp.length()-1);
+                permSort.add(temp);
+            }
+            Collections.sort(permSort);
+
+            for (String p : permSort){
+                arff.add(userSmartwatchDoingEventInstance);
+                features.add(userSmartwatchDoingEventInstance);
+
+                instancesUserWithSmartwatch++;
+                String[] n = p.split(",");
+                for (String otherUsersLoc : n){
+                    arff.add("?," + otherUsersLoc + "," + event);
+                    features.add("?," + otherUsersLoc + "," + event);
+                    instancesUserWithSmartwatch++;
+                }
+            }
+        }
+
+        LOG.info("Event with user with smartwatch triggering the event: "
+                + eventsUserWithSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttributes.length
+                + nUsers + ". N instances:" + (instancesUserWithSmartwatch));
+
+
+
+        // Event user does not have smartwatch
+        int eventsUserWithoutSmartwatch = 0;
+        int instancesUserWithoutSmartwatch = 0;
+        for (String event : classAttributes){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String userNoSmartwatchDoingEventInstance =  "?," + location + "," + event;
+
+            ArrayList<String> events = createOtherUsersEventInstancesMotion(otherUsers);
+            eventsUserWithoutSmartwatch = events.size();
+
+            for (String p : events){
+                arff.add(userNoSmartwatchDoingEventInstance);
+                features.add(userNoSmartwatchDoingEventInstance);
+                instancesUserWithoutSmartwatch++;
+                String[] n = p.split("\\|");
+                for (String otherUsersFt : n){
+                    arff.add(otherUsersFt + "," + event);
+                    features.add(otherUsersFt + "," + event);
+                    instancesUserWithoutSmartwatch++;
+                }
+            }
+
+        }
+
+        LOG.info("Event with user without smartwatch triggering the event: "
+                + eventsUserWithoutSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttributes.length
+                + ". N instances:" + (instancesUserWithoutSmartwatch));
+        LOG.info("Arff lines " + arff.size());
+
+
+        String filename = "Experiment-Mock_" + Utils.getCurrentTimestamp() + ".arff";
+        GcsHelper gcsHelper = new GcsHelper();
+        //gcsHelper.writeToGCS(filename, arff);
+
+        try {
+            Instances instances = WekaMethods
+                    .CreateMockInstanceSet("Events", locAttr, motionAttr, classAttr, features);
+
+            LOG.info(instances.toString());
+
+            byte[] serializedWekaObject = Utils.serialize(instances);
+            LOG.info(Utils.humanReadableByteCount(serializedWekaObject.length, true));
+            gcsHelper.writeWekaArffToGCS(filename, instances);
+        } catch (Exception e){
+            LOG.severe(e.getMessage());
+        }
+        return filename;
+    }
+
+
+    public ArrayList<String> createMockArffFiltered(int nUsers, String filter){
+        int otherUsers = nUsers - 1;
+        String[] classAttributes = {
+                "Kitchen-Boiler", "Kitchen-CoffeeMachine", "Kitchen-Oven", "Kitchen-Hotplates",
+                "Kitchen-Microwave", "Kitchen-Grill", "Kitchen-Lights",
+                "BedroomA-Computer", "BedroomA-Lights", "BedroomA-Fridge",
+                "BedroomB-Computer", "BedroomB-Lights", "BedroomB-Fridge",
+                "LivingRoom-Lights", "LivingRoom-Computer", "LivingRoom-Television",
+                "Shower-Lights", "Toilet-Lights" };
+        String[] locationAttributes = {
+                "BedroomA", "BedroomB", "LivingRoom", "Kitchen", "Shower", "Toilet", "Unknown"};
+        String[] motionAttributesDevices = {
+                "Boiler", "CoffeeMachine", "Oven", "Hotplates", "Microwave", "Grill",
+                "Lights", "Fridge", "Computer", "Television" };
+        String[] motionAttributesOther = {"Idle", "Active", "Random"};
+
+        String[] filterParts = filter.replaceAll("\\s", "").split(",");
+
+
+        boolean filtered = false;
+        ArrayList<String> classAttr;
+        if (filter.equals(("NONE").toLowerCase())){
+            classAttr = new ArrayList<String>(Arrays.asList(classAttributes));
+        } else {
+            filtered = true;
+            classAttr = new ArrayList<String>(Arrays.asList(filterParts));
+        }
+
+        ArrayList<String> locAttr = new ArrayList<String>(Arrays.asList(locationAttributes));
+        ArrayList<String> motionAttr = new ArrayList<String>();
+        motionAttr.addAll(Arrays.asList(motionAttributesDevices));
+        motionAttr.addAll(Arrays.asList(motionAttributesOther));
+
+        ArrayList<String> arff =  createMockArffHeaders(filterParts, locationAttributes, motionAttributesDevices, motionAttributesOther);
+        ArrayList<String> features = new ArrayList<String>();
+        ArrayList<ArrayList<String>> userFeatures = new ArrayList<ArrayList<String>>();
+        for (int i = 0; i<nUsers; i++){
+            ArrayList<String> userFeatureArray = new ArrayList<String>();
+            userFeatures.add(userFeatureArray);
+        }
+
+        // Event user has smartwatch
+        int eventsUserWithSmartwatch = 0;
+        int instancesUserWithSmartwatch = 0;
+        for (String event : classAttr){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String motion   = parts[1];
+            String userSmartwatchDoingEventInstance = motion + "," + location + "," + event;
+
+            List<String[]> permutations = Permutations.get(otherUsers, String.class, locationAttributes);
+            eventsUserWithSmartwatch = permutations.size();
+
+            ArrayList<String> permSort = new ArrayList<String>();
+            for (String[] perm : permutations){
+                String temp = "";
+                for (String s : perm){
+                    temp += s + ",";
+                }
+                temp = temp.substring(0, temp.length()-1);
+                permSort.add(temp);
+            }
+            Collections.sort(permSort);
+
+            for (String p : permSort){
+                arff.add(userSmartwatchDoingEventInstance);
+                features.add(userSmartwatchDoingEventInstance);
+                userFeatures.get(0).add(userSmartwatchDoingEventInstance);
+
+                instancesUserWithSmartwatch++;
+                String[] n = p.split(",");
+                int k = 1;
+                for (String otherUsersLoc : n){
+                    arff.add("?," + otherUsersLoc + "," + event);
+                    features.add("?," + otherUsersLoc + "," + event);
+                    userFeatures.get(k++).add("?," + otherUsersLoc + "," + event);
+                    instancesUserWithSmartwatch++;
+                }
+            }
+        }
+
+        LOG.info("Event with user with smartwatch triggering the event: "
+                + eventsUserWithSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttr.size()
+                + nUsers + ". N instances:" + (instancesUserWithSmartwatch));
+
+
+
+        // Event user does not have smartwatch
+        int eventsUserWithoutSmartwatch = 0;
+        int instancesUserWithoutSmartwatch = 0;
+        for (String event : classAttr){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String userNoSmartwatchDoingEventInstance =  "?," + location + "," + event;
+
+            ArrayList<String> events = createOtherUsersEventInstancesMotion(otherUsers);
+            eventsUserWithoutSmartwatch = events.size();
+
+            for (String p : events){
+                String[] n = p.split("\\|");
+
+                String userWithSmartwatch = n[0] + "," + event;
+                arff.add(userWithSmartwatch);
+                features.add(userWithSmartwatch);
+                userFeatures.get(0).add(userWithSmartwatch);
+                instancesUserWithoutSmartwatch++;
+
+                arff.add(userNoSmartwatchDoingEventInstance);
+                features.add(userNoSmartwatchDoingEventInstance);
+                userFeatures.get(1).add(userNoSmartwatchDoingEventInstance);
+                instancesUserWithoutSmartwatch++;
+
+                for (int i = 1; i < n.length; i++){
+                    String otherUsersFt = n[i];
+                    arff.add(otherUsersFt + "," + event);
+                    features.add(otherUsersFt + "," + event);
+                    userFeatures.get(i).add(otherUsersFt + "," + event);
+                    instancesUserWithoutSmartwatch++;
+                }
+
+            }
+
+        }
+
+        LOG.info("Event with user without smartwatch triggering the event: "
+                + eventsUserWithoutSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttr.size()
+                + ". N instances:" + (instancesUserWithoutSmartwatch));
+        LOG.info("Arff lines " + arff.size());
+
+        ArrayList<String> filenames = new ArrayList<String>();
+        String timestamp =  Utils.getCurrentTimestamp();
+        String filenameAll = "Experiment-Mock-Filtered-All_" + timestamp + ".arff";
+        if (filtered){
+            filenameAll =  "Experiment-Mock-Filtered-All_"+ filter + timestamp + ".arff";
+        }
+
+        filenames.add(filenameAll);
+        int i = 0;
+        for (ArrayList<String> uFts : userFeatures){
+            String file = "Experiment-Mock-Filtered-User"+ i +"_" + timestamp + ".arff";
+            if (filtered){
+                file =  "Experiment-Mock-Filtered-User"+ i +"_" + filter + "_" + timestamp + ".arff";
+            }
+            filenames.add(file);
+            i++;
+        }
+
+        GcsHelper gcsHelper = new GcsHelper();
+
+        try {
+            Instances instances = WekaMethods
+                    .CreateMockInstanceSet("Events", locAttr, motionAttr, classAttr, features);
+
+            LOG.info(instances.toString());
+            byte[] serializedWekaObject = Utils.serialize(instances);
+            LOG.info(Utils.humanReadableByteCount(serializedWekaObject.length, true));
+            gcsHelper.writeWekaArffToGCS(filenameAll, instances);
+
+            i = 1;
+            for (ArrayList<String> uFts : userFeatures){
+                Instances userInstances = WekaMethods
+                        .CreateMockInstanceSet("Events", locAttr, motionAttr, classAttr, uFts);
+                LOG.info(userInstances.toString());
+                gcsHelper.writeWekaArffToGCS(filenames.get(i++), userInstances);
+            }
+
+
+        } catch (Exception e){
+            LOG.severe(e.getMessage());
+        }
+        return filenames;
+    }
+
+
+    public ArrayList<String> createMockArffFilteredTimestamp(int nUsers, String filter){
+        int otherUsers = nUsers - 1;
+        String[] classAttributes = {
+                "Kitchen-Boiler", "Kitchen-CoffeeMachine", "Kitchen-Oven", "Kitchen-Hotplates",
+                "Kitchen-Microwave", "Kitchen-Grill", "Kitchen-Lights",
+                "BedroomA-Computer", "BedroomA-Lights", "BedroomA-Fridge",
+                "BedroomB-Computer", "BedroomB-Lights", "BedroomB-Fridge",
+                "LivingRoom-Lights", "LivingRoom-Computer", "LivingRoom-Television",
+                "Shower-Lights", "Toilet-Lights" };
+        String[] locationAttributes = {
+                "BedroomA", "BedroomB", "LivingRoom", "Kitchen", "Shower", "Toilet", "Unknown"};
+        String[] motionAttributesDevices = {
+                "Boiler", "CoffeeMachine", "Oven", "Hotplates", "Microwave", "Grill",
+                "Lights", "Fridge", "Computer", "Television" };
+        String[] motionAttributesOther = {"Idle", "Active", "Random"};
+
+        String[] filterParts = filter.replaceAll("\\s", "").split(",");
+
+
+        boolean filtered = false;
+        ArrayList<String> classAttr;
+        if (filter.equals(("NONE").toLowerCase())){
+            classAttr = new ArrayList<String>(Arrays.asList(classAttributes));
+        } else {
+            filtered = true;
+            classAttr = new ArrayList<String>(Arrays.asList(filterParts));
+        }
+
+        ArrayList<String> locAttr = new ArrayList<String>(Arrays.asList(locationAttributes));
+        ArrayList<String> motionAttr = new ArrayList<String>();
+        motionAttr.addAll(Arrays.asList(motionAttributesDevices));
+        motionAttr.addAll(Arrays.asList(motionAttributesOther));
+
+        ArrayList<String> arff =  createMockArffHeaders(filterParts, locationAttributes, motionAttributesDevices, motionAttributesOther);
+        ArrayList<String> features = new ArrayList<String>();
+        ArrayList<ArrayList<String>> userFeatures = new ArrayList<ArrayList<String>>();
+        for (int i = 0; i<nUsers; i++){
+            ArrayList<String> userFeatureArray = new ArrayList<String>();
+            userFeatures.add(userFeatureArray);
+        }
+
+        // Event user has smartwatch
+        int eventsUserWithSmartwatch = 0;
+        int instancesUserWithSmartwatch = 0;
+        int timestamp = 0;
+        for (String event : classAttr){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String motion   = parts[1];
+            String userSmartwatchDoingEventInstance = motion + "," + location + "," + event;
+
+            List<String[]> permutations = Permutations.get(otherUsers, String.class, locationAttributes);
+            eventsUserWithSmartwatch = permutations.size();
+
+            ArrayList<String> permSort = new ArrayList<String>();
+            for (String[] perm : permutations){
+                String temp = "";
+                for (String s : perm){
+                    temp += s + ",";
+                }
+                temp = temp.substring(0, temp.length()-1);
+                permSort.add(temp);
+            }
+            Collections.sort(permSort);
+
+            for (String p : permSort){
+                arff.add(timestamp +"," +userSmartwatchDoingEventInstance);
+                features.add(timestamp +"," +userSmartwatchDoingEventInstance);
+                userFeatures.get(0).add(timestamp +"," + userSmartwatchDoingEventInstance);
+
+                instancesUserWithSmartwatch++;
+                String[] n = p.split(",");
+                int k = 1;
+                for (String otherUsersLoc : n){
+                    arff.add(timestamp +"," +"?," + otherUsersLoc + "," + event);
+                    features.add(timestamp +"," +"?," + otherUsersLoc + "," + event);
+                    userFeatures.get(k++).add(timestamp +"," +"?," + otherUsersLoc + "," + event);
+                    instancesUserWithSmartwatch++;
+                }
+                timestamp++;
+            }
+        }
+
+        LOG.info("Event with user with smartwatch triggering the event: "
+                + eventsUserWithSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttr.size()
+                + nUsers + ". N instances:" + (instancesUserWithSmartwatch));
+
+
+
+        // Event user does not have smartwatch
+        int eventsUserWithoutSmartwatch = 0;
+        int instancesUserWithoutSmartwatch = 0;
+        timestamp = 0;
+        for (String event : classAttr){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String userNoSmartwatchDoingEventInstance =  "?," + location + "," + event;
+
+            ArrayList<String> events = createOtherUsersEventInstancesMotion(otherUsers);
+            eventsUserWithoutSmartwatch = events.size();
+
+            for (String p : events){
+                String[] n = p.split("\\|");
+
+                String userWithSmartwatch = timestamp +"," + n[0] + "," + event;
+                arff.add(userWithSmartwatch);
+                features.add(userWithSmartwatch);
+                userFeatures.get(0).add(userWithSmartwatch);
+                instancesUserWithoutSmartwatch++;
+
+                arff.add(timestamp +"," + userNoSmartwatchDoingEventInstance);
+                features.add(timestamp +"," + userNoSmartwatchDoingEventInstance);
+                userFeatures.get(1).add(timestamp +"," + userNoSmartwatchDoingEventInstance);
+                instancesUserWithoutSmartwatch++;
+
+                for (int i = 1; i < n.length; i++){
+                    String otherUsersFt = timestamp +"," + n[i];
+                    arff.add(otherUsersFt + "," + event);
+                    features.add(otherUsersFt + "," + event);
+                    userFeatures.get(i).add(otherUsersFt + "," + event);
+                    instancesUserWithoutSmartwatch++;
+                }
+                timestamp++;
+            }
+
+        }
+
+        LOG.info("Event with user without smartwatch triggering the event: "
+                + eventsUserWithoutSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttr.size()
+                + ". N instances:" + (instancesUserWithoutSmartwatch));
+        LOG.info("Arff lines " + arff.size());
+
+        ArrayList<String> filenames = new ArrayList<String>();
+        String stimestamp =  Utils.getCurrentTimestamp();
+
+        String filenameAll = "Experiment-Mock-Filtered-All_Timestamp_" + stimestamp + ".arff";
+        if (filtered){
+            filenameAll =  "Experiment-Mock-Filtered-All_Timestamp_"+ filter + stimestamp + ".arff";
+        }
+
+        filenames.add(filenameAll);
+        int i = 0;
+        for (ArrayList<String> uFts : userFeatures){
+            String file = "Experiment-Mock-Filtered-User"+ i +"_Timestamp_" + stimestamp + ".arff";
+            if (filtered){
+                file =  "Experiment-Mock-Filtered-User"+ i +"_Timestamp_" + filter + "_" + stimestamp + ".arff";
+            }
+            filenames.add(file);
+            i++;
+        }
+
+        GcsHelper gcsHelper = new GcsHelper();
+
+        try {
+            Instances instances = WekaMethods
+                    .CreateMockInstanceSetTimestamp("Events", locAttr, motionAttr, classAttr, features);
+
+            LOG.info(instances.toString());
+            byte[] serializedWekaObject = Utils.serialize(instances);
+            LOG.info(Utils.humanReadableByteCount(serializedWekaObject.length, true));
+            gcsHelper.writeWekaArffToGCS(filenameAll, instances);
+
+            i = 1;
+            for (ArrayList<String> uFts : userFeatures){
+                Instances userInstances = WekaMethods
+                        .CreateMockInstanceSetTimestamp("Events", locAttr, motionAttr, classAttr, uFts);
+                LOG.info(userInstances.toString());
+                gcsHelper.writeWekaArffToGCS(filenames.get(i++), userInstances);
+            }
+
+        } catch (Exception e){
+            LOG.severe(e.getMessage());
+        }
+        return filenames;
+    }
+
+    public String createMockArffAllIn1(int nUsers){
+        int otherUsers = nUsers - 1;
+        String[] classAttributes = {
+                "Kitchen-Boiler", "Kitchen-CoffeeMachine", "Kitchen-Oven", "Kitchen-Hotplates",
+                "Kitchen-Microwave", "Kitchen-Grill", "Kitchen-Lights",
+                "BedroomA-Computer", "BedroomA-Lights", "BedroomA-Fridge",
+                "BedroomB-Computer", "BedroomB-Lights", "BedroomB-Fridge",
+                "LivingRoom-Lights", "LivingRoom-Computer", "LivingRoom-Television",
+                "Shower-Lights", "Toilet-Lights" };
+        String[] locationAttributes = {
+                "BedroomA", "BedroomB", "LivingRoom", "Kitchen", "Shower", "Toilet", "Unknown"};
+        String[] motionAttributesDevices = {
+                "Boiler", "CoffeeMachine", "Oven", "Hotplates", "Microwave", "Grill",
+                "Lights", "Fridge", "Computer", "Television" };
+        String[] motionAttributesOther = {"Idle", "Active", "Random"};
+
+        ArrayList<String> classAttr = new ArrayList<String>(Arrays.asList(classAttributes));
+        ArrayList<String> locAttr = new ArrayList<String>(Arrays.asList(locationAttributes));
+        ArrayList<String> motionAttr = new ArrayList<String>();
+        motionAttr.addAll(Arrays.asList(motionAttributesDevices));
+        motionAttr.addAll(Arrays.asList(motionAttributesOther));
+
+        ArrayList<String> arff =  createMockArffHeaders(classAttributes, locationAttributes, motionAttributesDevices, motionAttributesOther);
+        ArrayList<String> features = new ArrayList<String>();
+
+
+        // Event user has smartwatch
+        int eventsUserWithSmartwatch = 0;
+        int instancesUserWithSmartwatch = 0;
+        for (String event : classAttributes){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String motion   = parts[1];
+            String userSmartwatchDoingEventInstance = motion + "," + location + ",";
+
+            List<String[]> permutations = Permutations.get(otherUsers, String.class, locationAttributes);
+            eventsUserWithSmartwatch = permutations.size();
+
+            ArrayList<String> permSort = new ArrayList<String>();
+            for (String[] perm : permutations){
+                String temp = "";
+                for (String s : perm){
+                    temp += s + ",";
+                }
+                temp = temp.substring(0, temp.length()-1);
+                permSort.add(temp);
+            }
+            Collections.sort(permSort);
+
+            for (String p : permSort){
+
+                instancesUserWithSmartwatch++;
+                String temp = userSmartwatchDoingEventInstance;
+                String[] n = p.split(",");
+                for (String otherUsersLoc : n){
+                    temp += "?," + otherUsersLoc + ",";
+                }
+                temp += event;
+                arff.add(temp);
+                features.add(temp);
+
+                //LOG.info(p + "||" + temp);
+            }
+        }
+
+        LOG.info("Event with user with smartwatch triggering the event: "
+                + eventsUserWithSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttributes.length
+                + ". N instances:" + (instancesUserWithSmartwatch));
+
+
+
+        // Event user does not have smartwatch
+        int eventsUserWithoutSmartwatch = 0;
+        int instancesUserWithoutSmartwatch = 0;
+        for (String event : classAttributes){
+            String[] parts = event.split("-");
+            String location = parts[0];
+            String userNoSmartwatchDoingEventInstance =  "?," + location + ",";
+
+            ArrayList<String> events = createOtherUsersEventInstancesMotion(otherUsers);
+            eventsUserWithoutSmartwatch = events.size();
+
+            for (String p : events){
+                instancesUserWithoutSmartwatch++;
+                String[] n = p.split("\\|");
+                String temp = n[0] + "," + userNoSmartwatchDoingEventInstance;
+                for (int i = 1; i < n.length; i++){
+                    String otherUsersFt = n[i];
+                    temp += otherUsersFt + ",";
+                }
+
+                temp += event;
+                arff.add(temp);
+                features.add(temp);
+
+                //LOG.info(p + "||" + temp);
+
+            }
+
+        }
+
+        LOG.info("Event with user without smartwatch triggering the event: "
+                + eventsUserWithoutSmartwatch
+                + ". N users:"  + nUsers
+                + ". N events:" + classAttributes.length
+                + ". N instances:" + (instancesUserWithoutSmartwatch));
+        LOG.info("Arff lines " + features.size());
+
+
+        String filename = "Experiment-Mock-AllIn1_" + Utils.getCurrentTimestamp() + ".arff";
+        GcsHelper gcsHelper = new GcsHelper();
+        //gcsHelper.writeToGCS(filename, arff);
+
+        try {
+            Instances instances = WekaMethods
+                    .CreateMockInstanceSetAllIn1(nUsers, "Events", locAttr, motionAttr, classAttr,
+                            features);
+
+            LOG.info(instances.toString());
+
+            byte[] serializedWekaObject = Utils.serialize(instances);
+            LOG.info(Utils.humanReadableByteCount(serializedWekaObject.length, true));
+            gcsHelper.writeWekaArffToGCS(filename, instances);
+        } catch (Exception e){
+            LOG.severe(e.getMessage());
+        }
+        return filename;
+    }
+
+
+    public ArrayList<String> createOtherUsersEventInstancesMotion(
+            int users) {
+        String[] locationAttributes = {
+                "BedroomA", "BedroomB", "LivingRoom", "Kitchen", "Shower", "Toilet", "Unknown"};
+        String[] motionAttributesDevices = {
+                "Boiler"," CoffeeMachine", "Oven", "Hotplates", "Microwave", "Grill",
+                "Lights", "Fridge", "Computer", "Television" };
+        String[] motionAttributesOther = {"Idle", "Active", "Random"};
+
+        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> finalResult = new ArrayList<String>();
+
+        List<String[]> permutations = Permutations.get(users, String.class, locationAttributes);
+        for (String[] perm : permutations){
+            String temp = "";
+            for (String s : perm){
+                temp += s + "|?,";
+            }
+            temp = temp.substring(0, temp.length()-3);
+            result.add(temp);
+        }
+
+        for (String temp : result){
+            for (String motion : motionAttributesOther){
+                String p = motion + "," + temp;
+                finalResult.add(p);
+            }
+        }
+        Collections.sort(result);
+
+        return finalResult;
+    }
+
+
+    public ArrayList<String> createOtherUsersEventInstances(
+            int users) {
+        String[] locationAttributes = {
+                "BedroomA", "BedroomB", "LivingRoom", "Kitchen", "Shower", "Toilet", "Unknown"};
+
+        ArrayList<String> result = new ArrayList<String>();
+
+        List<String[]> permutations = Permutations.get(users, String.class, locationAttributes);
+
+        for (String[] perm : permutations){
+            String temp = "";
+            for (String s : perm){
+                temp += s + ",";
+            }
+            temp = temp.substring(0, temp.length()-1);
+           result.add(temp);
+        }
+
+        return result;
+    }
+
+    private ArrayList<String> createMockArffHeaders(
+            String[] classAttributes,
+            String[] locationAttributes,
+            String[] motionAttributesDevices,
+            String[] motionAttributesOther){
+
+
+        ArrayList<String> arff = new ArrayList<String>();
+        String relation  = "Events";
+
+        //Add headers
+        arff.add("@relation" + relation);
+        arff.add("");
+
+        //@attribute Motion {a,b,c,x}
+        String motAttrs = "";
+        for (String attr : motionAttributesDevices){
+            motAttrs += attr + ",";
+        }
+        for (String attr : motionAttributesOther){
+            motAttrs += attr + ",";
+        }
+        motAttrs = motAttrs.substring(0, motAttrs.length()-1);
+        arff.add("@attribute Motion {" + motAttrs + "}");
+
+        //@attribute Location {a,b,c,x}
+        String locAttrs = "";
+        for (String attr : locationAttributes){
+            locAttrs += attr + ",";
+        }
+        locAttrs = locAttrs.substring(0, locAttrs.length()-1);
+        arff.add("@attribute Location {" + locAttrs + "}");
+
+        //@attribute Activity {a,b,c,x}
+        String activityAttrs = "";
+        for (String attr : classAttributes){
+            activityAttrs += attr + ",";
+        }
+        activityAttrs = activityAttrs.substring(0, activityAttrs.length()-1);
+        arff.add("@attribute Activity {" + activityAttrs + "}");
+        arff.add("");
+
+        arff.add("@data");
+        return  arff;
+    }
+
+    public static final class Permutations {
+        private Permutations() {}
+
+        public static <T> List<T[]> get(Class<T> itemClass, T... itemsPool) {
+            return get(itemsPool.length, itemClass, itemsPool);
+        }
+
+        public static <T> List<T[]> get(int size, Class<T> itemClass, T... itemsPool) {
+            if (size < 1) {
+                return new ArrayList<T[]>();
+            }
+
+            int itemsPoolCount = itemsPool.length;
+
+            List<T[]> permutations = new ArrayList<T[]>();
+            for (int i = 0; i < Math.pow(itemsPoolCount, size); i++) {
+                T[] permutation = (T[]) Array.newInstance(itemClass, size);
+                for (int j = 0; j < size; j++) {
+                    // Pick the appropriate item from the item pool given j and i
+                    int itemPoolIndex = (int) Math.floor((double) (i % (int) Math.pow(itemsPoolCount, j + 1)) / (int) Math.pow(itemsPoolCount, j));
+                    permutation[j] = itemsPool[itemPoolIndex];
+                }
+                permutations.add(permutation);
+            }
+
+            return permutations;
+        }
+    }
 }
