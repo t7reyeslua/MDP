@@ -107,7 +107,7 @@ public class WekaMethods {
     }
 
 
-    public static Instances CreateInstanceSet(String relation,ArrayList<String> usernames, ArrayList<String> motionAttributes,ArrayList<String> locationAttributes,ArrayList<String> classAttributes,ArrayList<String> features){
+    public static Instances CreateInstanceSet1(String relation,ArrayList<String> usernames, ArrayList<String> motionAttributes,ArrayList<String> locationAttributes,ArrayList<String> classAttributes,ArrayList<String> features){
 
         int numOfAttributes = motionAttributes.size()+locationAttributes.size()+2;
         FastVector fvWekaAttributes = new FastVector(numOfAttributes);
@@ -175,6 +175,198 @@ public class WekaMethods {
         return dataset;
     }
 
+    public static Instances CreateInstanceSet(String relation,ArrayList<String> usernames, ArrayList<String> motionAttributes,ArrayList<String> locationAttributes,ArrayList<String> classAttributes,ArrayList<String> features){
+
+        int numOfAttributes = motionAttributes.size()+locationAttributes.size()+3;
+        FastVector fvWekaAttributes = new FastVector(numOfAttributes);
+
+        //Creating/adding the location attributes
+        for(int i=0;i<locationAttributes.size();i++){
+            fvWekaAttributes.addElement(StringtoNumericAttribute(locationAttributes.get(i)));
+        }
+
+        //Creating/adding the motion attributes
+        for(int i=0;i<motionAttributes.size();i++){
+            fvWekaAttributes.addElement(StringtoNumericAttribute(motionAttributes.get(i)));
+        }
+
+        //Creating/adding the Classes
+        fvWekaAttributes.addElement(ALStringtoNominalAttribute("Activity",classAttributes));
+        fvWekaAttributes.addElement(ALStringtoNominalAttribute("User",usernames));
+        fvWekaAttributes.addElement(ALStringtoNominalAttribute("UserPredict", usernames));
+
+        //Creating the dataset and adding the features
+        Instances dataset = new Instances(relation, fvWekaAttributes, numOfAttributes);
+        dataset.setClassIndex(numOfAttributes - 1);
+
+        //create the features (Instance) group
+
+        for(int i=0;i<features.size();i++){
+            String[] parts=features.get(i).split(",");
+            Instance ft1Instance = new Instance(numOfAttributes);
+            String attrDebug = "";
+
+            try {
+                //LOG.info(fvWekaAttributes.elementAt(0).toString() + "-" + parts[0]);
+                attrDebug = fvWekaAttributes.elementAt(0).toString();
+                for (int j = 0; j < parts.length - 3; j++) {
+
+                    boolean numtest = true;
+                    double InstanceValue = 0;
+                    try {
+                        InstanceValue = Double.parseDouble(parts[j]);
+                    } catch (NumberFormatException nfe) {
+                        numtest = false;
+                    }
+
+                    if (numtest == true) {
+
+                        attrDebug = fvWekaAttributes.elementAt(j).toString();
+                        ft1Instance
+                                .setValue((Attribute) fvWekaAttributes.elementAt(j), InstanceValue);
+                    }
+
+
+                }
+                //System.out.println(parts[parts.length-1]);
+
+                ft1Instance.setValue((Attribute) fvWekaAttributes.elementAt(parts.length - 3), parts[parts.length - 3]);
+                ft1Instance.setValue((Attribute) fvWekaAttributes.elementAt(parts.length - 2), parts[parts.length - 2]);
+
+                if (!parts[parts.length - 1].equals("?")) {
+                    ft1Instance.setValue((Attribute) fvWekaAttributes.elementAt(parts.length - 1), parts[parts.length - 1]);
+                }
+
+                attrDebug = fvWekaAttributes.elementAt(parts.length - 3).toString();
+
+                dataset.add(ft1Instance);
+            } catch (Exception e){
+                LOG.severe(e.getLocalizedMessage() + "|" + attrDebug + "|" + features.get(i));
+            }
+        }
+
+        return dataset;
+    }
+
+    public static Instances CreateInstanceSetLocationExclusively(String relation,ArrayList<String> locationAttributes,ArrayList<String> classAttributes,ArrayList<String> features){
+
+        int numOfAttributes = locationAttributes.size()+1;
+        FastVector fvWekaAttributes = new FastVector(numOfAttributes);
+
+        //Creating/adding the location attributes
+        for(int i=0;i<locationAttributes.size();i++){
+            fvWekaAttributes.addElement(StringtoNumericAttribute(locationAttributes.get(i)));
+        }
+
+        //Creating/adding the Classes
+        fvWekaAttributes.addElement(ALStringtoNominalAttribute("Activity",classAttributes));
+        //Creating the dataset and adding the features
+        Instances dataset = new Instances(relation, fvWekaAttributes, numOfAttributes);
+        dataset.setClassIndex(numOfAttributes - 1);
+
+        //create the features (Instance) group
+
+        for(int i=0;i<features.size();i++){
+            String[] parts=features.get(i).split(",");
+            Instance ft1Instance = new Instance(numOfAttributes);
+            String attrDebug = "";
+
+            try {
+                //LOG.info(fvWekaAttributes.elementAt(0).toString() + "-" + parts[0]);
+                attrDebug = fvWekaAttributes.elementAt(0).toString();
+                for (int j = 0; j < parts.length - 1; j++) {
+
+                    boolean numtest = true;
+                    double InstanceValue = 0;
+                    try {
+                        InstanceValue = Double.parseDouble(parts[j]);
+                    } catch (NumberFormatException nfe) {
+                        numtest = false;
+                    }
+
+                    if (numtest == true) {
+
+                        attrDebug = fvWekaAttributes.elementAt(j).toString();
+                        ft1Instance
+                                .setValue((Attribute) fvWekaAttributes.elementAt(j), InstanceValue);
+                    }
+
+
+                }
+                //System.out.println(parts[parts.length-1]);
+
+                ft1Instance.setValue((Attribute) fvWekaAttributes.elementAt(parts.length - 1), parts[parts.length - 1]);
+
+                attrDebug = fvWekaAttributes.elementAt(parts.length - 1).toString();
+
+                dataset.add(ft1Instance);
+            } catch (Exception e){
+                LOG.severe(e.getLocalizedMessage() + "|" + attrDebug + "|" + features.get(i));
+            }
+        }
+
+        return dataset;
+    }
+
+    public static Instances CreateInstanceSetMotionExclusively(String relation, ArrayList<String> motionAttributes,ArrayList<String> classAttributes,ArrayList<String> features){
+
+        int numOfAttributes = motionAttributes.size()+1;
+        FastVector fvWekaAttributes = new FastVector(numOfAttributes);
+
+        //Creating/adding the motion attributes
+        for(int i=0;i<motionAttributes.size();i++){
+            fvWekaAttributes.addElement(StringtoNumericAttribute(motionAttributes.get(i)));
+        }
+
+        //Creating/adding the Classes
+        fvWekaAttributes.addElement(ALStringtoNominalAttribute("Activity",classAttributes));
+
+        //Creating the dataset and adding the features
+        Instances dataset = new Instances(relation, fvWekaAttributes, numOfAttributes);
+        dataset.setClassIndex(numOfAttributes - 1);
+
+        //create the features (Instance) group
+
+        for(int i=0;i<features.size();i++){
+            String[] parts=features.get(i).split(",");
+            Instance ft1Instance = new Instance(numOfAttributes);
+            String attrDebug = "";
+
+            try {
+                //LOG.info(fvWekaAttributes.elementAt(0).toString() + "-" + parts[0]);
+                attrDebug = fvWekaAttributes.elementAt(0).toString();
+                for (int j = 0; j < parts.length - 1; j++) {
+
+                    boolean numtest = true;
+                    double InstanceValue = 0;
+                    try {
+                        InstanceValue = Double.parseDouble(parts[j]);
+                    } catch (NumberFormatException nfe) {
+                        numtest = false;
+                    }
+
+                    if (numtest == true) {
+
+                        attrDebug = fvWekaAttributes.elementAt(j).toString();
+                        ft1Instance
+                                .setValue((Attribute) fvWekaAttributes.elementAt(j), InstanceValue);
+                    }
+
+
+                }
+                //System.out.println(parts[parts.length-1]);
+
+                ft1Instance.setValue((Attribute) fvWekaAttributes.elementAt(parts.length - 1), parts[parts.length - 1]);
+                attrDebug = fvWekaAttributes.elementAt(parts.length - 1).toString();
+
+                dataset.add(ft1Instance);
+            } catch (Exception e){
+                LOG.severe(e.getLocalizedMessage() + "|" + attrDebug + "|" + features.get(i));
+            }
+        }
+
+        return dataset;
+    }
 
     /**
      * Create a dataset as readed from an .arff file, only for Location.
@@ -502,6 +694,8 @@ public class WekaMethods {
             return null;
         }
     }
+
+
 
 
     public static Instances CreateInstanceSetToEval(Instances OriginalSet, DeviceMotionLocationRecord recordToEval){

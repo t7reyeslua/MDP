@@ -347,6 +347,9 @@ public class WekaUtils {
 
         // Build the class and location attributes. (Motion Attributes are always fixed)
         for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            if (deviceMotionLocationRecord.getEvent().contains("Microwave")){
+                deviceMotionLocationRecord.setEvent("Microwave-Kitchen-04E85AC22D3580");
+            }
             classAttributesSet.add(deviceMotionLocationRecord.getEvent().replaceAll("\\s",""));
 
             String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
@@ -386,6 +389,7 @@ public class WekaUtils {
             String lines[] = locationData.split("\\n");
             String locationAttributesStr = lines[0];
             String locationFeaturesStr = lines[1];
+            String date = deviceMotionLocationRecord.getTimestamp().substring(0,8);
 
             String attributes[] = locationAttributesStr.split(",");
             String values[]     = locationFeaturesStr.split(",");
@@ -417,7 +421,286 @@ public class WekaUtils {
                         + motionFeatures + ","
                         + motionFeatures;
             }
-            features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user);
+            features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + ",?");
+
+            if (user.equals("AntonioReyesLua") && (date.equals("20141124") || date.equals("20141125"))){
+                features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + user);
+            }
+
+            if (user.equals("LuisAlfonsoGonzalezGodinez") && date.equals("20141113")){
+                features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + user);
+            }
+
+            if (user.equals("ThomasAnderson") && date.equals("20141127")){
+                features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + user);
+            }
+        }
+
+        Instances wekaInstances = WekaMethods.CreateInstanceSet(relation,
+                usernames,
+                motionAttributes,
+                locationAttributes,
+                classAttributes,
+                features);
+
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate, "Motion-Location", filteredUsers);
+        return filesCreated;
+    }
+
+    public ArrayList<String> createInstanceSetLocationExclusively(List<RegistrationRecord>users, List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
+        String relation  = "Events";
+        ArrayList<String> classAttributes;
+        ArrayList<String> locationAttributes;
+        ArrayList<String> features = new ArrayList<String>();
+
+
+        HashSet<String> classAttributesSet = new HashSet<String>();
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            if (deviceMotionLocationRecord.getEvent().contains("Microwave")){
+                deviceMotionLocationRecord.setEvent("Microwave-Kitchen-04E85AC22D3580");
+            }
+            classAttributesSet.add(deviceMotionLocationRecord.getEvent().replaceAll("\\s",""));
+
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributesStr.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+        }
+
+        classAttributes     = new ArrayList<String>(classAttributesSet);
+        locationAttributes  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(locationAttributes);
+
+
+        LOG.info("Distinct Class Records:" + classAttributes.size());
+        LOG.info("Distinct Networks:" + (locationAttributes.size()/4));
+        LOG.info("Distinct Location Attributes:" + locationAttributes.size());
+
+        for (String attr : classAttributes){
+            LOG.info("Class: " + attr);
+        }
+        for (String attr : locationAttributes){
+            LOG.info("Location: " + attr);
+        }
+
+        // Once you know all existing location attributes, build the location features
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String user = removeAccents(deviceMotionLocationRecord.getUsername().replaceAll("\\s", ""));
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+            String locationFeaturesStr = lines[1];
+            String date = deviceMotionLocationRecord.getTimestamp().substring(0,8);
+
+            String attributes[] = locationAttributesStr.split(",");
+            String values[]     = locationFeaturesStr.split(",");
+
+            HashMap<String,String> recordFeatures = new HashMap<String, String>();
+            for (int i = 0; i < attributes.length; i++){
+                recordFeatures.put(attributes[i], values[i]);
+            }
+
+            String locationFeatures = "";
+            for (String locationAttribute : locationAttributes){
+                if (recordFeatures.containsKey(locationAttribute)){
+                    locationFeatures += recordFeatures.get(locationAttribute) + ",";
+                } else {
+                    locationFeatures += "?,";
+                }
+            }
+            //remove the last comma
+            locationFeatures = locationFeatures.substring(0, locationFeatures.length()-1);
+
+            if (deviceMotionLocationRecord.getEvent().contains("Microwave")){
+                deviceMotionLocationRecord.setEvent("Microwave-Kitchen-04E85AC22D3580");
+            }
+            String classAttribute = deviceMotionLocationRecord.getEvent().replaceAll("\\s", "");
+            //features.add(locationFeatures + "," + motionFeatures);
+
+
+            if (user.equals("AntonioReyesLua") && (date.equals("20141124") || date.equals("20141125"))){
+                features.add(locationFeatures + "," + classAttribute);
+            }
+
+            if (user.equals("LuisAlfonsoGonzalezGodinez") && date.equals("20141113")){
+                features.add(locationFeatures + "," + classAttribute);
+            }
+
+            if (user.equals("ThomasAnderson") && date.equals("20141127")){
+                features.add(locationFeatures + "," + classAttribute);
+            }
+        }
+
+        Instances wekaInstances = WekaMethods.CreateInstanceSetLocationExclusively(relation,
+                locationAttributes,
+                classAttributes,
+                features);
+
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate, "Location-Exclusively", filteredUsers);
+        return filesCreated;
+    }
+
+    public ArrayList<String> createInstanceSetMotionExclusively(List<RegistrationRecord>users, List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
+        String relation  = "Events";
+        ArrayList<String> classAttributes;
+        ArrayList<String> motionAttributes;
+        ArrayList<String> features = new ArrayList<String>();
+
+        HashSet<String> classAttributesSet = new HashSet<String>();
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            if (deviceMotionLocationRecord.getEvent().contains("Microwave")){
+                deviceMotionLocationRecord.setEvent("Microwave-Kitchen-04E85AC22D3580");
+            }
+            classAttributesSet.add(deviceMotionLocationRecord.getEvent().replaceAll("\\s",""));
+        }
+
+        classAttributes     = new ArrayList<String>(classAttributesSet);
+        motionAttributes    = new ArrayList<String>(WekaUtils.getAttributes());
+
+        LOG.info("Distinct Class Records:" + classAttributes.size());
+        LOG.info("Distinct Motion Attributes:" + motionAttributes.size());
+
+        for (String attr : classAttributes){
+            LOG.info("Class: " + attr);
+        }
+        for (String attr : motionAttributes){
+            LOG.info("Motion: " + attr);
+        }
+
+        // Once you know all existing location attributes, build the location features
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String user = removeAccents(deviceMotionLocationRecord.getUsername().replaceAll("\\s", ""));
+            String motionFeatures = deviceMotionLocationRecord.getMotionFeatures().getValue();
+            String date = deviceMotionLocationRecord.getTimestamp().substring(0,8);
+
+
+            if (deviceMotionLocationRecord.getEvent().contains("Microwave")){
+                deviceMotionLocationRecord.setEvent("Microwave-Kitchen-04E85AC22D3580");
+            }
+            String classAttribute = deviceMotionLocationRecord.getEvent().replaceAll("\\s", "");
+
+            //Hack to solve bug in ugly way
+            if (motionFeatures.length() < 50){
+                motionFeatures =  motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures;
+            }
+
+            if (user.equals("LuisAlfonsoGonzalezGodinez") && date.equals("20141113")){
+                features.add(motionFeatures + "," + classAttribute);
+            }
+        }
+
+        Instances wekaInstances = WekaMethods.CreateInstanceSetMotionExclusively(relation,
+                motionAttributes,
+                classAttributes,
+                features);
+
+        ArrayList<String> filesCreated = storeWekaObjects(wekaInstances, minDate, maxDate, "Motion-Exclusively", filteredUsers);
+        return filesCreated;
+    }
+
+    public ArrayList<String> createInstanceSet1(List<RegistrationRecord>users, List<DeviceMotionLocationRecord> records, String minDate, String maxDate, String filteredUsers){
+        String relation  = "Events";
+        ArrayList<String> classAttributes;
+        ArrayList<String> locationAttributes;
+        ArrayList<String> motionAttributes;
+        ArrayList<String> features = new ArrayList<String>();
+        ArrayList<String> usernames = new ArrayList<String>();
+
+
+        HashSet<String> classAttributesSet = new HashSet<String>();
+        HashSet<String> locationAttributesSet = new HashSet<String>();
+
+        for(RegistrationRecord registrationRecord : users){
+            usernames.add(removeAccents(registrationRecord.getUsername().replaceAll("\\s","")));
+        }
+
+        // Build the class and location attributes. (Motion Attributes are always fixed)
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            classAttributesSet.add(deviceMotionLocationRecord.getEvent().replaceAll("\\s",""));
+
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+
+            String allNetworksWithSuffix[] = locationAttributesStr.split(",");
+            locationAttributesSet.addAll(Arrays.asList(allNetworksWithSuffix));
+        }
+
+        classAttributes     = new ArrayList<String>(classAttributesSet);
+        motionAttributes    = new ArrayList<String>(WekaUtils.getAttributes());
+        locationAttributes  = new ArrayList<String>(locationAttributesSet);
+        Collections.sort(locationAttributes);
+
+
+        LOG.info("Distinct Class Records:" + classAttributes.size());
+        LOG.info("Distinct Networks:" + (locationAttributes.size()/4));
+        LOG.info("Distinct Location Attributes:" + locationAttributes.size());
+        LOG.info("Distinct Motion Attributes:" + motionAttributes.size());
+
+        for (String attr : classAttributes){
+            LOG.info("Class: " + attr);
+        }
+        for (String attr : motionAttributes){
+            LOG.info("Motion: " + attr);
+        }
+        for (String attr : locationAttributes){
+            LOG.info("Location: " + attr);
+        }
+
+        // Once you know all existing location attributes, build the location features
+        for (DeviceMotionLocationRecord deviceMotionLocationRecord : records){
+            String user = removeAccents(deviceMotionLocationRecord.getUsername().replaceAll("\\s", ""));
+            String locationData = deviceMotionLocationRecord.getLocationFeatures().getValue();
+            String motionFeatures = deviceMotionLocationRecord.getMotionFeatures().getValue();
+            String lines[] = locationData.split("\\n");
+            String locationAttributesStr = lines[0];
+            String locationFeaturesStr = lines[1];
+            String date = deviceMotionLocationRecord.getTimestamp().substring(0,8);
+
+            String attributes[] = locationAttributesStr.split(",");
+            String values[]     = locationFeaturesStr.split(",");
+
+            HashMap<String,String> recordFeatures = new HashMap<String, String>();
+            for (int i = 0; i < attributes.length; i++){
+                recordFeatures.put(attributes[i], values[i]);
+            }
+
+            String locationFeatures = "";
+            for (String locationAttribute : locationAttributes){
+                if (recordFeatures.containsKey(locationAttribute)){
+                    locationFeatures += recordFeatures.get(locationAttribute) + ",";
+                } else {
+                    locationFeatures += "?,";
+                }
+            }
+            //remove the last comma
+            locationFeatures = locationFeatures.substring(0, locationFeatures.length()-1);
+            String classAttribute = deviceMotionLocationRecord.getEvent().replaceAll("\\s", "");
+            //features.add(locationFeatures + "," + motionFeatures);
+
+            //Hack to solve bug in ugly way
+            if (motionFeatures.length() < 50){
+                motionFeatures =  motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures + ","
+                        + motionFeatures;
+            }
+            features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + date);
         }
 
         Instances wekaInstances = WekaMethods.CreateInstanceSet(relation,

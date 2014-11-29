@@ -384,9 +384,17 @@ public class DeviceMotionLocationRecordEndpoint {
         LOG.info("Records: " + records.size());
 
         WekaUtils wekaUtils = new WekaUtils();
-        ArrayList<String> filesCreated = wekaUtils.createInstanceSet(users, records, minDate, maxDate, "ALL");
+        ArrayList<String> filesCreatedMix = wekaUtils.createInstanceSet(users, records, minDate, maxDate, "3ARFFS");
+        ArrayList<String> filesCreatedLoc = wekaUtils.createInstanceSetLocationExclusively(users,
+                records, minDate, maxDate, "3ARFFS");
+        ArrayList<String> filesCreatedMot = wekaUtils.createInstanceSetMotionExclusively(users,
+                records, minDate, maxDate, "3ARFFS");
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
 
+        ArrayList<String> filesCreated = new ArrayList<String>();
+        filesCreated.addAll(filesCreatedMix);
+        filesCreated.addAll(filesCreatedLoc);
+        filesCreated.addAll(filesCreatedMot);
         String files = "";
         for (String file : filesCreated){
             files += "http://storage.cloud.google.com/tudelft-mdp.appspot.com/" + file + " | ";

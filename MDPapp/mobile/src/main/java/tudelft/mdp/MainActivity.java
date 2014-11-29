@@ -46,6 +46,7 @@ import java.util.Arrays;
 
 import tudelft.mdp.Utilities.DatabaseManagerFragment;
 import tudelft.mdp.Utilities.MessengerFragment;
+import tudelft.mdp.Utilities.TesterFragment;
 import tudelft.mdp.dashboard.DashboardFragment;
 import tudelft.mdp.deviceManager.DeviceDetectionAsyncTask;
 import tudelft.mdp.deviceManager.DeviceManagerFragment;
@@ -351,7 +352,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
         child = new ArrayList<String>();
         //child.add("Sensors recorder");
         child.add("Messenger");
-        //child.add("DB manager");
+        child.add("Tester");
         childItem.add(child);
     }
 
@@ -401,7 +402,7 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                         position = NavigationDrawer.MESSENGER;
                         break;
                     case 1:
-                        position = NavigationDrawer.DBMANAGER;
+                        position = NavigationDrawer.TESTER;
                         break;
                     default:
                         break;
@@ -478,6 +479,12 @@ public class MainActivity extends GoogleLoginManager implements ServiceConnectio
                 fragment =  new MessengerFragment();
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragment, "id_messenger")
+                        .commit();
+                break;
+            case NavigationDrawer.TESTER:
+                fragment =  new TesterFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragment, "id_tester")
                         .commit();
                 break;
             default:
