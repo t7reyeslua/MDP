@@ -35,9 +35,9 @@
     <string-array name="menu_array">
         <item>MDP</item>
         <item>MDP</item>
+        <item>Device Manager</item>
         <item>Activity Monitor</item>
         <item>Location Tracker</item>
-        <item>Device Manager</item>
         <item>Utilities</item>
     </string-array>
 
@@ -62,6 +62,43 @@
         <item>Office</item>
     </string-array>
 
+
+    <string name="place_prompt">Choose a location</string>
+    <string-array name="test_places">
+        <item>Home</item>
+        <item>Unknown</item>
+    </string-array>
+    <string name="zone_prompt">Choose a room</string>
+    <string-array name="test_zones">
+        <item>Bedroom A</item>
+        <item>Bedroom B</item>
+        <item>Living room</item>
+        <item>Kitchen</item>
+        <item>Toilet</item>
+        <item>Shower</item>
+    </string-array>
+    <string name="motion_prompt">Choose an activity</string>
+    <string-array name="test_motion">
+        <item>Fridge</item>
+        <item>Computer</item>
+        <item>Microwave</item>
+        <item>Television</item>
+        <item>Coffee machine</item>
+        <item>Grill</item>
+        <item>Idle</item>
+    </string-array>
+
+    <string name="event_prompt">Choose an event</string>
+    <string-array name="test_event">
+        <item>Fridge-BedroomA</item>
+        <item>Fridge-BedroomB</item>
+        <item>Computer-BedroomA</item>
+        <item>Computer-BedroomB</item>
+        <item>Television-LivingRoom</item>
+        <item>Grill-Kitchen</item>
+        <item>CoffeeMachine-Kitchen</item>
+        <item>Microwave-LivingRoom</item>
+    </string-array>
 
 
 </resources>

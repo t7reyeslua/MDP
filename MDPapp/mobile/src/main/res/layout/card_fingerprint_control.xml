@@ -4,6 +4,7 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content">
 
+
     <LinearLayout
             android:orientation="vertical"
             android:paddingTop="10dp"
@@ -43,6 +44,7 @@
                 android:layout_marginBottom="4dp"
                 android:hint="e.g. Home" />
     </LinearLayout>
+
 
     <LinearLayout
             android:orientation="horizontal"

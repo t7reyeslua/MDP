@@ -12,6 +12,13 @@ public class UserPreferences {
     public static final String USERPIC = "USERPIC";
     public static final String WEARCONNECTED = "WEARCONNECTED";
 
+    public static final String TESTMODE = "TESTMODE";
+    public static final String TESTPLACE = "TESTPLACE";
+    public static final String TESTZONE = "TESTZONE";
+    public static final String TESTMOTION = "TESTMOTION";
+    public static final String TESTEVENT = "TESTEVENT";
+    public static final String TESTMOTION_USE = "TESTMOTION_USE";
+
 
     public static final String CALIBRATED = "CALIBRATED";
     public static final String CALIBRATION_M = "CALIBRATION_M";
