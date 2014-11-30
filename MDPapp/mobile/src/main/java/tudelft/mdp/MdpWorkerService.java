@@ -1025,8 +1025,12 @@ public class MdpWorkerService extends Service implements
         Boolean testModeOn = sharedPrefs.getBoolean(UserPreferences.TESTMODE, true);
 
         if (testModeOn && !testLocFts.equals("") && !testMotFts.equals("")){
-            motionFeatures.setValue(testLocFts);
             locationFeatures.setValue(testMotFts);
+            if (sharedPrefs.getBoolean(UserPreferences.TESTMOTION_USE, true)) {
+                motionFeatures.setValue(testLocFts);
+            } else {
+                motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
+            }
         } else {
             motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
             locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
