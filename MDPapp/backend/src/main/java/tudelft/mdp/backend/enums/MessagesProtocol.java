@@ -49,6 +49,7 @@ public class MessagesProtocol {
     public static final int SENDGCM_CMD_MOTIONLOCATION = 3003;
     public static final int SENDGCM_CMD_UPDATEGAUSSIANS = 4000;
     public static final int SENDGCM_CMD_KEEPGCMALIVE = 5000;
+    public static final int SENDGCM_CMD_APPORTIONING_RESULT = 6000;
 
     /* MSG Payloads */
     //Data Bundle
