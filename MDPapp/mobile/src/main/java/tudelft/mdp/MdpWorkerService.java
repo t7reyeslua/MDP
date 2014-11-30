@@ -32,8 +32,10 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1057,6 +1059,9 @@ public class MdpWorkerService extends Service implements
         if (v != null) {
             v.vibrate(500);
         }
+
+        //Toast.makeText(getApplicationContext(), event, Toast.LENGTH_SHORT).show();
+
         String[] parts = event.split("_");
         String deviceId = parts[0];
         String deviceType = parts[1].replaceAll("\\s","");
@@ -1098,6 +1103,85 @@ public class MdpWorkerService extends Service implements
     public void processFinishRequestEventEvaluationTester(WekaEvaluationRecord result){
         String resultPrediction = result.getEvaluation().getValue();
         //TODO Upload
+        if (v != null) {
+            v.vibrate(500);
+        }
+
+        String probabilitiesLocAll = resultPrediction.split("#")[0];
+        String probabilitiesMotAll = resultPrediction.split("#")[1];
+
+        String[] probabilitiesLoc = probabilitiesLocAll.split("\\|");
+        String[] probabilitiesMot = probabilitiesMotAll.split("\\|");
+
+        HashMap<String,Double> pmfFinalWekaLoc = new HashMap<String, Double>();
+        HashMap<String,Double> pmfFinalWekaMot = new HashMap<String, Double>();
+
+        String currentPlaceWeka = "TBD";
+        String currentActivityWeka = "TBD";
+
+        for (String locProb : probabilitiesLoc){
+            String[] parts = locProb.split(",");
+            String[] locationInfo = parts[0].split("-");
+
+            String location = locationInfo[1];
+            Double prob = Double.valueOf(parts[1]);
+
+            Double currentProbOfLoc = 0.0;
+            try {
+                currentProbOfLoc = pmfFinalWekaLoc.get(location);
+            } catch (Exception e){
+                currentProbOfLoc = 0.0;
+            }
+            if (currentProbOfLoc == null){
+                currentProbOfLoc = 0.0;
+            }
+
+            Log.w(LOGTAG, locProb + "|" +location + "|"+prob + "|"+currentProbOfLoc + "|");
+            pmfFinalWekaLoc.put(location, prob + currentProbOfLoc);
+        }
+
+        for (String motProb : probabilitiesMot){
+            String[] parts = motProb.split(",");
+            String[] motionInfo = parts[0].split("-");
+
+            String motion = motionInfo[0];
+            Double prob = Double.valueOf(parts[1]);
+
+            Double currentProbOfMot = 0.0;
+            try {
+                currentProbOfMot = pmfFinalWekaMot.get(motion);
+            } catch (Exception e){
+                currentProbOfMot = 0.0;
+            }
+
+
+            if (currentProbOfMot == null){
+                currentProbOfMot = 0.0;
+            }
+            pmfFinalWekaMot.put(motion, prob + currentProbOfMot);
+        }
+
+
+        Double locMax = Collections.max(pmfFinalWekaLoc.values());
+        for (String loc : pmfFinalWekaLoc.keySet()){
+            if (pmfFinalWekaLoc.get(loc).equals(locMax)){
+                currentPlaceWeka = loc;
+                break;
+            }
+        }
+        Double motMax = Collections.max(pmfFinalWekaMot.values());
+        for (String mot : pmfFinalWekaMot.keySet()){
+            if (pmfFinalWekaMot.get(mot).equals(motMax)){
+                currentActivityWeka = mot;
+                break;
+            }
+        }
+
+        String toast = "Result:\n" + currentPlaceWeka    + "[" + String.format("%.2f",locMax) + "] \n"
+                                   + currentActivityWeka + "[" + String.format("%.2f",motMax) + "]";
+        Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_LONG).show();
+
+
     }
     /**
      * Initializes the required variables for requesting motion and location data
