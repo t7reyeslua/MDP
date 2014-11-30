@@ -35,4 +35,5 @@ dependencies {
     compile 'com.android.support:support-v4:21.0.0'
     compile 'com.androidplot:androidplot-core:0.6.1'
     compile 'com.android.support:multidex:1.0.0'
+    compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.11'
 }

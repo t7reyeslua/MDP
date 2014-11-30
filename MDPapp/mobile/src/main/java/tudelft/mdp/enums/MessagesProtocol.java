@@ -52,6 +52,7 @@ public class MessagesProtocol {
     public static final int SENDGCM_CMD_MOTION = 3001;
     public static final int SENDGCM_CMD_LOCATION = 3002;
     public static final int SENDGCM_CMD_MOTIONLOCATION = 3003;
+    public static final int SENDGCM_CMD_MOTIONLOCATION_TEST = 3004;
     public static final int SENDGCM_CMD_UPDATEGAUSSIANS = 4000;
     public static final int SENDGCM_CMD_KEEPGCMALIVE = 5000;
 
@@ -77,6 +78,7 @@ public class MessagesProtocol {
     public static final String COLLECTDATA_MOTION = "COLLECT_DATA_MOTION";
     public static final String COLLECTDATA_LOCATION = "COLLECT_DATA_LOCATION";
     public static final String COLLECTDATA_MOTIONLOCATION = "COLLECT_DATA_MOTIONLOCATION";
+    public static final String COLLECTDATA_MOTIONLOCATION_TEST = "COLLECT_DATA_MOTIONLOCATION_TEST";
     public static final String UPDATE_GAUSSIANS = "UPDATE_GAUSSIANS";
     public static final String MSG_RECEIVED = "MSG_RECEIVED";
     public static final String KEEPGCMALIVE = "KEEPGCMALIVE";

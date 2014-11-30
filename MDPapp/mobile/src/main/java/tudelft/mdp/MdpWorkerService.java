@@ -45,6 +45,7 @@ import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.De
 import tudelft.mdp.backend.endpoints.deviceMotionLocationRecordEndpoint.model.Text;
 import tudelft.mdp.backend.endpoints.locationLogEndpoint.model.LocationLogRecord;
 import tudelft.mdp.backend.endpoints.radioMapFingerprintEndpoint.model.ApGaussianRecord;
+import tudelft.mdp.backend.endpoints.wekaEvaluationRecordApi.model.WekaEvaluationRecord;
 import tudelft.mdp.backend.endpoints.wekaObjectRecordEndpoint.model.LocationFeaturesRecord;
 import tudelft.mdp.communication.SendDataSyncThread;
 import tudelft.mdp.communication.VerifyAndroidWearConnectedAsyncTask;
@@ -60,6 +61,7 @@ import tudelft.mdp.locationTracker.RequestLocationEvaluationWekaAsyncTask;
 import tudelft.mdp.locationTracker.UploadCurrentLocationAsyncTask;
 import tudelft.mdp.utils.Utils;
 import tudelft.mdp.weka.RequestEventEvaluationAsyncTask;
+import tudelft.mdp.weka.RequestEventEvaluationTesterAsyncTask;
 import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
 import tudelft.mdp.weka.WekaNetworkScansObject;
 import tudelft.mdp.weka.WekaSensorsRawDataObject;
@@ -70,7 +72,8 @@ public class MdpWorkerService extends Service implements
         RequestUserActiveDevicesAsyncTask.RequestUserActiveDevicesAsyncResponse,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        RequestLocationEvaluationWekaAsyncTask.RequestLocationEvaluationWekaAsyncResponse {
+        RequestLocationEvaluationWekaAsyncTask.RequestLocationEvaluationWekaAsyncResponse,
+        RequestEventEvaluationTesterAsyncTask.RequestEventEvaluationTesterAsyncResponse {
 
     private static final String LOGTAG = "MdpWorkerService";
     private static boolean isRunning = false;
@@ -1025,9 +1028,9 @@ public class MdpWorkerService extends Service implements
         Boolean testModeOn = sharedPrefs.getBoolean(UserPreferences.TESTMODE, true);
 
         if (testModeOn && !testLocFts.equals("") && !testMotFts.equals("")){
-            locationFeatures.setValue(testMotFts);
+            locationFeatures.setValue(testLocFts);
             if (sharedPrefs.getBoolean(UserPreferences.TESTMOTION_USE, true)) {
-                motionFeatures.setValue(testLocFts);
+                motionFeatures.setValue(testMotFts);
             } else {
                 motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
             }
@@ -1040,13 +1043,62 @@ public class MdpWorkerService extends Service implements
         deviceMotionLocationRecord.setMotionFeatures(motionFeatures);
         deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
 
-        new UploadMotionLocationFeaturesAsyncTask().execute(this.getApplicationContext(), deviceMotionLocationRecord);
+        requestEvaluation(deviceMotionLocationRecord);
+        //new UploadMotionLocationFeaturesAsyncTask().execute(this.getApplicationContext(), deviceMotionLocationRecord);
+
+        /*
         if (!sharedPrefs.getBoolean(UserPreferences.TRAINING_PHASE, true)) {
             new RequestEventEvaluationAsyncTask()
                     .execute(this.getApplicationContext(), deviceMotionLocationRecord);
-        }
+        }*/
     }
 
+    private void startTestDataRecollection(String event){
+        if (v != null) {
+            v.vibrate(500);
+        }
+        String[] parts = event.split("_");
+        String deviceId = parts[0];
+        String deviceType = parts[1].replaceAll("\\s","");
+        String timestamp = parts[2];
+        String deviceLocation = parts[3].replaceAll("\\s","");
+        Text motionFeatures = new Text();
+        Text locationFeatures = new Text();
+
+        DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
+        deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
+        deviceMotionLocationRecord.setEvent(deviceType+"-"+deviceLocation+"-"+deviceId);
+        deviceMotionLocationRecord.setDeviceType(deviceType);
+        deviceMotionLocationRecord.setDeviceId(deviceId);
+        deviceMotionLocationRecord.setTimestamp(timestamp);
+
+        String testLocFts = sharedPrefs.getString(UserPreferences.TESTLOCATION_FTS,"");
+        String testMotFts = sharedPrefs.getString(UserPreferences.TESTMOTION_FTS,"");
+        Boolean testModeOn = sharedPrefs.getBoolean(UserPreferences.TESTMODE, true);
+
+        locationFeatures.setValue(testLocFts);
+        motionFeatures.setValue(testMotFts);
+
+        deviceMotionLocationRecord.setMotionFeatures(motionFeatures);
+        deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
+
+        requestEvaluation(deviceMotionLocationRecord);
+
+
+    }
+
+
+    private void requestEvaluation(DeviceMotionLocationRecord deviceMotionLocationRecord){
+        RequestEventEvaluationTesterAsyncTask requestEventEvaluationTesterAsyncTask
+                = new RequestEventEvaluationTesterAsyncTask();
+        requestEventEvaluationTesterAsyncTask.delegate = this;
+        requestEventEvaluationTesterAsyncTask.execute(this.getApplicationContext(), getResources(), deviceMotionLocationRecord);
+    }
+
+    public void processFinishRequestEventEvaluationTester(WekaEvaluationRecord result){
+        String resultPrediction = result.getEvaluation().getValue();
+        //TODO Upload
+    }
     /**
      * Initializes the required variables for requesting motion and location data
      */
@@ -1247,6 +1299,10 @@ public class MdpWorkerService extends Service implements
         MessageReceiver messageReceiver5 = new MessageReceiver();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver5, messageFilter5);
 
+        IntentFilter messageFilter6 = new IntentFilter(MessagesProtocol.COLLECTDATA_MOTIONLOCATION_TEST);
+        MessageReceiver messageReceiver6 = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(messageReceiver6, messageFilter6);
+
     }
 
     /**
@@ -1265,6 +1321,8 @@ public class MdpWorkerService extends Service implements
                 updateGaussians();
             } else if (broadcastFilter.equals(MessagesProtocol.COLLECTDATA_MOTIONLOCATION)) {
                 startMotionLocationDataRecollection(msg);
+            } else if (broadcastFilter.equals(MessagesProtocol.COLLECTDATA_MOTIONLOCATION_TEST)) {
+                startTestDataRecollection(msg);
             } else if (broadcastFilter.equals(MessagesProtocol.WEARSENSORSMSG)){
                 handleWearMessage(msg);
             } else if (broadcastFilter.equals(MessagesProtocol.MSG_RECEIVED)){
@@ -1280,6 +1338,9 @@ public class MdpWorkerService extends Service implements
                     switch (msgType){
                         case MessagesProtocol.SENDGCM_CMD_UPDATEGAUSSIANS:
                             updateGaussians();
+                            break;
+                        case MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION_TEST:
+                            startTestDataRecollection(msgLoad);
                             break;
                         case MessagesProtocol.SENDGCM_CMD_MOTIONLOCATION:
                             startMotionLocationDataRecollection(msgLoad);
