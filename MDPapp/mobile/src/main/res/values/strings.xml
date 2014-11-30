@@ -70,9 +70,9 @@
     </string-array>
     <string name="zone_prompt">Choose a room</string>
     <string-array name="test_zones">
-        <item>Bedroom A</item>
-        <item>Bedroom B</item>
-        <item>Living room</item>
+        <item>BedroomA</item>
+        <item>BedroomB</item>
+        <item>LivingRoom</item>
         <item>Kitchen</item>
         <item>Toilet</item>
         <item>Shower</item>
@@ -83,7 +83,7 @@
         <item>Computer</item>
         <item>Microwave</item>
         <item>Television</item>
-        <item>Coffee machine</item>
+        <item>CoffeeMachine</item>
         <item>Grill</item>
         <item>Idle</item>
     </string-array>

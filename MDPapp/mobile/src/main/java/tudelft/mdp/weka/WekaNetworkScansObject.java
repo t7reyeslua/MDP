@@ -34,6 +34,14 @@ public class WekaNetworkScansObject {
         mNetworkScans = networkScans;
     }
 
+    public HashMap<String, ArrayList<Double>> getNetworksFeatures() {
+        return mNetworksFeatures;
+    }
+
+    public void setNetworksFeatures(HashMap<String, ArrayList<Double>> networksFeatures) {
+        mNetworksFeatures = networksFeatures;
+    }
+
     public void buildArraysByNetworks(){
 
         for (ArrayList<NetworkInfoObject> singleNetworkScan : mNetworkScans){

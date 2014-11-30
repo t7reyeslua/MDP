@@ -1004,7 +1004,6 @@ public class MdpWorkerService extends Service implements
      */
     private void uploadFeaturesToDB(WekaNetworkScansObject wekaNetworkScansObject, WekaSensorsRawDataObject wekaSensorsRawDataObject){
         Log.i(LOGTAG, "uploadFeaturesToDB:" + deviceEvent);
-        //TODO Save/upload both data sets
         Boolean consolidated = sharedPrefs.getBoolean(MessagesProtocol.SENSORSCONSOLIDATED, true);
         String[] parts = deviceEvent.split("_");
         String deviceId = parts[0];
@@ -1022,6 +1021,7 @@ public class MdpWorkerService extends Service implements
         deviceMotionLocationRecord.setDeviceType(deviceType);
         deviceMotionLocationRecord.setDeviceId(deviceId);
         deviceMotionLocationRecord.setTimestamp(timestamp);
+        //TODO
         deviceMotionLocationRecord.setMotionFeatures(motionFeatures);
         deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
 

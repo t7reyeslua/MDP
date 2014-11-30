@@ -18,6 +18,8 @@ public class UserPreferences {
     public static final String TESTMOTION = "TESTMOTION";
     public static final String TESTEVENT = "TESTEVENT";
     public static final String TESTMOTION_USE = "TESTMOTION_USE";
+    public static final String TESTMOTION_FTS = "TESTMOTION_FTS";
+    public static final String TESTLOCATION_FTS = "TESTLOCATION_FTS";
 
 
     public static final String CALIBRATED = "CALIBRATED";

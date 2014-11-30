@@ -423,6 +423,7 @@ public class WekaUtils {
             }
             features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + ",?");
 
+
             if (user.equals("AntonioReyesLua") && (date.equals("20141124") || date.equals("20141125"))){
                 features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + user);
             }
@@ -430,6 +431,7 @@ public class WekaUtils {
             if (user.equals("LuisAlfonsoGonzalezGodinez") && date.equals("20141113")){
                 features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + user);
             }
+
 
             if (user.equals("ThomasAnderson") && date.equals("20141127")){
                 features.add(locationFeatures + "," + motionFeatures + "," + classAttribute + "," + user + "," + user);
@@ -524,6 +526,7 @@ public class WekaUtils {
             //features.add(locationFeatures + "," + motionFeatures);
 
 
+
             if (user.equals("AntonioReyesLua") && (date.equals("20141124") || date.equals("20141125"))){
                 features.add(locationFeatures + "," + classAttribute);
             }
@@ -531,6 +534,7 @@ public class WekaUtils {
             if (user.equals("LuisAlfonsoGonzalezGodinez") && date.equals("20141113")){
                 features.add(locationFeatures + "," + classAttribute);
             }
+
 
             if (user.equals("ThomasAnderson") && date.equals("20141127")){
                 features.add(locationFeatures + "," + classAttribute);
