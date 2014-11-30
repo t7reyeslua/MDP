@@ -1012,8 +1012,6 @@ public class MdpWorkerService extends Service implements
         String deviceLocation = parts[3].replaceAll("\\s","");
         Text motionFeatures = new Text();
         Text locationFeatures = new Text();
-        motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
-        locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
 
         DeviceMotionLocationRecord deviceMotionLocationRecord = new DeviceMotionLocationRecord();
         deviceMotionLocationRecord.setUsername(sharedPrefs.getString(UserPreferences.USERNAME, "TBD"));
@@ -1022,6 +1020,19 @@ public class MdpWorkerService extends Service implements
         deviceMotionLocationRecord.setDeviceId(deviceId);
         deviceMotionLocationRecord.setTimestamp(timestamp);
         //TODO
+        String testLocFts = sharedPrefs.getString(UserPreferences.TESTLOCATION_FTS,"");
+        String testMotFts = sharedPrefs.getString(UserPreferences.TESTMOTION_FTS,"");
+        Boolean testModeOn = sharedPrefs.getBoolean(UserPreferences.TESTMODE, true);
+
+        if (testModeOn && !testLocFts.equals("") && !testMotFts.equals("")){
+            motionFeatures.setValue(testLocFts);
+            locationFeatures.setValue(testMotFts);
+        } else {
+            motionFeatures.setValue(wekaSensorsRawDataObject.getFeatures(10000, consolidated));
+            locationFeatures.setValue(wekaNetworkScansObject.getFeatures());
+        }
+
+
         deviceMotionLocationRecord.setMotionFeatures(motionFeatures);
         deviceMotionLocationRecord.setLocationFeatures(locationFeatures);
 

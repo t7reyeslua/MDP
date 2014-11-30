@@ -79,6 +79,7 @@
     </string-array>
     <string name="motion_prompt">Choose an activity</string>
     <string-array name="test_motion">
+        <item>No watch</item>
         <item>Fridge</item>
         <item>Computer</item>
         <item>Microwave</item>
