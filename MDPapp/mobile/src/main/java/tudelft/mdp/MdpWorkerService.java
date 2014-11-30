@@ -65,6 +65,7 @@ import tudelft.mdp.utils.Utils;
 import tudelft.mdp.weka.RequestEventEvaluationAsyncTask;
 import tudelft.mdp.weka.RequestEventEvaluationTesterAsyncTask;
 import tudelft.mdp.weka.UploadMotionLocationFeaturesAsyncTask;
+import tudelft.mdp.weka.UploadWekaEvaluationAsyncTask;
 import tudelft.mdp.weka.WekaNetworkScansObject;
 import tudelft.mdp.weka.WekaSensorsRawDataObject;
 
@@ -1179,7 +1180,14 @@ public class MdpWorkerService extends Service implements
 
         String toast = "Result:\n" + currentPlaceWeka    + "[" + String.format("%.2f",locMax) + "] \n"
                                    + currentActivityWeka + "[" + String.format("%.2f",motMax) + "]";
-        Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_LONG).show();
+
+
+        //TODO detect if inHouse by using networks
+        String testHouse = sharedPrefs.getString(UserPreferences.TESTPLACE,"Unknown");
+        if (!testHouse.equals("Unknown")) {
+            Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_LONG).show();
+            new UploadWekaEvaluationAsyncTask().execute(getApplicationContext(),result);
+        }
 
 
     }
