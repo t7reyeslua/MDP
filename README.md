@@ -1,7 +1,7 @@
 MDP
 ===
 
-ET4380 Multidisciplinary Project - Multi User Scheduler for Energy Efficient Smart Homes
+Multi User Scheduler for Energy Efficient Smart Homes [ET4380 Multidisciplinary Project]
 
 * Implementation of framework for energy apportioning in multi-occupant households. 
 * Combines data from smartphones and smartwatches to obtain fine-grained information of occupants such as their location and activities performed. 
